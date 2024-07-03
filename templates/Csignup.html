@@ -1,0 +1,36 @@
+<!-- Customer Sign Up Page -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyFind-Customer Signup</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Customer Signup</h1>
+        <form action="/Csignup" method="post">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required><br><br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required><br><br>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required><br><br>
+            <label for="address">Address:</label>
+            <input type="text" id="text" name="address" required><br><br>
+
+            <!--<label for="email">Email:</label>-->
+            <!--<input type="text" id="email" name="email" required><br><br>-->
+
+            <input type="submit" value="Login">
+        </form> 
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <footer>
+        <p>&copy; 2024 My Flask Website</p>
+    </footer>
+</body>
+</html>

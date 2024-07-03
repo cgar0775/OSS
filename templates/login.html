@@ -7,24 +7,30 @@
     
     <!--Sets browser tab title-->
     <title>Easy Find</title>
+    <link rel="stylesheet" href="../static/css/style.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <header>
-        <!-- tag that defines a 1st level heading for the page-->
-        <h1>Login Page</h1>
-        <form action="/login" method="post">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required><br><br>
-            <label for="password">Password:</label>
-            <!-- type password  hides the characters the user inputs -->
-            <input type="password" id="password" name="password" required><br><br>
-            <input type="submit" value="Login">
-        </form> 
-    </header>
-    <main>
+    
+    <div id="logoDivLogin">
+        <img src="../static/images/logo/color.png">
+    </div>
+    
+    <h1>Login</h1>
+    <form action="/login" method="post">
+        <label for="username">Username:</label> <br>
+        <input type="text" id="username" name="username" required ><br><br>
+        <label for="password">Password:</label>
+        <br>
+        <!-- type password  hides the characters the user inputs -->
+        <input type="password" id="password" name="password" required><br><br>
+        <input type="submit" value="Login">
+    </form> 
+
+    <a href="/" id="backLink">Back</a>
+    <!-- <main>
         {% block content %}{% endblock %}
-    </main>
+    </main> -->
     <footer>
         <p>&copy; 2024 My Flask Website</p>
     </footer>

@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello_world():
-    return render_template('index.html')
+    return render_template('splash.html')
 
 @app.route('/login', methods = ['GET','POST'])
 def login():
@@ -13,6 +13,8 @@ def login():
         #handling login logic
         username = request.form['username']
         password = request.form['password']
+
+        print("hi there")
         #not sure what this exactly does coppied from chatgpt
         return redirect(url_for('index'))
     

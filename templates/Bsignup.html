@@ -1,24 +1,31 @@
-<!-- Login Page -->
+<!-- Customer Sign Up Page -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!--Sets browser tab title-->
-    <title>Easy Find</title>
+    <title>EasyFind-Business Signup</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <header>
-        <!-- tag that defines a 1st level heading for the page-->
-        <h1>Login Page</h1>
-        <form action="/login" method="post">
+        <h1>Business Signup</h1>
+        <form action="/Bsignup" method="post">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required><br><br>
             <label for="password">Password:</label>
-            <!-- type password  hides the characters the user inputs -->
             <input type="password" id="password" name="password" required><br><br>
+            <label for="business Name">Business Name</label>
+            <input type="text" id="business Name" name="business Name" required><br><br>
+            <label for="address">Address:</label>
+            <input type="text" id="text" name="address" required><br><br>
+            <label for="service offerings">Service Offerings:</label>
+            <input type="text" id="service offerings" name="service offerings"><br><br>
+
+            
+            <!--<label for="email">Email:</label>-->
+            <!--<input type="text" id="email" name="email" required><br><br>-->
+
             <input type="submit" value="Login">
         </form> 
     </header>

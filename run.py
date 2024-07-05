@@ -15,7 +15,7 @@ def login():
         password = request.form['password']
 
         print("hi there")
-        #not sure what this exactly does coppied from chatgpt
+        #This wont work... it will fail on the following line below
         return redirect(url_for('index'))
     
     return render_template('login.html')
@@ -26,8 +26,10 @@ def Bsignup():
         username = request.form['username']
         password = request.form['password']
         name = request.form['name']
+        businessname = request.form['business name']
         address = request.form['address']
-        return redirect(url_for('index'))
+        services = request.form['service offerings']
+        return redirect(url_for('login'))
     
     return render_template('Bsignup.html')
 
@@ -37,10 +39,8 @@ def Csignup():
     if request.method == 'POST':
          username = request.form['username']
          password = request.form['password']
-         businessname = request.form['business name']
          address = request.form['address']
-         services = request.form['service offerings']
-         return redirect(url_for('index'))
+         return redirect(url_for('login'))
     
     return render_template('Csignup.html')
 

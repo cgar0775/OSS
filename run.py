@@ -44,6 +44,24 @@ def Csignup():
     
     return render_template('Csignup.html')
 
+@app.route('/home')
+def homePage():
+    name = "Olivia"
+    return render_template('Components/home.html', name = name)
+
+@app.route('/profile')
+def profilePage():
+
+    return render_template('Components/profile.html')
+
+@app.route('/business/view')
+def businessViewProfilePage():
+    businessName = "Publix"
+    businessAddress = "123 Happy Street"
+
+
+    return render_template('Components/bViewProfile.html', businessName = businessName, businessAddress=businessAddress)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

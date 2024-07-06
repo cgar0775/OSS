@@ -17,9 +17,9 @@ body{
     text-align: center;
 }
 
-#logoDivLogin img{
-    width: 40vw;
-}
+    #logoDivLogin img{
+        width: 35vw;
+    }
 
 h1{
     color: #023047;

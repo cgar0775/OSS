@@ -1,0 +1,22 @@
+{% extends 'frame.html' %}
+
+{% block content %}
+    
+    <div id="header">
+        <!-- header Content -->
+        <img src="../../static/images/misc/tempHeader.jpg" id="profileHeader">
+
+        <div id="profilePicture">
+            <img src="../../static/images/misc/tempProfile.jpg">
+        </div>
+
+    </div>
+
+    <div id="profileContainer">
+        
+        <!-- make it a circle crop -->
+        <h2>{{ buisnessName }}</h2>
+        <h3>{{ businessAddress }}</h3>
+    </div>
+
+{% endblock %}

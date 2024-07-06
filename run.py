@@ -1,4 +1,15 @@
+#imports
 from flask import Flask, render_template, request, redirect, url_for
+import mysql.connector
+import oracledb
+from database import OracleConfig
+
+#global variable setup
+database= OracleConfig()
+
+
+
+
 
 app = Flask(__name__)
 

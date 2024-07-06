@@ -6,10 +6,11 @@ from database import OracleConfig
 
 #setup the database connection
 database=OracleConfig
-cursor=connection.cursor()
+
 def hashPass(passw):
     #establish db connection
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
     #hashing the password
     encoded_pass=passw.encode()
     hash_object=hashlib.Sha384(encoded_pass)
@@ -18,6 +19,7 @@ def hashPass(passw):
 
 def loginCheck(user,passw):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
     #hash the password
     hashed_passw=hashPass(passw)
     #define the query for checking login
@@ -31,6 +33,7 @@ def loginCheck(user,passw):
 
 def CreateCustomerAcc(username,password,firstname,lastname,country,state,city,address,email):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
     hashed_passw=hashPass(password)
     #fill the two tables needed
     query=f"INSERT INTO userlogin VALUES('{username}','{hashed_passw})"
@@ -48,6 +51,7 @@ def CreateCustomerAcc(username,password,firstname,lastname,country,state,city,ad
 
 def CreateBusinessAcc(username,password,name,country,state,city,address,email):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
     hashed_passw=hashPass(password)
     #fill the two tables needed
     query=f"INSERT INTO userlogin VALUES('{username}','{hashed_passw})"

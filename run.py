@@ -1,17 +1,18 @@
 #imports
 from flask import Flask, render_template, request, redirect, url_for
-import mysql.connector
 import oracledb
 from database import OracleConfig
+from dotenv import load_dotenv
+#start flask
+app = Flask(__name__)
+
+#loading the env file
+load_dotenv()
 
 #global variable setup
 database= OracleConfig()
 
 
-
-
-
-app = Flask(__name__)
 
 @app.route("/")
 def hello_world():

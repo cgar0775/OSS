@@ -47,7 +47,7 @@ def Csignup():
 @app.route('/home')
 def homePage():
     name = "Olivia"
-    return render_template('Components/home.html', name = name)
+    return render_template('home.html', name = name)
 
 @app.route('/profile')
 def profilePage():
@@ -60,7 +60,7 @@ def businessViewProfilePage():
     businessAddress = "123 Happy Street"
 
 
-    return render_template('Components/bViewProfile.html', businessName = businessName, businessAddress=businessAddress)
+    return render_template('bViewProfile.html', businessName = businessName, businessAddress=businessAddress)
 
 
 if __name__ == '__main__':

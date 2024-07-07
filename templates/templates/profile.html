@@ -1,7 +1,9 @@
 {% extends 'frame.html' %}
 
 {% block content %}
-    
+
+<div>
+
     <div id="header">
         <!-- header Content -->
         <img src="../../static/images/misc/tempHeader.jpg" id="profileHeader">
@@ -15,11 +17,11 @@
     <div id="profileContainer">
         
         <!-- make it a circle crop -->
-        <h2>{{ buisnessName }}</h2>
+        <h2>{{ businessName }}</h2>
         <h3>{{ businessAddress }}</h3>
     </div>
 
-    
     {% block inner %}{% endblock %}
+</div>
 
 {% endblock %}

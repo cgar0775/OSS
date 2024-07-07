@@ -92,8 +92,12 @@ body{
     margin-top: 0px;
 }
 
-#Services{
+#services{
     text-align: left;
     font-size: 25px;
-    
+
+}
+
+#servicesComtainer{
+    columns: 4;
 }

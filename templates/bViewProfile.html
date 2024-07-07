@@ -1,0 +1,22 @@
+{% extends 'templates/profile.html' %}
+
+{% block inner %}
+    
+<div id="services">
+    <h2>Our Services: </h2>
+
+    <!-- Add Services Here -->
+    <div id="servicesComtainer">
+        {% include 'components/services.html' %}
+        {% include 'components/services.html' %}
+        {% include 'components/services.html' %}
+        {% include 'components/services.html' %}
+
+    </div>
+
+    <h2>Our Location: </h2>
+
+    <!-- Add Google Maps Here -->
+</div>
+
+{% endblock %}

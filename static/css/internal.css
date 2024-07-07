@@ -1,0 +1,103 @@
+body{
+    background-color: #f2f2f2;
+
+        
+    display: flex;
+    flex-direction: column;
+
+    color: #023047;
+    text-align: center;
+
+    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+
+    padding: 20px;
+}
+
+#nearCol{
+    columns: 3;
+}
+
+.navbar {
+    position: -webkit-sticky; /* For Safari */
+    position: sticky;
+    top: 0;
+    background-color: #333;
+    padding: 10px 0;
+    width: 100%;
+    z-index: 1000; /* Ensures it stays on top of other content */
+}
+
+.navbar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+}
+
+.navbar li {
+    float: left;
+}
+
+.navbar li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+.navbar li a:hover {
+    background-color: #111;
+}
+
+
+#profileHeader{
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    object-position: center;
+}
+
+#profilePicture{
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    overflow: hidden;
+    border-radius: 50%;
+    margin-top:-100px;
+}
+
+#profilePicture img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#header{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#profileContainer h2{
+    font-size: 40px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#profileContainer h3{
+    font-size: 20px;
+    margin-top: 0px;
+}
+
+#services{
+    text-align: left;
+    font-size: 25px;
+
+}
+
+#servicesComtainer{
+    columns: 4;
+}

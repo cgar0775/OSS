@@ -30,14 +30,29 @@ def login():
         # Validate input
         is_valid_username, username_error = inputvalidation.validate_username(username)
         is_valid_password, password_error = inputvalidation.validate_password(password)
-        
+
+        #[error, error, error... etc] = errors
+        errors = []
+
         if not is_valid_username:
-            flash(username_error)
+            errors.append(username_error)
+
+         if not is_valid_password:
+            errors.append(password_error)
+
+        if errors:
+            for error in errors:
+                flash(error)
             return redirect(url_for('login'))
+
         
-        if not is_valid_password:
-            flash(password_error)
-            return redirect(url_for('login'))
+       # if not is_valid_username:
+            #flash(username_error)
+           # return redirect(url_for('login'))
+        
+        #if not is_valid_password:
+            #flash(password_error)
+           # return redirect(url_for('login'))
         
         #print("hi there")
         #Redirects to home page if login is successful
@@ -67,6 +82,7 @@ def Csignup():
          name = request.form['name']
          address = request.form['address']
 
+        #[error, error, error... etc] = errors
          errors = []
          
          #Validate Input, Error Messages will flash to CSignUp

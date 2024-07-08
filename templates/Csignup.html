@@ -16,6 +16,16 @@
         </div>
         
         <h1>Customer Signup</h1>
+        <!-- Flash message container -->
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
         <form action="/Csignup" method="post">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required><br><br>

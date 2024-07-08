@@ -77,7 +77,7 @@ def businessViewProfilePage():
 
     return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, stars=stars)
 
-@app.route('/customer/view')
+@app.route('/profile/view')
 def customerViewProfilePage():
 
     return render_template('templates/cProfile.html')

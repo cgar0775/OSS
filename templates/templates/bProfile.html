@@ -20,22 +20,26 @@
         <h2>{{ businessName }}</h2>
         <h3>{{ businessAddress }}</h3>
 
-        <!-- TODO: Turn this into a resopnsive image -->
-        <h4>{{stars}}/5 stars</h4>
+        <!-- TODO: Turn this izznto a resopnsive image -->
+        <h4>⭐️⭐️⭐️⭐️⭐️</h4>
     </div>
 
     <div id="contentArea">
 
         
         <div id="services">
-            <!-- <h2>Services:</h2> -->
+            <h2>Services</h2>
             
             <!-- Add Services Here -->
-            <div id="servicesComtainer">
+            <div id="servicesContainer">
                 {% include 'components/services.html' %}
                 {% include 'components/services.html' %}
                 {% include 'components/services.html' %}
                 {% include 'components/services.html' %}
+                {% include 'components/services.html' %}
+                {% include 'components/services.html' %}
+                {% include 'components/services.html' %}
+                
                 
             </div>
             
@@ -44,7 +48,7 @@
 
             <h2>Reviews</h2>
 
-            <div id="servicesComtainer">
+            <div id="servicesContainer">
                 {% include 'components/reviews.html' %}
                 {% include 'components/reviews.html' %}
                 {% include 'components/reviews.html' %}
@@ -69,6 +73,7 @@
                 <!-- Repeat for other days -->
             </div>
             
+            <!-- google maps here -->
             <div class="map-section">
                 <h2>Find Us Here</h2>
                 <div class="map-container">
@@ -76,9 +81,11 @@
                     <iframe src="https://www.google.com/maps/embed?pb=YOUR_EMBED_CODE_HERE" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
                 </div>
             </div>
+
+
             
             
-            <!-- google maps here -->
+            
             
             
         </div>

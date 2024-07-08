@@ -97,7 +97,7 @@ body{
     object-fit: cover;
     overflow: hidden;
     border-radius: 50%;
-    margin-top:-130px;
+    margin-top:-150px;
     border: white, solid, 3px;
 }
 
@@ -142,29 +142,61 @@ h2{
     font-size: 25px;
 
     padding: 0px;
+    
 
+    padding-right: 20px;
 }
 
-#servicesComtainer h6{
+#services h2{
+    text-align: center;
+}
+
+#servicesContainer h6{
     margin: 0px;
 }
-#servicesComtainer h3{
+#servicesContainer h3{
     margin: 0px;
 }
-#servicesComtainer h5{
+#servicesContainer h5{
     margin: 10px 0;
 }
+
+#servicesContainer{
+    /* column-count: 3; */
+
+    text-align: center;
+
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 40px;
+}
 #serviceContanier{
-    background-color: #f2f2f2;
-    border: #023047, solid, 1px;
+    /* columns: 3; */
+    /* background-color: #f2f2f2; */
+    border: #ddd, solid, 1px;
     /* color: white; */
     border-radius: 20px;
     padding: 30px;
-    margin: 30px 0;
+    /* margin: 30px 0; */
+
+    
 }
 
 #sidebar{
     flex:25%;
+
+    border: white, solid, 1px;
+    border-left-color: #ddd;
+}
+
+#reviewContanier{
+    /* columns: 3; */
+    /* background-color: #f2f2f2; */
+    border: #ddd, solid, 1px;
+    /* color: white; */
+    border-radius: 20px;
+    padding: 30px;
+    /* margin: 30px 0; */
 }
 
 /* Got Template Css and HTML from chatgbt */
@@ -243,3 +275,35 @@ h2{
     border: 0;
 }
 
+
+
+
+/* customer page css */
+
+#viewProfile {
+    display: flex;
+}
+
+.sidebarLeft {
+    flex: 25%;
+} 
+
+#mainContent{
+    flex:75%;
+    text-align: left;
+}
+
+#profileMain{
+    margin: 30px;
+    padding: 10px;
+    border-radius: 10px;
+    border: black, solid, 2px;
+
+    margin-top: 110px;
+}
+#profileMain img{
+
+    width: 200px;
+    border-radius: 150px;
+    margin-top: -100px;
+}

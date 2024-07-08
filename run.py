@@ -37,7 +37,7 @@ def login():
         if not is_valid_username:
             errors.append(username_error)
 
-         if not is_valid_password:
+        if not is_valid_password:
             errors.append(password_error)
 
         if errors:
@@ -56,9 +56,9 @@ def login():
         
         #print("hi there")
         #Redirects to home page if login is successful
-        return redirect(url_for('home'))
+    return redirect(url_for('home'))
     
-    return render_template('login.html')
+    #return render_template('login.html')
 
 @app.route('/Bsignup', methods = ['GET','POST'])
 def Bsignup():

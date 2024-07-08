@@ -37,7 +37,10 @@ def validate_address(address):
     return True, ""
 
 #Business Validation
-#def validate_businessname(businessname):
+def validate_businessname(businessname):
+    if not re.match(r'^[a-zA-Z0-9\s]{3,30}$'):
+        return False, "Business name can only contain letters, numbers, and spaces. only limited 3 - 30 characters."
+    return True
     
 #Business Validation
 #def validate_services(services):

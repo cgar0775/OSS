@@ -125,12 +125,19 @@ def profilePage():
 
 @app.route('/business/view')
 def businessViewProfilePage():
+    
     businessName = "Publix"
     businessAddress = "123 Happy Street"
 
+    stars = "4"
 
-    return render_template('bViewProfile.html', businessName = businessName, businessAddress=businessAddress)
 
+    return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, stars=stars)
+
+@app.route('/customer/view')
+def customerViewProfilePage():
+
+    return render_template('templates/cProfile.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

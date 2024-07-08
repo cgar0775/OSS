@@ -1,0 +1,43 @@
+import re
+
+#Customer and Business Validation
+def validate_username(username):
+    #Checks if username contains letters and numbers, and no spaces.
+    if not re.match(r'^[a-zA-Z0-9_]{2,20}$', username):
+        return False, "Username must be 3-20 characters long and can only contain letters, numbers, and underscores."
+    if ' ' in username:
+        return False, "Username cannot contain spaces."
+    return True, ""
+
+#Customer and Business Validation
+def validate_password(password):
+    #Checks if password is at least 6 characters long and contains no spaces.
+    if len(password) < 6:
+        return False, "Password must be at least 6 characters long."
+    if ' ' in password:
+        return False, "Password cannot contain spaces."
+    return True, ""
+
+#Customer and Business Validation
+def validate_name(name):
+    #Checks if name is at least 2 characters longs
+    if len(name) < 2:
+        return False, "Name must be at least 2 characters long."
+    if not re.match(r'^[a-zA-Z\s]', name):
+        return False, "Name can only contain letters and spaces."
+    return True, ""
+
+#Customer and Business Validation
+def validate_address(address):
+    #Checks if address is valid
+    if not re.match(r'^[a-zA-Z0-9\s,.-]{1,100}$', address):
+        return False, "Address must be 1-100 characters long and can contain letters, numbers, and certain punctuation marks."
+    return True, ""
+
+#Business Validation
+#def validate_businessname(businessname):
+    
+#Business Validation
+#def validate_services(services):
+    #Check if service offered is valid
+    

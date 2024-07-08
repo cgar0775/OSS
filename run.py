@@ -1,16 +1,17 @@
 #imports
-from flask import Flask, render_template, request, redirect, url_for
-import oracledb
-from database import OracleConfig
-from dotenv import load_dotenv
-#start flask
+from flask import Flask, render_template, request, redirect, url_for, flash
+#import oracledb
+#from database import OracleConfig
+#from dotenv import load_dotenv
+import inputvalidation
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'
 
 #loading the env file
-load_dotenv()
+#load_dotenv()
 
 #global variable setup
-database= OracleConfig()
+#database= OracleConfig()
 
 
 
@@ -25,10 +26,22 @@ def login():
         #handling login logic
         username = request.form['username']
         password = request.form['password']
-
-        print("hi there")
-        #This wont work... it will fail on the following line below
-        return redirect(url_for('index'))
+        
+        # Validate input
+        is_valid_username, username_error = inputvalidation.validate_username(username)
+        is_valid_password, password_error = inputvalidation.validate_password(password)
+        
+        if not is_valid_username:
+            flash(username_error)
+            return redirect(url_for('login'))
+        
+        if not is_valid_password:
+            flash(password_error)
+            return redirect(url_for('login'))
+        
+        #print("hi there")
+        #Redirects to home page if login is successful
+        return redirect(url_for('home'))
     
     return render_template('login.html')
 
@@ -51,9 +64,37 @@ def Csignup():
     if request.method == 'POST':
          username = request.form['username']
          password = request.form['password']
+         name = request.form['name']
          address = request.form['address']
-         return redirect(url_for('login'))
-    
+
+         errors = []
+         
+         #Validate Input, Error Messages will flash to CSignUp
+         is_valid_username, username_error = inputvalidation.validate_username(username)
+         is_valid_password, password_error = inputvalidation.validate_password(password)
+         is_valid_name, name_error = inputvalidation.validate_name(name)
+         is_valid_address, address_error = inputvalidation.validate_address(address)
+
+         if not is_valid_username:
+            errors.append(username_error)
+
+         if not is_valid_password:
+            errors.append(password_error)
+
+         if not is_valid_name:
+            errors.append(name_error)
+
+         if not is_valid_address:
+            errors.append(address_error)
+
+         if errors:
+            for error in errors:
+                flash(error)
+            return redirect(url_for('Csignup'))
+        
+        #Create Customer Account if everything is valid
+               #  return redirect(url_for('login'))
+             
     return render_template('Csignup.html')
 
 @app.route('/home')

@@ -79,7 +79,11 @@ def Csignup():
     if request.method == 'POST':
          username = request.form['username']
          password = request.form['password']
-         name = request.form['name']
+         firstname = request.form['firstname']
+         lastname = request.form['lastname']
+         country = request.form['country']
+         state = request.form['state']
+         city = request.form['city']
          address = request.form['address']
 
         #[error, error, error... etc] = errors
@@ -88,7 +92,8 @@ def Csignup():
          #Validate Input, Error Messages will flash to CSignUp
          is_valid_username, username_error = inputvalidation.validate_username(username)
          is_valid_password, password_error = inputvalidation.validate_password(password)
-         is_valid_name, name_error = inputvalidation.validate_name(name)
+         is_valid_name, name_error = inputvalidation.validate_name(firstname, lastname)
+         is_valid_location, name_error = inputvalidation.validate_location(country, state, city)
          is_valid_address, address_error = inputvalidation.validate_address(address)
 
          if not is_valid_username:
@@ -99,6 +104,9 @@ def Csignup():
 
          if not is_valid_name:
             errors.append(name_error)
+            
+         if not is_valid_location:
+             errors.append(name_error)
 
          if not is_valid_address:
             errors.append(address_error)
@@ -110,6 +118,7 @@ def Csignup():
         
         #Create Customer Account if everything is valid
                #  return redirect(url_for('login'))
+        
              
     return render_template('Csignup.html')
 

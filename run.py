@@ -1,7 +1,7 @@
 #imports
 from flask import Flask, render_template, request, redirect, url_for, flash
 #import oracledb
-#from database import OracleConfig
+from database import OracleConfig
 #from dotenv import load_dotenv
 import inputvalidation
 app = Flask(__name__)
@@ -11,7 +11,7 @@ app.secret_key = 'your_secret_key'
 #load_dotenv()
 
 #global variable setup
-#database= OracleConfig()
+database= OracleConfig()
 
 
 
@@ -56,7 +56,7 @@ def login():
         
         #print("hi there")
         #Redirects to home page if login is successful
-    return redirect(url_for('home'))
+    return redirect(url_for('homePage'))
     
     #return render_template('login.html')
 
@@ -143,6 +143,14 @@ def businessViewProfilePage():
 
 
     return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, stars=stars)
+
+
+@app.route('/business/edit')
+def businessEditProfilePage():
+
+
+    return render_template('templates/bEdit.html', 
+            title="Edit Profile")
 
 @app.route('/profile/view')
 def customerViewProfilePage():

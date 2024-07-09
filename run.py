@@ -118,10 +118,20 @@ def homePage():
     name = "Olivia"
     return render_template('home.html', name = name)
 
+@app.route('/search')
+def searchPage():
+
+    return render_template('search.html')
+
 @app.route('/profile')
 def profilePage():
 
     return render_template('Components/profile.html')
+
+@app.route('/bookings')
+def bookingPage():
+
+    return render_template('templates/bookings.html')
 
 @app.route('/business/view')
 def businessViewProfilePage():

@@ -1,0 +1,97 @@
+{% extends 'frame.html' %}
+{% block content %}
+<h1>Edit Your Profile</h1>
+
+<div id="bSettingsPage"> 
+    <div class="tab">
+        <div>
+
+            <div id="profilePicture" style="margin: 0 auto; width: 100px; height: 100px;">
+                <img src="../../static/images/misc/tempProfile.jpg">
+            </div>
+
+            <h5 style="margin-bottom: 0px;">Hello,</h5>
+            <h2 style="margin-top: 0px;">Olivia</h2>
+
+        </div>
+        <button class="tablinks" onclick="openPage(event, 'Profile')" id="defaultOpen">Profile</button>
+        <button class="tablinks" onclick="openPage(event, 'Settings')">Settings</button>
+        <button class="tablinks" onclick="openPage(event, 'Services')">Our Services</button>
+        <button class="tablinks" onclick="openPage(event, 'Contact')">Reviews</button>
+    </div>
+    
+    <div id="Profile" class="tabcontent">
+        <form>
+            <label>Business Name: </label>
+            <input type="text">
+            
+            <br>
+
+            <label>Address: </label>
+            <input type="text">
+
+            <br>
+
+            <label>Profile Picture: </label>
+            <input type="file">
+            
+            <br>
+
+            <label for="">Banner Picture: </label>
+            <input type="file">
+
+            <br>
+
+            <input type="submit">
+        </form>
+    </div>
+    
+    <div id="Settings" class="tabcontent">
+        <form>
+            <!-- Make this non-editable -->
+            <label>Username: </label>
+            <input type="text">
+
+            <br>
+
+            <label>Current Password: </label>
+            <input type="password">
+            <br>
+            <label>New Password: </label>
+            <input type="password">
+
+            <br>
+
+            <input type="submit">
+        </form>
+
+    </div>
+    
+    <div id="Services" class="tabcontent">
+        <h2>Current Services Offered: </h2>
+
+        <!-- Table with the sevices -->
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Price</th>
+                    <th>Something else here</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        
+    </div>
+    
+    <div id="About" class="tabcontent">
+        <h3>About</h3>
+        <p>Information about us.</p>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    
+</div>
+{% endblock %}

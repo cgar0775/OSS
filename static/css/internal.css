@@ -1,0 +1,414 @@
+/* General CSS */
+
+body{
+    background-color: hsl(0, 0%, 100%);
+
+        
+    display: flex;
+    flex-direction: column;
+
+    color: #023047;
+    text-align: center;
+
+    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+
+    /* padding: 20px; */
+    margin: 0;
+
+    /* work on this */
+    /* max-width: 1600px; */
+
+    font-family: "Open Sans", sans-serif;
+    font-optical-sizing: auto;
+    /* font-weight: <weight>;
+    font-style: normal;
+    font-variation-settings:
+      "wdth" 100; */
+}
+
+#nearCol{
+    columns: 3;
+}
+
+#navheader{
+    background-color: #023047;
+    align-items: center;
+}
+
+.navbar{
+
+    width:50%;margin:0 auto;
+
+    max-width: 1000px;
+
+    position: -webkit-sticky; /* For Safari */
+    position: sticky;
+    top: 0;
+    padding: 10px 10px;
+    width: 100%;
+    z-index: 1000; /* Ensures it stays on top of other content */
+
+    display: flex;
+    justify-content: space-between;
+    align-content: center;
+    align-items: center;
+
+    color: white;
+    text-align: right;
+}
+
+.navbar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+}
+
+.navbar li {
+    float: left;
+}
+
+.navbar li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+.navbar li a:hover {
+    background-color: #111;
+}
+
+.navbar img {
+    width: 200px;
+}
+
+#profileHeader{
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    object-position: center;
+}
+
+#profilePicture{
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    overflow: hidden;
+    border-radius: 50%;
+    margin-top:-150px;
+    border: white, solid, 3px;
+}
+
+#profilePicture img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#header{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#profileContainer h2{
+    font-size: 40px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#profileContainer h3{
+    font-size: 20px;
+    margin-top: 0px;
+}
+h2{
+    font-size: 30px;
+}
+
+#contentArea{
+    display: flex;
+    max-width: 1400px;
+
+    margin: 0 auto;
+}
+
+
+
+#services{
+    flex: 75%;
+    text-align: left;
+    font-size: 25px;
+
+    padding: 0px;
+    
+
+    padding-right: 20px;
+}
+
+#services h2{
+    text-align: center;
+}
+
+#servicesContainer h6{
+    margin: 0px;
+}
+#servicesContainer h3{
+    margin: 0px;
+}
+#servicesContainer h5{
+    margin: 10px 0;
+}
+
+#servicesContainer{
+    /* column-count: 3; */
+
+    text-align: center;
+
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 40px;
+}
+#serviceContanier{
+    /* columns: 3; */
+    /* background-color: #f2f2f2; */
+    border: #ddd, solid, 1px;
+    /* color: white; */
+    border-radius: 20px;
+    padding: 30px;
+    /* margin: 30px 0; */
+
+    
+}
+
+#sidebar{
+    flex:25%;
+
+    border: white, solid, 1px;
+    border-left-color: #ddd;
+}
+
+#reviewContanier{
+    /* columns: 3; */
+    /* background-color: #f2f2f2; */
+    border: #ddd, solid, 1px;
+    /* color: white; */
+    border-radius: 20px;
+    padding: 30px;
+    /* margin: 30px 0; */
+}
+
+/* Got Template Css and HTML from chatgbt */
+
+.hours-section {
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    /* background-color: #f9f9f9; */
+    max-width: 300px;
+}
+
+/* .hours-section h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+} */
+
+.hours-section .day {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.hours-section .day:last-child {
+    border-bottom: none;
+}
+
+.hours-section .day-name {
+    font-weight: bold;
+    color: #555;
+}
+
+.hours-section .day-hours {
+    color: #777;
+}
+
+.map-section {
+    /* font-family: Arial, sans-serif; */
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    /* background-color: #f9f9f9; */
+    max-width: 700px;
+    /* box-shadow: 0 4px 8px rgba(0,0,0,0.1); */
+}
+
+/* .map-section h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+} */
+
+.map-section .map-container {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    height: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.map-section .map-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+
+
+
+/* customer page css */
+
+#viewProfile {
+    display: flex;
+}
+
+.sidebarLeft {
+    flex: 25%;
+} 
+
+#mainContent{
+    flex:75%;
+    text-align: left;
+}
+
+#profileMain{
+    margin: 30px;
+    padding: 10px;
+    border-radius: 10px;
+    border: black, solid, 2px;
+
+    margin-top: 110px;
+}
+#profileMain img{
+
+    width: 200px;
+    border-radius: 150px;
+    margin-top: -100px;
+}
+
+#bottomBuis{
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+#bookingContainer{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 50px;
+    padding: 50px;
+    padding-top: 10px;
+}
+
+#bookingBox{
+    /* columns: 3; */
+    /* background-color: #f2f2f2; */
+    border: #ddd, solid, 1px;
+    /* color: white; */
+    border-radius: 20px;
+    padding: 30px;
+    /* margin: 30px 0; */
+}
+/* Search Page */
+
+#searchForm #textInput{
+    width: 400px;
+    height: 40px;
+    width: 900px;
+    padding: 10px;
+    margin: 30px;
+    border: white, solid, 3px;
+    border-bottom-color: #023047;
+}
+
+
+#bSettingsPage{
+    display: flex;
+    padding: 30px;
+}
+
+/* Style the tab */
+.tab {
+    width: 25%;
+    overflow: hidden;
+    /* border-bottom: 1px solid #ccc; */
+    display: grid;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+    background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+    background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border-top: none;
+    width: 75%;
+}
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+    color: #333;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}

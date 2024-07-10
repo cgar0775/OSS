@@ -1,0 +1,100 @@
+{% extends 'frame.html' %}
+
+{% block content %}
+
+<div>
+
+    <div id="header">
+        <!-- header Content -->
+        <img src="../../static/images/misc/tempHeader.jpg" id="profileHeader">
+
+        <div id="profilePicture">
+            <img src="../../static/images/misc/tempProfile.jpg">
+        </div>
+
+    </div>
+
+    <div id="profileContainer">
+        
+        <!-- make it a circle crop -->
+        <h2>{{ businessName }}</h2>
+        <h3>{{ businessAddress }}</h3>
+
+        <!-- TODO: Turn this izznto a resopnsive image -->
+        <h4>⭐️⭐️⭐️⭐️⭐️</h4>
+    </div>
+
+    <div id="contentArea">
+
+        
+        <div id="services">
+            <h2>Services</h2>
+            
+            <!-- Add Services Here -->
+            <div id="servicesContainer">
+                {% include 'components/services.html' %}
+                {% include 'components/services.html' %}
+                {% include 'components/services.html' %}
+                {% include 'components/services.html' %}
+                {% include 'components/services.html' %}
+                {% include 'components/services.html' %}
+                {% include 'components/services.html' %}
+                
+                
+            </div>
+        </div>
+        <div id="sidebar">
+            
+            <!-- Hours here -->
+            
+            <div class="hours-section">
+                <h2>Opening Hours</h2>
+                <div class="day">
+                    <span class="day-name">Monday</span>
+                    <span class="day-hours">9:00 AM - 5:00 PM</span>
+                </div>
+                <div class="day">
+                    <span class="day-name">Tuesday</span>
+                    <span class="day-hours">9:00 AM - 5:00 PM</span>
+                </div>
+                <!-- Repeat for other days -->
+            </div>
+            
+            <!-- google maps here -->
+            <div class="map-section">
+                <h2>Find Us Here</h2>
+                <div class="map-container">
+                    <!-- Embed your Google Map here -->
+                    <iframe src="https://www.google.com/maps/embed?pb=YOUR_EMBED_CODE_HERE" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                </div>
+            </div>
+
+
+            
+            
+            
+            
+            
+        </div>
+
+        
+        
+    </div>
+
+    <div id="bottomBuis">
+
+        <!-- reviews here (maybe) -->
+        
+        <h2>Reviews</h2>
+        
+        <div id="servicesContainer" class="contentArea">
+            {% include 'components/reviews.html' %}
+            {% include 'components/reviews.html' %}
+            {% include 'components/reviews.html' %}
+            {% include 'components/reviews.html' %}
+            
+        </div>
+    </div>
+</div>
+    
+    {% endblock %}

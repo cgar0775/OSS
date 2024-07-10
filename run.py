@@ -214,7 +214,7 @@ def businessViewProfilePage():
     stars = "4"
 
 
-    return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, stars=stars)
+    return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, stars=stars, title='View Buisness')
 
 
 @app.route('/business/edit')

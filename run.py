@@ -67,6 +67,8 @@ def Bsignup():
          username = request.form['username']
          password = request.form['password']
          businessname = request.form['business name']
+         firstname = request.form['firstname']
+         lastname = request.form['lastname']
          country = request.form['country']
          state = request.form['state']
          city = request.form['city']
@@ -79,7 +81,7 @@ def Bsignup():
          is_valid_username, username_error = inputvalidation.validate_username(username)
          is_valid_password, password_error = inputvalidation.validate_password(password)
          is_valid_businessname, businessname_error = inputvalidation.validate_businessname(businessname)
-         #is_valid_name, name_error = inputvalidation.validate_name(firstname, lastname)
+         is_valid_name, name_error = inputvalidation.validate_name(firstname, lastname)
          is_valid_location, location_error = inputvalidation.validate_location(country, state, city)
          is_valid_address, address_error = inputvalidation.validate_address(address)
 
@@ -93,8 +95,8 @@ def Bsignup():
          if not is_valid_businessname:
              errors.append(businessname_error)
 
-         #if not is_valid_name:
-           # errors.extend(name_error)
+         if not is_valid_name:
+           errors.extend(name_error)
             
          if not is_valid_location:
              errors.extend(location_error)

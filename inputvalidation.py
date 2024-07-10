@@ -63,9 +63,9 @@ def validate_address(address):
 
 #Business Validation
 def validate_businessname(businessname):
-    if not re.match(r'^[a-zA-Z0-9\s]{3,30}$'):
+    if not re.match(r'^[a-zA-Z0-9\s]{3,30}$', businessname):
         return False, "Business name can only contain letters, numbers, and spaces. only limited 3 - 30 characters."
-    return True
+    return True, ""
 
 
 #def capitalize(firstname, lastname, country, state, city):

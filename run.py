@@ -1,12 +1,12 @@
 #imports
 from flask import Flask, render_template, request, redirect, url_for, flash
-#import oracledb
-from database import OracleConfig
-#from dotenv import load_dotenv
 import oracledb
 from database import OracleConfig
 from dotenv import load_dotenv
-from dbfunc import CreateCustomerAcc,CreateBusinessAcc
+import oracledb
+from database import OracleConfig
+from dotenv import load_dotenv
+from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck
 import inputvalidation
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -44,6 +44,10 @@ def login():
         if not is_valid_password:
             errors.append(password_error)
 
+        #validate login with the db
+        if not loginCheck(username,password):
+            errors.append("Login Invalid, please try again")
+
         if errors:
             for error in errors:
                 flash(error)
@@ -61,7 +65,7 @@ def login():
         #print("hi there")
         #Redirects to home page if login is successful
         
-        #return redirect(url_for('homePage'))
+        return redirect(url_for('homePage'))
         #return redirect(url_for('home'))
     return render_template('login.html')
 
@@ -118,8 +122,7 @@ def Bsignup():
          state = state.capitalize()
          city = city.capitalize()
 
-         
-         CreateBusinessAcc(username,password,firstname,lastname,country,state,city,address,email)
+         CreateBusinessAcc(username,password,businessname,country,state,city,address,email)
          
          #Return customer to login page after sucessful account creation
          return redirect(url_for('login'))

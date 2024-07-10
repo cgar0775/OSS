@@ -13,6 +13,7 @@ body{
     text-align: center;
 }
 
+
 #logoDivLogin{
     text-align: center;
 }
@@ -45,6 +46,20 @@ h1{
     border-radius: 40px;
     color: white;
     margin: 30px;
+}
+
+.input-row{
+    display: flex;
+    gap: 30px
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column; /* Stack label and input vertically */
+}
+
+.input-group label, .input-group input {
+    margin: 5px 0;
 }
 
 #backLink{

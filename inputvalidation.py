@@ -23,34 +23,34 @@ def validate_password(password):
 #PASSED
 #Customer and Business Validation
 def validate_name(firstname, lastname):
+    
+    errors = []
+
     #Checks if name is at least 2 characters longs
     if not re.match(r'^[a-zA-Z\s]{3,30}$', firstname):
-        return False, "First name can only contain letters and spaces and only limited 3 - 30 characters."
+        errors.append("First name can only contain letters and spaces and only limited 3 - 30 characters.")
     if not re.match(r'^[a-zA-Z\s]{3,30}$', lastname):
-        return False, "Last name can only contain letters and spaces and only limited 3 - 30 characters."
-    
-    #Capitalize first letter of First Name and Last Name
-    firstname = firstname.capitalize()
-    lastname = lastname.capitalize()
-    
+        errors.append("Last name can only contain letters and spaces and only limited 3 - 30 characters.")
+    if errors:
+        return False, errors 
     return True, ""
 
-#Need to check if this works
+
 #Customer and Business Validation
 def validate_location(country, state, city):
+
+    errors = []
+
     #Checks if country, state, city only contains letters
     if not re.match(r'^[a-zA-Z\s]+$', country):
-        return False, "Country can only contain letters and spaces."
+        errors.append("Country can only contain letters and spaces.")
     if not re.match(r'^[a-zA-Z\s]+$', state):
-        return False, "State can only contain letters and spaces."
+        errors.append("State can only contain letters and spaces.")
     if not re.match(r'^[a-zA-Z\s]+$', city):
-        return False, "City can only contain letters and spaces."
+        errors.append("City can only contain letters and spaces.")
     
-    #Capitalize first letter of Country, State, City
-    country = country.capitalize()
-    state = state.capitalize()
-    city = city.capitlize()
-    
+    if errors:
+        return False, errors 
     return True, ""
 
 #PASSED
@@ -66,8 +66,15 @@ def validate_businessname(businessname):
     if not re.match(r'^[a-zA-Z0-9\s]{3,30}$'):
         return False, "Business name can only contain letters, numbers, and spaces. only limited 3 - 30 characters."
     return True
+
+
+#def capitalize(firstname, lastname, country, state, city):
     
-#Business Validation
-#def validate_services(services):
-    #Check if service offered is valid
-    
+    #firstname = firstname.capitalize()
+    #lastname = lastname.capitalize()
+    #country = country.capitalize()
+    #state = state.capitalize()
+    #city = city.capitlize()
+
+    #return firstname,lastname,country,state,city 
+

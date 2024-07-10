@@ -66,3 +66,14 @@ def CreateBusinessAcc(username,password,name,country,state,city,address,email):
     #testing purposes erase later
     print("done")
     return
+
+#returns an array/tuple
+def CallBusinessInfo(name):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    #calls a specific business' info from the database
+    query=f"SELECT * FROM BUSINESSINFO WHERE name='{name}'"
+    cursor.execute(query)
+    cursor.commit()
+    #returns the first (and expectedly only) row
+    return cursor.fetchone()

@@ -1,5 +1,5 @@
 #imports
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 import oracledb
 from database import OracleConfig
 from dotenv import load_dotenv
@@ -8,6 +8,9 @@ from database import OracleConfig
 from dotenv import load_dotenv
 from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck
 import inputvalidation
+from flask_session import Session
+import redis
+
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
@@ -17,6 +20,29 @@ load_dotenv()
 #global variable setup
 database= OracleConfig()
 
+# Configure server-side session storage
+
+#--Specifies the session type... here it is redis--#
+app.config['SESSION_TYPE'] = 'redis'
+
+#--False if the session should be non-permanent--#
+app.config['SESSION_PERMANENT'] = False
+
+#--Adds an extra layer of security by signing the session cookies--#
+app.config['SESSION_USE_SIGNER'] = True
+
+#--Prefix for session keys in the storage backend--#
+app.config['SESSION_KEY_PREFIX'] = 'session:'
+
+#--Configures Redis as the storage backend--#
+app.config['SESSION_REDIS'] = redis.StrictRedis(host='localhost', port=6379, db=0)
+
+#initializes the session management in flask application
+Session(app)
+
+#With this configuration, user sessions are stored in Redis, 
+#which ensures that the session persists across different requests
+#and even server restarts, retaining the user login state
 
 
 @app.route("/")
@@ -31,10 +57,14 @@ def login():
         username = request.form['username']
         password = request.form['password']
         
+        #The code below is unncessary... we need to validate user names against database
         # Validate input
         is_valid_username, username_error = inputvalidation.validate_username(username)
         is_valid_password, password_error = inputvalidation.validate_password(password)
 
+        # we need to create a function called loginCheck to compare against DB
+
+        #We will have to reconfigure lines 69-84
         #[error, error, error... etc] = errors
         errors = []
 
@@ -53,6 +83,13 @@ def login():
                 flash(error)
             return redirect(url_for('login'))
 
+        # Set session variable for logged-in user
+
+        #--indicates that the user is logged in--#
+        session['logged_in'] = True
+
+        #--stores the logged-in username--#
+        session['username'] = username
         
        # if not is_valid_username:
             #flash(username_error)

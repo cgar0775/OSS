@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import oracledb
 from database import OracleConfig
 from dotenv import load_dotenv
-from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck
+from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo
 import inputvalidation
 from flask_session import Session
 import redis
@@ -216,14 +216,29 @@ def bookingPage():
 
     return render_template('templates/bookings.html')
 
+
 @app.route('/business/view')
-def businessViewProfilePage():
+def redirectToHome():
+    return redirect('/home')
+
+@app.route('/business/view/<username>',  methods = ['GET','POST'])
+def businessViewProfilePage(username):
+
+    # General Business Information
+    businessInfo = CallBusinessInfo(username)
     
-    businessName = "Publix"
-    businessAddress = "123 Happy Street"
+    businessName = businessInfo[0]
+    businessAddress = businessInfo[3] + ", " + businessInfo[2]
 
     stars = "4"
 
+    # Get array for services
+
+    # Time Table
+
+    # Map
+
+    # Reviews
 
     return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, stars=stars, title='View Buisness')
 
@@ -238,7 +253,16 @@ def businessEditProfilePage():
 @app.route('/profile/view')
 def customerViewProfilePage():
 
-    return render_template('templates/cProfile.html')
+    customerName = "Olivia Bisset"
+    customerAddress = "11351 W. Broward Blvd"
+
+    return render_template('templates/cProfile.html', customerName=customerName, customerAddress=customerAddress)
+
+
+@app.route('/profile/edit')
+def customerEditProfilePage(): 
+
+    return render_template('templates/cEdit.html')
 
 @app.route('/logout')
 def logout():

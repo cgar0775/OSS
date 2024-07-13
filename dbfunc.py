@@ -88,6 +88,20 @@ def CallBusinessInfo(name):
     #returns the first (and expectedly only) row
     return val
 
+def CallCustomerInfo(name):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    #calls a specific business' info from the database
+    query=f"SELECT * FROM CUSTOMERINFO WHERE username='{name}'"
+    cursor.execute(query)
+    connection.commit()
+    #store result so we can close db connection
+    val=cursor.fetchone()
+    cursor.close()
+    connection.close()
+    #returns the first (and expectedly only) row
+    return val
+
 #check username is already in db
 def CheckUsername(name):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
@@ -100,3 +114,4 @@ def CheckUsername(name):
     cursor.close()
     connection.close()
     return bool(check) 
+

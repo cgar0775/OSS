@@ -9,6 +9,8 @@ load_dotenv()
 #setup the database connection
 database= OracleConfig()
 
+# Login and Signup Functions
+
 def hashPass(passw):
     #establish db connection
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
@@ -78,7 +80,7 @@ def CallBusinessInfo(name):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
     #calls a specific business' info from the database
-    query=f"SELECT * FROM BUSINESSINFO WHERE name='{name}'"
+    query=f"SELECT * FROM BUSINESSINFO WHERE username='{name}'"
     cursor.execute(query)
     connection.commit()
     #store result so we can close db connection

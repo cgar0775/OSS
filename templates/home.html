@@ -4,6 +4,42 @@
 
     <h1 style="text-align: center;">Greetings, {{name}}!</h1>
 
+    <div>
+
+        <div id="nearContainer">
+            <h2>For You:</h2>
+            <div id="nearCol">
+
+                {% include 'components/serviceBox.html' %}
+                {% include 'components/serviceBox.html' %}
+                {% include 'components/serviceBox.html' %}
+                
+            </div>
+        </div>  
+
+        <div>
+            <h2>Near You: </h2>
+            <div id="nearCol">
+
+                {% include 'components/serviceBox.html' %}
+                {% include 'components/serviceBox.html' %}
+                {% include 'components/serviceBox.html' %}
+                
+            </div>
+        </div>
+
+        <div>
+            <h2>Your Bookings: </h2>
+            <div>
+                {% include 'components/bookingBox.html' %}                
+                {% include 'components/bookingBox.html' %}                
+                {% include 'components/bookingBox.html' %}                
+            </div>
+        </div>
+
+    </div>
+<!-- <h1 style="text-align: center;">Greetings, {{name}}!</h1>
+
     <div id="">
         <h2>Your Bookings:</h2>
         
@@ -27,7 +63,7 @@
             <h6>.3 miles away</h6>
             <button></button>
         </div>
-        <!-- Put their bookings here -->
+        
 
     </div>
 

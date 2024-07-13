@@ -88,3 +88,15 @@ def CallBusinessInfo(name):
     #returns the first (and expectedly only) row
     return val
 
+#check username is already in db
+def CheckUsername(name):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query= f"SELECT COUNT(*) FROM userlogin where username='{name}'"
+    #check
+    cursor.execute(query)
+    connection.commit()
+    check=cursor.fetchone()[0]
+    cursor.close()
+    connection.close()
+    return bool(check) 

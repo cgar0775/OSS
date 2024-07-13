@@ -1,5 +1,5 @@
 #imports
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 import oracledb
 from database import OracleConfig
 from dotenv import load_dotenv
@@ -8,6 +8,9 @@ from database import OracleConfig
 from dotenv import load_dotenv
 from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo
 import inputvalidation
+from flask_session import Session
+import redis
+
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
@@ -17,6 +20,29 @@ load_dotenv()
 #global variable setup
 database= OracleConfig()
 
+# Configure server-side session storage
+
+#--Specifies the session type... here it is redis--#
+app.config['SESSION_TYPE'] = 'redis'
+
+#--False if the session should be non-permanent--#
+app.config['SESSION_PERMANENT'] = False
+
+#--Adds an extra layer of security by signing the session cookies--#
+app.config['SESSION_USE_SIGNER'] = True
+
+#--Prefix for session keys in the storage backend--#
+app.config['SESSION_KEY_PREFIX'] = 'session:'
+
+#--Configures Redis as the storage backend--#
+app.config['SESSION_REDIS'] = redis.StrictRedis(host='localhost', port=6379, db=0)
+
+#initializes the session management in flask application
+Session(app)
+
+#With this configuration, user sessions are stored in Redis, 
+#which ensures that the session persists across different requests
+#and even server restarts, retaining the user login state
 
 
 @app.route("/")
@@ -31,42 +57,24 @@ def login():
         username = request.form['username']
         password = request.form['password']
         
-        # Validate input
-        is_valid_username, username_error = inputvalidation.validate_username(username)
-        is_valid_password, password_error = inputvalidation.validate_password(password)
-
-        #[error, error, error... etc] = errors
-        errors = []
-
-        if not is_valid_username:
-            errors.append(username_error)
-
-        if not is_valid_password:
-            errors.append(password_error)
-
         #validate login with the db
         if not loginCheck(username,password):
-            errors.append("Login Invalid, please try again")
-
-        if errors:
-            for error in errors:
-                flash(error)
+            flash("Login Invalid, please try again")
             return redirect(url_for('login'))
+        
+        #add logic for to select for customer or business
 
+        # Set session variable for logged-in user
+        #--indicates that the user is logged in--#
+        session['logged_in'] = True
+
+        #--stores the logged-in username--#
+        session['username'] = username
         
-       # if not is_valid_username:
-            #flash(username_error)
-           # return redirect(url_for('login'))
-        
-        #if not is_valid_password:
-            #flash(password_error)
-           # return redirect(url_for('login'))
-        
-        #print("hi there")
-        #Redirects to home page if login is successful
         
         return redirect(url_for('homePage'))
         #return redirect(url_for('home'))
+
     return render_template('login.html')
 
 @app.route('/Bsignup', methods = ['GET','POST'])
@@ -264,7 +272,6 @@ def customerEditProfilePage():
 
     return render_template('templates/cEdit.html')
 
-
 @app.route('/services')
 def servicePage():
 
@@ -273,6 +280,13 @@ def servicePage():
 
 # Add service page code here
 # @app.route()
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in',None)
+    session.pop('username',None)
+    flash('You have been logged out.')
+    return redirect('/')
 
 if __name__ == '__main__':
     app.run(debug=True)

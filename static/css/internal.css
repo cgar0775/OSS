@@ -25,16 +25,6 @@ body{
     font-variation-settings:
       "wdth" 100; */
 }
-
-#nearCol{
-    columns: 3;
-    padding: 30px;
-    max-width: 1870px;
-    align-content: center;
-    justify-content: center;
-    width: 1700px;
-}
-
 #navheader{
     background-color: #023047;
     align-items: center;
@@ -324,18 +314,20 @@ h2{
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 50px;
-    padding: 50px;
+    padding: 10px;
     padding-top: 10px;
 }
 
 #bookingBox{
-    /* columns: 3; */
-    /* background-color: #f2f2f2; */
-    border: #ddd, solid, 1px;
-    /* color: white; */
-    border-radius: 20px;
-    padding: 30px;
-    /* margin: 30px 0; */
+    flex: 0 0 auto; /* Prevent items from shrinking or growing */
+    width: 400px; /* Set a fixed width for each item */
+    margin-right: 10px; /* Optional spacing between items */
+    background-color: lightgray; /* For visibility */
+    text-align: center; /* Center text horizontally */
+    padding: 20px; /* Optional padding */
+
+    border-radius: 30px;
+    
 }
 #bookingBox button{ 
     
@@ -458,4 +450,32 @@ input[type="submit"] {
     border-radius: 30px;
     border: none;
     font-size: 17px;
+}
+
+/* Service page table */
+
+#servicePage table{
+    /* Fix this later */
+}
+
+#nearContainer{
+    /* display: flex;
+    overflow-x: auto;
+    white-space: nowrap; Prevent items from wrapping */
+
+    padding: 30px; 
+  
+}
+#nearCol{
+    /* columns: 3;
+    padding: 30px;
+    max-width: 1870px;
+    align-content: center;
+    justify-content: center;
+    width: 1700px; */
+
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap; 
+
 }

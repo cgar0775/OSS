@@ -190,13 +190,14 @@ def Csignup():
 
 @app.route('/home')
 def homePage():
+    # Put an if statement here
     name = "Olivia"
     return render_template('home.html', name = name)
 
 @app.route('/search')
 def searchPage():
 
-    return render_template('search.html')
+    return render_template('templates/search.html')
 
 @app.route('/profile')
 def profilePage():
@@ -206,7 +207,14 @@ def profilePage():
 @app.route('/bookings')
 def bookingPage():
 
+    
+    # return render_template('templates/Bbookings.html')
     return render_template('templates/bookings.html')
+
+@app.route('/employees')
+def employeePage():
+
+    return render_template('templates/bEmployees.html')
 
 
 @app.route('/business/view')
@@ -255,6 +263,16 @@ def customerViewProfilePage():
 def customerEditProfilePage(): 
 
     return render_template('templates/cEdit.html')
+
+
+@app.route('/services')
+def servicePage():
+
+
+    return render_template('templates/servicePage.html')
+
+# Add service page code here
+# @app.route()
 
 if __name__ == '__main__':
     app.run(debug=True)

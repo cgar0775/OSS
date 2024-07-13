@@ -57,53 +57,24 @@ def login():
         username = request.form['username']
         password = request.form['password']
         
-        #The code below is unncessary... we need to validate user names against database
-        # Validate input
-        is_valid_username, username_error = inputvalidation.validate_username(username)
-        is_valid_password, password_error = inputvalidation.validate_password(password)
-
-        # we need to create a function called loginCheck to compare against DB
-
-        #We will have to reconfigure lines 69-84
-        #[error, error, error... etc] = errors
-        errors = []
-
-        if not is_valid_username:
-            errors.append(username_error)
-
-        if not is_valid_password:
-            errors.append(password_error)
-
         #validate login with the db
         if not loginCheck(username,password):
-            errors.append("Login Invalid, please try again")
-
-        if errors:
-            for error in errors:
-                flash(error)
+            flash("Login Invalid, please try again")
             return redirect(url_for('login'))
+        
+        #add logic for to select for customer or business
 
         # Set session variable for logged-in user
-
         #--indicates that the user is logged in--#
         session['logged_in'] = True
 
         #--stores the logged-in username--#
         session['username'] = username
         
-       # if not is_valid_username:
-            #flash(username_error)
-           # return redirect(url_for('login'))
-        
-        #if not is_valid_password:
-            #flash(password_error)
-           # return redirect(url_for('login'))
-        
-        #print("hi there")
-        #Redirects to home page if login is successful
         
         return redirect(url_for('homePage'))
         #return redirect(url_for('home'))
+
     return render_template('login.html')
 
 @app.route('/Bsignup', methods = ['GET','POST'])
@@ -268,6 +239,13 @@ def businessEditProfilePage():
 def customerViewProfilePage():
 
     return render_template('templates/cProfile.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in',None)
+    session.pop('username',None)
+    flash('You have been logged out.')
+    return redirect('/')
 
 if __name__ == '__main__':
     app.run(debug=True)

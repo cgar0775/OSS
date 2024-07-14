@@ -52,6 +52,8 @@ def CreateCustomerAcc(username,password,firstname,lastname,country,state,city,ad
     cursor.close()
     connection.close()
     #end func
+    #testing purposes erase later
+    print("done")
     return
 
 def CreateBusinessAcc(username,password,name,country,state,city,address,email):
@@ -69,6 +71,8 @@ def CreateBusinessAcc(username,password,name,country,state,city,address,email):
     cursor.close()
     connection.close()
     #end func
+    #testing purposes erase later
+    print("done")
     return
 
 #returns an array/tuple

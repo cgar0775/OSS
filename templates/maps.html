@@ -1,0 +1,21 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Website</title>
+    <link rel="stylesheet" href="static/css/style.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDX0AZFZl4fZxV9POauPkRDpUQRJs6ZbPc&libraries=places"></script>
+    <script src="static/js/index.js"></script>
+</head>
+<!-- Initialize the map when the page loads -->
+<div class="content-section">
+    <h2>Find Local Businesses</h2>
+    <input id="searchInput" type="text" placeholder="Enter a location">
+    <button onclick="searchBusinesses()">Search</button>
+    <div id="map"></div>
+</div>
+<!-- Initialize the map when the page loads -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initialize_Map();
+});
+</script>

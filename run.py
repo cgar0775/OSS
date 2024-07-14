@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import oracledb
 from database import OracleConfig
 from dotenv import load_dotenv
-from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo
+from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CallCustomerInfo
 import inputvalidation
 from flask_session import Session
 import redis
@@ -61,17 +61,14 @@ def login():
         if not loginCheck(username,password):
             flash("Login Invalid, please try again")
             return redirect(url_for('login'))
-        
-        #add logic for to select for customer or business
 
         # Set session variable for logged-in user
         #--indicates that the user is logged in--#
         session['logged_in'] = True
-
         #--stores the logged-in username--#
         session['username'] = username
         
-        
+        #add logic to select user_type(customer or business)
         return redirect(url_for('homePage'))
         #return redirect(url_for('home'))
 
@@ -125,12 +122,15 @@ def Bsignup():
             for error in errors:
                 flash(error)
             return redirect(url_for('Bsignup'))
-
+         
+         businessname = businessname.capitalize()
          country = country.capitalize()
          state = state.capitalize()
          city = city.capitalize()
-
-         CreateBusinessAcc(username,password,businessname,country,state,city,address,email)
+         
+         #Need to configure correctly
+         #CreateBusinessAcc(username,password,businessname,country,state,city,address,email)
+         CreateBusinessAcc(username,password,businessname,email,country,state,city,address)
          
          #Return customer to login page after sucessful account creation
          return redirect(url_for('login'))
@@ -198,8 +198,12 @@ def Csignup():
 
 @app.route('/home')
 def homePage():
-    # Put an if statement here
-    name = "Olivia"
+    #Check if the login cache works
+    username = session.get('username')
+    CustomerInfo = CallCustomerInfo(username)
+    name = CustomerInfo[1]
+    #BusinessInfo = CallBusinessInfo(username)
+    #name = BusinessInfo[0]
     return render_template('home.html', name = name)
 
 @app.route('/search')
@@ -280,6 +284,11 @@ def servicePage():
 
 # Add service page code here
 # @app.route()
+
+#Trial for maps
+@app.route('/maps')
+def viewMap():
+    return render_template('maps.html')
 
 @app.route('/logout')
 def logout():

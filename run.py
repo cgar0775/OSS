@@ -91,14 +91,6 @@ def Bsignup():
          address = request.form['address']
          email = request.form['email']
 
-         if CheckBusinessName(businessname):
-             flash("Business already exists")
-             return redirect(url_for('Bsignup'))
-
-         if CheckUsername(username):
-             flash("Invalid Username: User already exists")
-             return redirect(url_for('Bsignup'))
-             
          errors = []
 
          #Validate Input, Error Messages will flash to CSignUp
@@ -108,7 +100,6 @@ def Bsignup():
          is_valid_name, name_error = inputvalidation.validate_name(firstname, lastname)
          is_valid_location, location_error = inputvalidation.validate_location(country, state, city)
          is_valid_address, address_error = inputvalidation.validate_address(address)
-
 
          if not is_valid_username:
             errors.append(username_error)
@@ -127,6 +118,12 @@ def Bsignup():
 
          if not is_valid_address:
             errors.append(address_error)
+
+         if CheckBusinessName(businessname):
+             errors.append("Invalid Business Name: Business already exists")
+            
+         if CheckUsername(username):
+             errors.append("Invalid Username: User already exists")
 
         #Flash errors... retain users in sign up screen
          if errors:
@@ -159,10 +156,6 @@ def Csignup():
          address = request.form['address']
          email = request.form['email']
 
-         if CheckUsername(username):
-             flash("Invalid Username: User already exists")
-             return redirect(url_for('Csignup'))
-
          #[error, error, error... etc] = errors
          errors = []
          
@@ -187,6 +180,9 @@ def Csignup():
 
          if not is_valid_address:
             errors.append(address_error)
+        
+         if CheckUsername(username):
+             errors.append("Invalid Username: User already exists")
 
         #Flash errors... retain users in sign up screen
          if errors:

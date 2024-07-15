@@ -60,7 +60,7 @@ def CreateBusinessAcc(username,password,name,country,state,city,address,email):
     hashed_passw=hashPass(password)
     #fill the two tables needed
     query=f"INSERT INTO userlogin VALUES('{username}','{hashed_passw}')"
-    query2=f"INSERT INTO BUSINESSINFO VALUES('{name}','{country}','{state}','{city}','{address}','{email}','{username}')"
+    query2=f"INSERT INTO BUSINESSINFO VALUES('{name}','{email}','{country}','{state}','{city}','{address}','{username}')"
     #execute the database calls
     cursor.execute(query)
     cursor.execute(query2)

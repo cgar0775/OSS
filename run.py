@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import oracledb
 from database import OracleConfig
 from dotenv import load_dotenv
-from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername
+from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo
 import inputvalidation
 from flask_session import Session
 import redis
@@ -206,8 +206,12 @@ def Csignup():
 
 @app.route('/home')
 def homePage():
-    # Put an if statement here
-    name = "Olivia"
+    #Check if the login cache works
+    username = session.get('username')
+    CustomerInfo = CallCustomerInfo(username)
+    name = CustomerInfo[1]
+    #BusinessInfo = CallBusinessInfo(username)
+    #name = BusinessInfo[0]
     return render_template('home.html', name = name)
 
 @app.route('/search')

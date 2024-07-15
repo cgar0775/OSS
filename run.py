@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import oracledb
 from database import OracleConfig
 from dotenv import load_dotenv
-from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo
+from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername
 import inputvalidation
 from flask_session import Session
 import redis
@@ -91,8 +91,16 @@ def Bsignup():
          address = request.form['address']
          email = request.form['email']
 
+         if CheckBusinessName(businessname):
+             flash("Business already exists")
+             return redirect(url_for('Bsignup'))
+
+         if CheckUsername(username):
+             flash("Invalid Username: User already exists")
+             return redirect(url_for('Bsignup'))
+             
          errors = []
-        
+
          #Validate Input, Error Messages will flash to CSignUp
          is_valid_username, username_error = inputvalidation.validate_username(username)
          is_valid_password, password_error = inputvalidation.validate_password(password)
@@ -150,6 +158,10 @@ def Csignup():
          city = request.form['city']
          address = request.form['address']
          email = request.form['email']
+
+         if CheckUsername(username):
+             flash("Invalid Username: User already exists")
+             return redirect(url_for('Csignup'))
 
          #[error, error, error... etc] = errors
          errors = []

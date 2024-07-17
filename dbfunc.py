@@ -60,7 +60,7 @@ def CreateBusinessAcc(username,password,name,country,state,city,address,email):
     hashed_passw=hashPass(password)
     #fill the two tables needed
     query=f"INSERT INTO userlogin VALUES('{username}','{hashed_passw}')"
-    query2=f"INSERT INTO BUSINESSINFO VALUES('{name}','{country}','{state}','{city}','{address}','{email}','{username}')"
+    query2=f"INSERT INTO BUSINESSINFO VALUES('{name}','{email}','{country}','{state}','{city}','{address}','{username}')"
     #execute the database calls
     cursor.execute(query)
     cursor.execute(query2)
@@ -81,6 +81,20 @@ def CallBusinessInfo(name):
     connection.commit()
     #store result so we can close db connection
     val=cursor.fetchone()
+    cursor.close()
+    connection.close()
+    #returns the first (and expectedly only) row
+    return val
+
+def CheckBusinessName(name):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    #calls a specific business' info from the database
+    query=f"SELECT Count(*) FROM BUSINESSINFO WHERE name='{name}'"
+    cursor.execute(query)
+    connection.commit()
+    #store result so we can close db connection
+    val=cursor.fetchone()[0]
     cursor.close()
     connection.close()
     #returns the first (and expectedly only) row
@@ -181,6 +195,31 @@ def GetService(sname,bname):
     cursor.close()
     connection.close()
     return service
+
+#update services
+def UpdateService(sname,bname,price,slots):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"""UPDATE services 
+    SET sname='{sname}', bname='{bname}', price={price}, slots={slots}
+    WHERE sname='{sname}', bname='{bname}'"""
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return
+
+def DeleteService(sname,bname):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"""DELETE FROM services WHERE sname='{sname}' AND bname='{bname}'"""
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return 
+
+
 #create booking
 #inputs service name (sname), businessname (bname), username of the customer, timeslot_start the time and date of the start of the service, timeslot_end the ending time and date of the service
 #both are in the format of MON-DD-YYYY HH:MM that being MON=3 letter shortening of the year Jan Feb etc, DD day 01,25 etc, YYYY the full year 2024 etc, HH:MM the time in 24 hour standard 09:30 for 9:30 AM
@@ -193,6 +232,7 @@ def CreateBooking(sname,bname,username,timeslot_start,timeslot_end):
     cursor.close()
     connection.close()
     return
+
 #return a specific customer's bookings
 def getUserBookings(username):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
@@ -204,6 +244,7 @@ def getUserBookings(username):
     cursor.close()
     connection.close()
     return bookings
+
 #return a business' bookings
 def getBusinessBookings(name):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
@@ -225,6 +266,19 @@ def UpdateBooking(sname,bname,username,timeslot_start,timeslot_end, new_timeslot
     SET sname='{sname}', bname='{bname}', username='{username}',
     timeslot_start=TO_DATE('{new_timeslot_start}', 'MON-DD-YYYY HH24:MI'), 
     timeslot_end=TO_DATE('{new_timeslot_end}', 'MON-DD-YYYY HH24:MI'))
+    WHERE sname='{sname}', bname='{bname}', username='{username}',
+    timeslot_start=TO_DATE('{timeslot_start}', 'MON-DD-YYYY HH24:MI'), 
+    timeslot_end=TO_DATE('{timeslot_end}', 'MON-DD-YYYY HH24:MI'))"""
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return
+
+def DeleteBooking(sname,bname,username,timeslot_start,timeslot_end, new_timeslot_start, new_timeslot_end):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"""DELETE FROM bookings 
     WHERE sname='{sname}', bname='{bname}', username='{username}',
     timeslot_start=TO_DATE('{timeslot_start}', 'MON-DD-YYYY HH24:MI'), 
     timeslot_end=TO_DATE('{timeslot_end}', 'MON-DD-YYYY HH24:MI'))"""

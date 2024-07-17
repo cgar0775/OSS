@@ -6,7 +6,8 @@ from dotenv import load_dotenv
 import oracledb
 from database import OracleConfig
 from dotenv import load_dotenv
-from dbfunc import CreateCustomerAcc,CreateBusinessAcc, CreateService, GetBusinessServices, loginCheck, CallBusinessInfo
+
+from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices
 import inputvalidation
 from flask_session import Session
 import redis
@@ -92,7 +93,7 @@ def Bsignup():
          email = request.form['email']
 
          errors = []
-        
+
          #Validate Input, Error Messages will flash to CSignUp
          is_valid_username, username_error = inputvalidation.validate_username(username)
          is_valid_password, password_error = inputvalidation.validate_password(password)
@@ -100,7 +101,6 @@ def Bsignup():
          is_valid_name, name_error = inputvalidation.validate_name(firstname, lastname)
          is_valid_location, location_error = inputvalidation.validate_location(country, state, city)
          is_valid_address, address_error = inputvalidation.validate_address(address)
-
 
          if not is_valid_username:
             errors.append(username_error)
@@ -119,6 +119,12 @@ def Bsignup():
 
          if not is_valid_address:
             errors.append(address_error)
+
+         if CheckBusinessName(businessname):
+             errors.append("Invalid Business Name: Business already exists")
+            
+         if CheckUsername(username):
+             errors.append("Invalid Username: User already exists")
 
         #Flash errors... retain users in sign up screen
          if errors:
@@ -175,6 +181,9 @@ def Csignup():
 
          if not is_valid_address:
             errors.append(address_error)
+        
+         if CheckUsername(username):
+             errors.append("Invalid Username: User already exists")
 
         #Flash errors... retain users in sign up screen
          if errors:
@@ -198,8 +207,12 @@ def Csignup():
 
 @app.route('/home')
 def homePage():
-    # Put an if statement here
-    name = "Olivia"
+    #Check if the login cache works
+    username = session.get('username')
+    CustomerInfo = CallCustomerInfo(username)
+    name = CustomerInfo[1]
+    #BusinessInfo = CallBusinessInfo(username)
+    #name = BusinessInfo[0]
     return render_template('home.html', name = name)
 
 @app.route('/search')

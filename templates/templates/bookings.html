@@ -6,15 +6,35 @@
     <h1>Bookings</h1>
 
     <div id="bookingContainer">
-
-        {% include 'components/bookingBox.html' %}
-        {% include 'components/bookingBox.html' %}
-        {% include 'components/bookingBox.html' %}
-        {% include 'components/bookingBox.html' %}
-        {% include 'components/bookingBox.html' %}
-        {% include 'components/bookingBox.html' %}
-        {% include 'components/bookingBox.html' %}
-
+        <div>
+        
+            <table>
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Time Slot</th>
+                        <th>Price</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for items in service%}
+                        <tr>
+                            {%for data in items %}
+                                <td>{{ data }}</td>
+                            {% endfor %}
+                            <!-- <td>{{ items[0] }}</td> -->
+                            <td><a href="/{{items[0]}}/service/edit/{{items[1]}}"><button>Edit</button></a></td>
+                        </tr>
+                    {% endfor %}
+                    <!-- Add dynamic data here -->
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 

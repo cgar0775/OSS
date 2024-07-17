@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import oracledb
 from database import OracleConfig
 from dotenv import load_dotenv
-from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo
+from dbfunc import CreateCustomerAcc,CreateBusinessAcc, CreateService, GetBusinessServices, loginCheck, CallBusinessInfo
 import inputvalidation
 from flask_session import Session
 import redis
@@ -270,13 +270,53 @@ def customerViewProfilePage():
 @app.route('/profile/edit')
 def customerEditProfilePage(): 
 
-    return render_template('templates/cEdit.html')
+    # return render_template('templates/cEdit.html')
+    return render_template('templates/bEdit.html')
 
 @app.route('/services')
 def servicePage():
 
+    print(GetBusinessServices("Pozie Jewelry"))
+    print(len(GetBusinessServices("Pozie Jewelry")))
 
-    return render_template('templates/servicePage.html')
+    return render_template('templates/servicePage.html', service=GetBusinessServices("Pozie Jewelry"))
+
+@app.route('/add-service', methods = ['GET','POST'])
+def addService():
+
+    if request.method == "POST":
+       print("Hello there")
+
+    return render_template('templates/addService.html')
+
+@app.route('/submit-form', methods=['POST', 'GET'])
+def addServiceFunction():
+    print(request.form)
+    name = request.form.get('name')
+    price = request.form.get('price')
+    slots = request.form.get('slots')
+    bName = "Pozie Jewelry" #for test
+
+    print(name + " " + price+ " " + bName + " " + slots)
+
+    
+    CreateService(bName, name, price, slots)
+
+
+    return redirect(url_for('servicePage'))
+
+@app.route('/<businessname>/service/<serviceName>')
+
+# @app.route('/service')
+def singleServicePage(businessname, serviceName):
+    # print(Get)
+    return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName)
+
+@app.route('/<businessname>/service/edit/<serviceName>')
+def singleServiceEditPage(businessname, serviceName):
+
+
+    return render_template("templates/sEdit.html")
 
 # Add service page code here
 # @app.route()

@@ -1,0 +1,30 @@
+{% extends 'frame.html' %}
+
+{% block content %}
+
+<div id="addService">
+    <h1>Add a Service</h1>
+    <form action="{{url_for('addServiceFunction')}}" method="post">
+        <label>Service Name: </label>
+        <input type="text" id="textInput" name="name">
+
+        <br>
+        
+        <label>Price: </label>
+        <input type="number" id="textInput" name="price">
+
+        <br>
+
+        <label>Avalible Slots At Once: </label>
+        <input type="number" id="textInput" name="slots">
+
+        <br>
+
+        <!-- something for the time -->
+
+
+        <input type="submit">
+    </form>
+</div>
+
+{% endblock %}

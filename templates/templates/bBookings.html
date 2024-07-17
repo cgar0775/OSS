@@ -7,6 +7,28 @@
 
     <div>
         
+        <table>
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Name</th>
+                    <th>Time</th>
+                    <th>See More</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for items in service%}
+                    <tr>
+                        {%for data in items %}
+                            <td>{{ data }}</td>
+                        {% endfor %}
+                        <!-- <td>{{ items[0] }}</td> -->
+                        <td><a href="/{{items[0]}}/service/edit/{{items[1]}}"><button>Edit</button></a></td>
+                    </tr>
+                {% endfor %}
+                <!-- Add dynamic data here -->
+            </tbody>
+        </table>
     </div>
 </div>
 

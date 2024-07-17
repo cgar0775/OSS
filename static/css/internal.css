@@ -311,9 +311,9 @@ h2{
 }
 
 #bookingContainer{
-    display: grid;
+    /* display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 50px;
+    gap: 50px; */
     padding: 10px;
     padding-top: 10px;
 }
@@ -339,12 +339,12 @@ h2{
 }
 /* Search Page */
 
-#searchForm #textInput{
+#searchForm #textInput, #addService #textInput{
     width: 400px;
     height: 40px;
-    width: 900px;
-    padding: 10px;
-    margin: 30px;
+    /* width: 900px; */
+    /* padding: 10px; */
+    margin: 20px;
     border: white, solid, 3px;
     border-bottom-color: #023047;
 }
@@ -417,6 +417,8 @@ table {
     border-collapse: collapse;
 }
 
+
+
 th, td {
     padding: 12px;
     border: 1px solid #ddd;
@@ -454,8 +456,20 @@ input[type="submit"] {
 
 /* Service page table */
 
-#servicePage table{
-    /* Fix this later */
+#servicePage table, #bookingContainer table{
+    margin: 0 auto;
+    width: 90%;
+}
+#servicePage thead, #bookingContainer thead{
+    background-color: red;
+}
+
+#servicePage button, #bookingContainer button{
+    background: white;
+    padding: 10px;
+    border-radius: 20px;
+    border: black, solid, 1px;
+    font-size: 15px;
 }
 
 #nearContainer{
@@ -478,4 +492,17 @@ input[type="submit"] {
     overflow-x: auto;
     white-space: nowrap; 
 
+}
+
+#addService label{
+    font-size: 30px;
+}
+
+#editProfileHeader {
+    width: 70%;
+    height: 300px;
+    object-fit: cover;
+    object-position: center;
+    margin-top: 30px;
+    border-radius: 30px;   
 }

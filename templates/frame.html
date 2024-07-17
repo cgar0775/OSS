@@ -4,7 +4,7 @@
     <title>{{title}}</title>
     <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="../../static/css/internal.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/internal.css') }}">
 </head>
 <body>
     {% include 'components/header.html' %}

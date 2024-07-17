@@ -1,12 +1,13 @@
 #imports
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, session
 import oracledb
+import requests
 from database import OracleConfig
 from dotenv import load_dotenv
 import oracledb
 from database import OracleConfig
 from dotenv import load_dotenv
-from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CallCustomerInfo
+from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo
 import inputvalidation
 from flask_session import Session
 import redis
@@ -61,14 +62,17 @@ def login():
         if not loginCheck(username,password):
             flash("Login Invalid, please try again")
             return redirect(url_for('login'))
+        
+        #add logic for to select for customer or business
 
         # Set session variable for logged-in user
         #--indicates that the user is logged in--#
         session['logged_in'] = True
+
         #--stores the logged-in username--#
         session['username'] = username
         
-        #add logic to select user_type(customer or business)
+        
         return redirect(url_for('homePage'))
         #return redirect(url_for('home'))
 
@@ -89,7 +93,7 @@ def Bsignup():
          email = request.form['email']
 
          errors = []
-        
+
          #Validate Input, Error Messages will flash to CSignUp
          is_valid_username, username_error = inputvalidation.validate_username(username)
          is_valid_password, password_error = inputvalidation.validate_password(password)
@@ -97,7 +101,6 @@ def Bsignup():
          is_valid_name, name_error = inputvalidation.validate_name(firstname, lastname)
          is_valid_location, location_error = inputvalidation.validate_location(country, state, city)
          is_valid_address, address_error = inputvalidation.validate_address(address)
-
 
          if not is_valid_username:
             errors.append(username_error)
@@ -117,20 +120,23 @@ def Bsignup():
          if not is_valid_address:
             errors.append(address_error)
 
+         if CheckBusinessName(businessname):
+             errors.append("Invalid Business Name: Business already exists")
+            
+         if CheckUsername(username):
+             errors.append("Invalid Username: User already exists")
+
         #Flash errors... retain users in sign up screen
          if errors:
             for error in errors:
                 flash(error)
             return redirect(url_for('Bsignup'))
-         
-         businessname = businessname.capitalize()
+
          country = country.capitalize()
          state = state.capitalize()
          city = city.capitalize()
-         
-         #Need to configure correctly
-         #CreateBusinessAcc(username,password,businessname,country,state,city,address,email)
-         CreateBusinessAcc(username,password,businessname,email,country,state,city,address)
+
+         CreateBusinessAcc(username,password,businessname,country,state,city,address,email)
          
          #Return customer to login page after sucessful account creation
          return redirect(url_for('login'))
@@ -175,6 +181,9 @@ def Csignup():
 
          if not is_valid_address:
             errors.append(address_error)
+        
+         if CheckUsername(username):
+             errors.append("Invalid Username: User already exists")
 
         #Flash errors... retain users in sign up screen
          if errors:
@@ -288,7 +297,31 @@ def servicePage():
 #Trial for maps
 @app.route('/maps')
 def viewMap():
+    username = session.get('username')
+    CustomerInfo = CallCustomerInfo(username)
     return render_template('maps.html')
+
+#Geocoding Location for maps
+@app.route('/get-user-location')
+def get_user_location():
+    username = session.get('username')
+    customer_info = CallCustomerInfo(username)
+    address = f"{customer_info[6]}, {customer_info[5]}, {customer_info[4]}, {customer_info[3]}" 
+
+    # Print the address for debugging purposes
+    # print(f"Address: {address}")
+    
+    # Use Google Geocoding API to convert address to coordinates
+    geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={address}&key=AIzaSyDX0AZFZl4fZxV9POauPkRDpUQRJs6ZbPc"
+    response = requests.get(geocode_url)
+    geocode_data = response.json()
+
+    if geocode_data['status'] == 'OK':
+        location = geocode_data['results'][0]['geometry']['location']
+        return jsonify({'lat': location['lat'], 'lng': location['lng']})
+    else:
+        return jsonify({'error': 'Unable to geocode address'})
+#Need a function to grab all businesses in the area??
 
 @app.route('/logout')
 def logout():

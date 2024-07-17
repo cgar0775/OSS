@@ -2,26 +2,28 @@
 
 {% block content %}
 
-<div id="viewProfile">
-    <div id="sidebar" class="sidebarLeft">
-        <div id="">
-            <!-- Profile Picture -->
-            <img src="/static/images/misc/profile.jpeg">
+<div>
+    <div id="header">
+        <!-- header Content -->
+        <img src="../../static/images/misc/tempHeader.jpg" id="profileHeader">
 
-            <h2>Name</h2>
-            <h3>address</h3>
-
-            <!-- buttons to edit -->
+        <div id="profilePicture">
+            <img src="../../static/images/misc/tempProfile.jpg">
         </div>
 
-        <p>Account
-            Bookings
-            Settings
-        </p>
     </div>
 
-    <div id="mainContent">
-        <h2>hi there</h2>
+    <div id="profileContainer">
+        
+        
+        <h2>{{ customerName }}</h2>
+        <h3>{{ customerAddress }}</h3>
+
+        
+    </div>
+
+    <div>
+        <h2>Their Appointments With You: </h2>
     </div>
 </div>
 

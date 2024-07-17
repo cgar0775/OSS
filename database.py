@@ -1,9 +1,13 @@
+from dotenv import load_dotenv
 import os
 import oracledb
 
 #this sets up a database connection using environment variables, copied from a previous project I worked on - Cody
 class OracleConfig:
     def __init__(self):
+
+        load_dotenv()
+
         self.username = os.environ.get("DB_USERNAME")
         self.password = os.environ.get("DB_PASSWORD")
         self.hostname = os.environ.get("DB_HOSTNAME")

@@ -1,8 +1,9 @@
 {% extends 'frame.html' %}
-{% block content %}
-<h1>Edit Your Profile</h1>
 
-<div id="SettingsPage"> 
+{% block content %}
+<h2>Edit Profile</h2>
+
+<div id="SettingsPage">
     <div class="tab">
         <div>
             <div style="position: relative;">
@@ -20,15 +21,15 @@
         </div>
         <button class="tablinks" onclick="openPage(event, 'Profile')" id="defaultOpen">Profile</button>
         <button class="tablinks" onclick="openPage(event, 'Settings')">Settings</button>
-        <button class="tablinks" onclick="openPage(event, 'Services')">Our Services</button>
-        <button class="tablinks" onclick="openPage(event, 'Details')">Details</button>
+        <!-- <button class="tablinks" onclick="openPage(event, 'Services')">Our Services</button> -->
+        <!-- <button class="tablinks" onclick="openPage(event, 'Details')">Details</button> -->
     </div>
-    
+
     <div id="Profile" class="tabcontent">
         <h1>Profile</h1>
         <form>
             <div class="formGroup">
-                <label>Business Name: </label>
+                <label>Name: </label>
                 <input type="text">
             </div>
             
@@ -59,7 +60,7 @@
             <input type="submit">
         </form>
     </div>
-    
+
     <div id="Settings" class="tabcontent">
         <h1>Settings</h1>
         <form>
@@ -89,78 +90,12 @@
 
             <input type="submit">
         </form>
-
-    </div>
-    
-    <div id="Services" class="tabcontent">
-        <h2>Current Services Offered: </h2>
-
-        <!-- Table with the sevices -->
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Service</th>
-                    <th>Price</th>
-                    <th>Something else here</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Add dynamic data here -->
-            </tbody>
-        </table>
-
-        <button>Add new service</button>
-        
     </div>
 
-    <div id="addService" class="tabcontent">
-        <h2>
-            Add new service: 
-        </h2>
-
-        <form>
-            
-        </form>
-    </div>    
-    <div id="Details" class="tabcontent">
-        <h2>Business Deatils: </h2>
-        <h3>Hours</h3>
-        <form>
-            <label>Monday: </label>
-            <input type="time">
-            <input type="time">
-            <br> 
-            <label>Tuesday: </label>
-            <input type="time">
-            <input type="time">
-            <br> 
-            <label>Wednesday: </label>
-            <input type="time">
-            <input type="time">
-            <br> 
-            <label>Thursday: </label>
-            <input type="time">
-            <input type="time">
-            <br> 
-            <label>Friday: </label>
-            <input type="time">
-            <input type="time">
-            <br> 
-            <label>Saturday: </label>
-            <input type="time">
-            <input type="time">
-            <br> 
-            <label>Sunday: </label>
-            <input type="time">
-            <input type="time">
-            <br> 
-
-            <input type="submit">
-        </form>
     </div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-    
+
 </div>
+
 {% endblock %}

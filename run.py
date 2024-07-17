@@ -1,13 +1,16 @@
 #imports
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 import oracledb
 from database import OracleConfig
 from dotenv import load_dotenv
 import oracledb
 from database import OracleConfig
 from dotenv import load_dotenv
-from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck
+from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo
 import inputvalidation
+from flask_session import Session
+import redis
+
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
@@ -17,6 +20,29 @@ load_dotenv()
 #global variable setup
 database= OracleConfig()
 
+# Configure server-side session storage
+
+#--Specifies the session type... here it is redis--#
+app.config['SESSION_TYPE'] = 'redis'
+
+#--False if the session should be non-permanent--#
+app.config['SESSION_PERMANENT'] = False
+
+#--Adds an extra layer of security by signing the session cookies--#
+app.config['SESSION_USE_SIGNER'] = True
+
+#--Prefix for session keys in the storage backend--#
+app.config['SESSION_KEY_PREFIX'] = 'session:'
+
+#--Configures Redis as the storage backend--#
+app.config['SESSION_REDIS'] = redis.StrictRedis(host='localhost', port=6379, db=0)
+
+#initializes the session management in flask application
+Session(app)
+
+#With this configuration, user sessions are stored in Redis, 
+#which ensures that the session persists across different requests
+#and even server restarts, retaining the user login state
 
 
 @app.route("/")
@@ -31,42 +57,24 @@ def login():
         username = request.form['username']
         password = request.form['password']
         
-        # Validate input
-        is_valid_username, username_error = inputvalidation.validate_username(username)
-        is_valid_password, password_error = inputvalidation.validate_password(password)
-
-        #[error, error, error... etc] = errors
-        errors = []
-
-        if not is_valid_username:
-            errors.append(username_error)
-
-        if not is_valid_password:
-            errors.append(password_error)
-
         #validate login with the db
         if not loginCheck(username,password):
-            errors.append("Login Invalid, please try again")
-
-        if errors:
-            for error in errors:
-                flash(error)
+            flash("Login Invalid, please try again")
             return redirect(url_for('login'))
+        
+        #add logic for to select for customer or business
 
+        # Set session variable for logged-in user
+        #--indicates that the user is logged in--#
+        session['logged_in'] = True
+
+        #--stores the logged-in username--#
+        session['username'] = username
         
-       # if not is_valid_username:
-            #flash(username_error)
-           # return redirect(url_for('login'))
-        
-        #if not is_valid_password:
-            #flash(password_error)
-           # return redirect(url_for('login'))
-        
-        #print("hi there")
-        #Redirects to home page if login is successful
         
         return redirect(url_for('homePage'))
         #return redirect(url_for('home'))
+
     return render_template('login.html')
 
 @app.route('/Bsignup', methods = ['GET','POST'])
@@ -84,7 +92,7 @@ def Bsignup():
          email = request.form['email']
 
          errors = []
-        
+
          #Validate Input, Error Messages will flash to CSignUp
          is_valid_username, username_error = inputvalidation.validate_username(username)
          is_valid_password, password_error = inputvalidation.validate_password(password)
@@ -92,7 +100,6 @@ def Bsignup():
          is_valid_name, name_error = inputvalidation.validate_name(firstname, lastname)
          is_valid_location, location_error = inputvalidation.validate_location(country, state, city)
          is_valid_address, address_error = inputvalidation.validate_address(address)
-
 
          if not is_valid_username:
             errors.append(username_error)
@@ -111,6 +118,12 @@ def Bsignup():
 
          if not is_valid_address:
             errors.append(address_error)
+
+         if CheckBusinessName(businessname):
+             errors.append("Invalid Business Name: Business already exists")
+            
+         if CheckUsername(username):
+             errors.append("Invalid Username: User already exists")
 
         #Flash errors... retain users in sign up screen
          if errors:
@@ -167,6 +180,9 @@ def Csignup():
 
          if not is_valid_address:
             errors.append(address_error)
+        
+         if CheckUsername(username):
+             errors.append("Invalid Username: User already exists")
 
         #Flash errors... retain users in sign up screen
          if errors:
@@ -190,13 +206,18 @@ def Csignup():
 
 @app.route('/home')
 def homePage():
-    name = "Olivia"
+    #Check if the login cache works
+    username = session.get('username')
+    CustomerInfo = CallCustomerInfo(username)
+    name = CustomerInfo[1]
+    #BusinessInfo = CallBusinessInfo(username)
+    #name = BusinessInfo[0]
     return render_template('home.html', name = name)
 
 @app.route('/search')
 def searchPage():
 
-    return render_template('search.html')
+    return render_template('templates/search.html')
 
 @app.route('/profile')
 def profilePage():
@@ -206,16 +227,38 @@ def profilePage():
 @app.route('/bookings')
 def bookingPage():
 
+    
+    # return render_template('templates/Bbookings.html')
     return render_template('templates/bookings.html')
 
+@app.route('/employees')
+def employeePage():
+
+    return render_template('templates/bEmployees.html')
+
+
 @app.route('/business/view')
-def businessViewProfilePage():
+def redirectToHome():
+    return redirect('/home')
+
+@app.route('/business/view/<username>',  methods = ['GET','POST'])
+def businessViewProfilePage(username):
+
+    # General Business Information
+    businessInfo = CallBusinessInfo(username)
     
-    businessName = "Publix"
-    businessAddress = "123 Happy Street"
+    businessName = businessInfo[0]
+    businessAddress = businessInfo[3] + ", " + businessInfo[2]
 
     stars = "4"
 
+    # Get array for services
+
+    # Time Table
+
+    # Map
+
+    # Reviews
 
     return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, stars=stars, title='View Buisness')
 
@@ -230,7 +273,32 @@ def businessEditProfilePage():
 @app.route('/profile/view')
 def customerViewProfilePage():
 
-    return render_template('templates/cProfile.html')
+    customerName = "Olivia Bisset"
+    customerAddress = "11351 W. Broward Blvd"
+
+    return render_template('templates/cProfile.html', customerName=customerName, customerAddress=customerAddress)
+
+
+@app.route('/profile/edit')
+def customerEditProfilePage(): 
+
+    return render_template('templates/cEdit.html')
+
+@app.route('/services')
+def servicePage():
+
+
+    return render_template('templates/servicePage.html')
+
+# Add service page code here
+# @app.route()
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in',None)
+    session.pop('username',None)
+    flash('You have been logged out.')
+    return redirect('/')
 
 if __name__ == '__main__':
     app.run(debug=True)

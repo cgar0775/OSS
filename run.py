@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 import oracledb
 from database import OracleConfig
 from dotenv import load_dotenv
-
-from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability
+import dbfunc
+#from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability
 import inputvalidation
 from flask_session import Session
 import redis
@@ -59,7 +59,7 @@ def login():
         password = request.form['password']
         
         #validate login with the db
-        if not loginCheck(username,password):
+        if not dbfunc.loginCheck(username,password):
             flash("Login Invalid, please try again")
             return redirect(url_for('login'))
         
@@ -120,10 +120,10 @@ def Bsignup():
          if not is_valid_address:
             errors.append(address_error)
 
-         if CheckBusinessName(businessname):
+         if dbfunc.CheckBusinessName(businessname):
              errors.append("Invalid Business Name: Business already exists")
             
-         if CheckUsername(username):
+         if dbfunc.CheckUsername(username):
              errors.append("Invalid Username: User already exists")
 
         #Flash errors... retain users in sign up screen
@@ -136,7 +136,7 @@ def Bsignup():
          state = state.capitalize()
          city = city.capitalize()
 
-         CreateBusinessAcc(username,password,businessname,country,state,city,address,email)
+         dbfunc.CreateBusinessAcc(username,password,businessname,country,state,city,address,email)
          
          #Return customer to login page after sucessful account creation
          return redirect(url_for('login'))
@@ -182,7 +182,7 @@ def Csignup():
          if not is_valid_address:
             errors.append(address_error)
         
-         if CheckUsername(username):
+         if dbfunc.CheckUsername(username):
              errors.append("Invalid Username: User already exists")
 
         #Flash errors... retain users in sign up screen
@@ -198,7 +198,7 @@ def Csignup():
          state = state.capitalize()
          city = city.capitalize()
 
-         CreateCustomerAcc(username,password,firstname,lastname,country,state,city,address,email)
+         dbfunc.CreateCustomerAcc(username,password,firstname,lastname,country,state,city,address,email)
 
         #Return customer to login page after sucessful account creation
          return redirect(url_for('login'))
@@ -211,7 +211,7 @@ def homePage():
     username = session.get('username')
     # print(username)
     username = "otest"
-    CustomerInfo = CallCustomerInfo(username)
+    CustomerInfo = dbfunc.CallCustomerInfo(username)
     print(CustomerInfo)
     # name = "Olivia"
     #BusinessInfo = CallBusinessInfo(username)
@@ -250,7 +250,7 @@ def redirectToHome():
 def businessViewProfilePage(username):
 
     # General Business Information
-    businessInfo = CallBusinessInfo(username)
+    businessInfo = dbfunc.CallBusinessInfo(username)
     
     businessName = businessInfo[0]
     businessAddress = businessInfo[3] + ", " + businessInfo[2]
@@ -293,10 +293,10 @@ def customerEditProfilePage():
 @app.route('/services')
 def servicePage():
 
-    print(GetBusinessServices("Pozie Jewelry"))
-    print(len(GetBusinessServices("Pozie Jewelry")))
+    print(dbfunc.GetBusinessServices("Pozie Jewelry"))
+    print(len(dbfunc.GetBusinessServices("Pozie Jewelry")))
 
-    return render_template('templates/servicePage.html', service=GetBusinessServices("Pozie Jewelry"))
+    return render_template('templates/servicePage.html', service=dbfunc.GetBusinessServices("Pozie Jewelry"))
 
 @app.route('/add-service', methods = ['GET','POST'])
 def addService():
@@ -317,7 +317,7 @@ def addServiceFunction():
     print(name + " " + price+ " " + bName + " " + slots)
 
     
-    CreateService(bName, name, price, slots)
+    dbfunc.CreateService(bName, name, price, slots)
 
 
     return redirect(url_for('servicePage'))

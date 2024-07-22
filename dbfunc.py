@@ -12,14 +12,22 @@ database= OracleConfig()
 # Login and Signup Functions
 
 def hashPass(passw):
-    #establish db connection
-    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
-    cursor=connection.cursor()
     #hashing the password
     encoded_pass=passw.encode()
     hash_object=hashlib.sha384(encoded_pass)
     hashed_passw=hash_object.hexdigest()
     return hashed_passw
+
+def CheckRole(username):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"SELECT role FROM userlogin WHERE username='{username}'"
+    cursor.execute(query)
+    connection.commit()
+    role=cursor.fetchone()
+    cursor.close()
+    connection.close()
+    return role
 
 def loginCheck(user,passw):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)

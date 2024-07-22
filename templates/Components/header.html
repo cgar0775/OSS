@@ -1,6 +1,6 @@
 <div id="navheader">
     <nav class="navbar">
-        <img src="{{ url_for('static', filename='/images/logo/logo1.png')}}" id="headerlogo">
+        <a href="/home"><img src="{{ url_for('static', filename='/images/logo/logo1.png')}}" id="headerlogo"></a>
         <!-- <ul>
             <li><a href="/home">Home</a></li>
             <li><a href="/search">Search</a></li>
@@ -10,12 +10,13 @@
         </ul> -->
 
         <ul>
-            <li><a href="/home">Home</a></li>
-            <li><a href="/services">Our Services</a></li>
+            <!-- <li><a href="/home">Home</a></li> -->
+            <li><a href="/services">Services</a></li>
             <li><a href="/bookings">Bookings</a></li>
             <li><a href="/employees">Employees</a></li>
-            <li><a href="profile/edit">Profile</a></li>
-            <li><a href="/logout">Logout</a></li>
+            <!-- <li><a href="profile/edit">Profile</a></li>  -->
+            <li><a><img src="/static/images/icons/profile.png" style="width:50px;"></a></li>
+            <!-- <li><a href="/logout">Logout</a></li> -->
         </ul>
     </nav>
 </div>

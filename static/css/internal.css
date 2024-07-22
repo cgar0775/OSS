@@ -25,31 +25,27 @@ body{
     font-variation-settings:
       "wdth" 100; */
 }
+
+/* Navigation Styles */
+
 #navheader{
     background-color: #023047;
-    align-items: center;
 }
 
 .navbar{
 
-    width:50%;margin:0 auto;
-
-    max-width: 1000px;
+    margin: 0 auto;
 
     position: -webkit-sticky; /* For Safari */
     position: sticky;
     top: 0;
     padding: 10px 10px;
-    width: 100%;
     z-index: 1000; /* Ensures it stays on top of other content */
 
     display: flex;
     justify-content: space-between;
     align-content: center;
     align-items: center;
-
-    color: white;
-    text-align: right;
 }
 
 .navbar ul {
@@ -63,6 +59,11 @@ body{
 
 .navbar li {
     float: left;
+    align-content: center;
+}
+
+.navbar li img{
+    border-radius: 50px;
 }
 
 .navbar li a {
@@ -74,7 +75,7 @@ body{
 }
 
 .navbar li a:hover {
-    background-color: #111;
+    color: #FFB703;
 }
 
 .navbar img {
@@ -505,4 +506,29 @@ input[type="submit"] {
     object-position: center;
     margin-top: 30px;
     border-radius: 30px;   
+}
+
+
+/* Employee Page Styles */
+
+.containter{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+
+    padding: 30px;
+}
+
+.block img{
+    width: 100px;
+    border-radius: 300px;
+}
+
+
+.block{
+    background-color: lightblue;
+    padding: 20px;
+    text-align: center;
+    
+    border-radius: 30px
 }

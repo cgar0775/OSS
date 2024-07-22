@@ -354,6 +354,11 @@ def singleServiceEditPage(businessname, serviceName):
 
     return render_template("templates/sEdit.html")
 
+@app.route('/employee/add')
+def addEmployee():
+
+    return render_template("templates/bAddEmployee.html")
+
 # Add service page code here
 # @app.route()
 

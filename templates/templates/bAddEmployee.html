@@ -1,0 +1,28 @@
+{% extends 'frame.html' %}
+
+{% block content %}
+
+<div>
+    <h2>Add Employee</h2>
+
+    <form>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        
+        <label for="firstname">First Name:</label>
+        <input type="text" id="firstname" name="firstname" required><br><br>
+
+        <label for="lastname">Last Name:</label>
+        <input type="text" id="lastname" name="lastname" required><br><br>
+
+        <label>Role</label>
+        <input type="checkbox"> <br><br>
+
+        <input type="submit">
+    </form>
+</div>
+
+{% endblock %}

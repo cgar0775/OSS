@@ -7,7 +7,7 @@ import oracledb
 from database import OracleConfig
 from dotenv import load_dotenv
 
-from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability
+from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices,CreateEmployee,UpdateAvailability
 import inputvalidation
 from flask_session import Session
 import redis
@@ -239,6 +239,9 @@ def bookingPage():
 @app.route('/employees')
 def employeePage():
 
+
+
+
     return render_template('templates/bEmployees.html')
 
 
@@ -356,6 +359,45 @@ def singleServiceEditPage(businessname, serviceName):
 
 @app.route('/employee/add')
 def addEmployee():
+
+    eusername = request.form['username']
+    password = request.form['password']
+    efname = request.form['firstname']
+    elname = request.form['lastname']
+    role = request.form['checkbox']
+
+    errors = []
+         
+    #Validate Input, Error Messages will flash to CSignUp
+    is_valid_username, username_error = inputvalidation.validate_username(eusername)
+    is_valid_password, password_error = inputvalidation.validate_password(password)
+    is_valid_name, name_error = inputvalidation.validate_name(efname, elname)
+
+    if CheckUsername(eusername):
+        errors.append("Invalid Username: User already exists")
+
+    if not is_valid_username:
+        errors.append(username_error)
+
+    if not is_valid_password:
+        errors.append(password_error)
+
+    if not is_valid_name:
+        errors.extend(name_error)
+
+    if errors:
+        for error in errors:
+            flash(error)
+        return redirect(url_for('bAddEmployee'))
+
+    efname = efname.capitalize()
+    elname = elname.capitalize()
+
+    #invoke database to get business name based on current logged in user session because only buiness admins can make employee acc.
+    BusinessInfo = CallBusinessInfo(session.get('username'))
+    bname = BusinessInfo[0]
+
+    CreateEmployee(bname,eusername,password,efname,elname,role)
 
     return render_template("templates/bAddEmployee.html")
 

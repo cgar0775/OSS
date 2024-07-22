@@ -7,7 +7,7 @@ import oracledb
 from database import OracleConfig
 from dotenv import load_dotenv
 
-from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices
+from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability
 import inputvalidation
 from flask_session import Session
 import redis
@@ -209,10 +209,14 @@ def Csignup():
 def homePage():
     #Check if the login cache works
     username = session.get('username')
+    # print(username)
+    username = "otest"
     CustomerInfo = CallCustomerInfo(username)
-    name = CustomerInfo[1]
+    print(CustomerInfo)
+    # name = "Olivia"
     #BusinessInfo = CallBusinessInfo(username)
     #name = BusinessInfo[0]
+    name = CustomerInfo[1]
     return render_template('home.html', name = name)
 
 @app.route('/search')
@@ -318,6 +322,25 @@ def addServiceFunction():
 
     return redirect(url_for('servicePage'))
 
+@app.route('/update-form', methods=['POST', 'GET'])
+def updateTime():
+
+    days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+
+    breakStart = request.form.get("break-start")
+    breakEnd = request.form.get("break-end")
+
+    for i in days:
+        startLabel = i + '-start'    
+        endLabel = i + '-end'    
+        
+        print(request.form.get(startLabel))
+        print(request.form.get(endLabel))
+
+        # UpdateAvailability('Pozie Jewelry', 'thingy4', i, startLabel, endLabel, breakStart, breakEnd)
+
+    return redirect(url_for('servicePage'))
+
 @app.route('/<businessname>/service/<serviceName>')
 
 # @app.route('/service')
@@ -330,6 +353,11 @@ def singleServiceEditPage(businessname, serviceName):
 
 
     return render_template("templates/sEdit.html")
+
+@app.route('/employee/add')
+def addEmployee():
+
+    return render_template("templates/bAddEmployee.html")
 
 # Add service page code here
 # @app.route()

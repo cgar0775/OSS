@@ -5,7 +5,7 @@
 <div>
     <div id="header">
         <!-- header Content -->
-        <img src="{{ url_for('static', filename='/images/misc/tempHeader.jpg')}}" id="editProfileHeader">
+        <img src="{{ url_for('static', filename='/images/misc/tempHeader.jpg')}}" id="editProfileHeader" onclick="handleClick()">
 
         <div id="profilePicture">
             <img src="{{ url_for('static', filename='/images/misc/tempProfile.jpg')}}">
@@ -14,102 +14,69 @@
     </div>
 
     <div>
-        <div class="tab-container">
-            <div class="tabs">
-                <button class="tab-button" onclick="openTab(event, 'Tab1')">Tab 1</button>
-                <button class="tab-button" onclick="openTab(event, 'Tab2')">Tab 2</button>
-                <button class="tab-button" onclick="openTab(event, 'Tab3')">Tab 3</button>
+        <h1>Service Name</h1>
+        <h4>Description</h4>
+
+        <div>
+            <h2>Bookings</h2>
+            <div>
+                <!-- Put booking information here -->
             </div>
-            <div id="Tab1" class="tab-content">
-                <h3>Hours</h3>
-                <form>
-                    <label>Monday: </label>
-                    <input type="time">
-                    <input type="time">
-                    <br> 
-                    <label>Tuesday: </label>
-                    <input type="time">
-                    <input type="time">
-                    <br> 
-                    <label>Wednesday: </label>
-                    <input type="time">
-                    <input type="time">
-                    <br> 
-                    <label>Thursday: </label>
-                    <input type="time">
-                    <input type="time">
-                    <br> 
-                    <label>Friday: </label>
-                    <input type="time">
-                    <input type="time">
-                    <br> 
-                    <label>Saturday: </label>
-                    <input type="time">
-                    <input type="time">
-                    <br> 
-                    <label>Sunday: </label>
-                    <input type="time">
-                    <input type="time">
-                    <br> 
+        </div>
+
+        <div>
+            <h2>Schedule</h2>
+            <div>
+                <form action="{{url_for('updateTime')}}" method="post">
+                    <label for="monday-start">Monday: </label>
+                    <input type="time" id="monday-start" name="monday-start">
+                    <input type="time" id="monday-end" name="monday-end">
+                    <br>
+                    <label for="tuesday-start">Tuesday: </label>
+                    <input type="time" id="tuesday-start" name="tuesday-start">
+                    <input type="time" id="tuesday-end" name="tuesday-end">
+                    <br>
+                    <label for="wednesday-start">Wednesday: </label>
+                    <input type="time" id="wednesday-start" name="wednesday-start">
+                    <input type="time" id="wednesday-end" name="wednesday-end">
+                    <br>
+                    <label for="thursday-start">Thursday: </label>
+                    <input type="time" id="thursday-start" name="thursday-start">
+                    <input type="time" id="thursday-end" name="thursday-end">
+                    <br>
+                    <label for="friday-start">Friday: </label>
+                    <input type="time" id="friday-start" name="friday-start">
+                    <input type="time" id="friday-end" name="friday-end">
+                    <br>
+                    <label for="saturday-start">Saturday: </label>
+                    <input type="time" id="saturday-start" name="saturday-start">
+                    <input type="time" id="saturday-end" name="saturday-end">
+                    <br>
+                    <label for="sunday-start">Sunday: </label>
+                    <input type="time" id="sunday-start" name="sunday-start">
+                    <input type="time" id="sunday-end" name="sunday-end">
+                    <br>
+                    
+                    <label for="break-start">Break: </label>
+                    <input type="time" id="break-start" name="break-start">
+                    <input type="time" id="break-end" name="break-end">
+                    <br>
         
                     <input type="submit">
-            </div>
-            <div id="Tab2" class="tab-content">
-                <h2>Tab 2 Content</h2>
-                <p>This is the content for Tab 2.</p>
-            </div>
-            <div id="Tab3" class="tab-content">
-                <h2>Tab 3 Content</h2>
-                <p>This is the content for Tab 3.</p>
+                </form>
             </div>
         </div>
     </div>
-
-    <script>
-        function openTab(event, tabName) {
-            var i, tabcontent, tabbuttons;
-
-            // Hide all tab contents
-            tabcontent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-            }
-
-            // Remove the active class from all tab buttons
-            tabbuttons = document.getElementsByClassName("tab-button");
-            for (i = 0; i < tabbuttons.length; i++) {
-                tabbuttons[i].className = tabbuttons[i].className.replace(" active", "");
-            }
-
-            // Show the current tab content and add the active class to the button that opened the tab
-            document.getElementById(tabName).style.display = "block";
-            event.currentTarget.className += " active";
-        }
-
-        // Open the first tab by default
-        document.addEventListener("DOMContentLoaded", function() {
-            document.querySelector(".tab-button").click();
-        });
-    </script>
-
-    <!-- <div id="editContent">
-        <div>
-            <h2>Name</h2>
-            <button>Edit</button>
-        </div>
-        <div>
-            <h2>Price</h2>
-            <button>Edit</button>
-        </div>
-        <div>
-            <h2>Description</h2>
-            <button>Edit</button>
-        </div>
-        <div>
-            <h2>Avalible Slots</h2>
-            <button>Edit</button>
-        </div>
-    </div> -->
 </div>
+
+
+<script>
+    function handleClick() {
+        // Add your desired JavaScript functionality here
+        alert('Image clicked!');
+        // You can add more complex actions or behavior here
+    }
+</script>
+
 
 {% endblock %}

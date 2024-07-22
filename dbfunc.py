@@ -313,6 +313,18 @@ def UpdateEmployee(bname,username,efname,elname,role):
     connection.close()
     return
 
+#returns all of a businesses employees for display
+def CallBusinessEmployees(bname):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"SELECT * FROM employees WHERE bname='{bname}'"
+    cursor.execute(query)
+    connection.commit()
+    fetch=cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return fetch
+
 #this function is dangerous, be very careful with implementation it should only be called on a visible delete button tied into background checking systems, like a user's profile page
 def DeleteAccount(username):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)

@@ -76,7 +76,7 @@ def CallBusinessInfo(name):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
     #calls a specific business' info from the database
-    query=f"SELECT * FROM BUSINESSINFO WHERE username='{name}'"
+    query=f"SELECT * FROM BUSINESSINFO WHERE bname='{name}'"
     cursor.execute(query)
     connection.commit()
     #store result so we can close db connection

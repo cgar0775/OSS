@@ -9,18 +9,32 @@
         <table>
             <thead>
                 <tr>
-                    <th>Service</th>
+                    <th>Buisness</th>
+                    <th>Service Name</th>
                     <th>Price</th>
-                    <th>Something else here</th>
+                    <th>Slots Avalible</th>
+                    <th>Edit</th>
+                    <th>View</th>
+                    <!-- <th>Edit</th> -->
                 </tr>
             </thead>
             <tbody>
+                {% for items in service%}
+                    <tr>
+                        {%for data in items %}
+                            <td>{{ data }}</td>
+                        {% endfor %}
+                        <!-- <td>{{ items[0] }}</td> -->
+                        <td><a href="/{{items[0]}}/service/edit/{{items[1]}}"><button>Edit</button></a></td>
+                        <td><a href="/{{items[0]}}/service/{{items[1]}}"><button>View</button></a></td>
+                    </tr>
+                {% endfor %}
                 <!-- Add dynamic data here -->
             </tbody>
         </table>
     </div>
     
-    <button>Add new service</button>
+    <a href="/add-service"><button>Add new service</button></a>
 
 </div>
 

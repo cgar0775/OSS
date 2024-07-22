@@ -335,3 +335,47 @@ def DeleteAccount(username):
     cursor.close()
     connection.close()
     return
+
+#geocoordinate stuff
+
+def AddCoordinates(username,lat,lng):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"INSERT INTO geocoordinates VALUES('{username}',{lat},{lng})"
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return
+
+def CheckCoordinates(username):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"SELECT lat,lng FROM geocoordinates WHERE username='{username}'"
+    cursor.execute(query)
+    connection.commit()
+    coords=cursor.fetchone()
+    cursor.close()
+    connection.close()
+    return coords
+
+def CallBusinessGeo(Customerusername):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    coords=CheckCoordinates(Customerusername)
+    query=f"""SELECT username,name,
+       (
+          3959 * ACOS(COS(RADIANS(37)) * COS(RADIANS(lat)) * COS(RADIANS(lng) - RADIANS(-122)) + SIN(RADIANS(37)) * SIN(RADIANS(lat)))
+       ) AS distance
+FROM geocoordinates
+INNER JOIN Businessinfo b ON geocoordinates.username=b.username
+WHERE lat BETWEEN {coords[0]} - (20 / 69.172) AND {coords[0]} + (20 / 69.172)
+  AND lng BETWEEN {coords[1]} - (20 / (69.172 * COS(RADIANS(37)))) AND {coords[1]} + (20 / (69.172 * COS(RADIANS(37)))))
+HAVING distance < 20
+ORDER BY distance"""
+    cursor.execute(query)
+    connection.commit()
+    info=cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return info

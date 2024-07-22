@@ -41,7 +41,7 @@ def CreateCustomerAcc(username,password,firstname,lastname,country,state,city,ad
     cursor=connection.cursor()
     hashed_passw=hashPass(password)
     #fill the two tables needed
-    query=f"INSERT INTO userlogin VALUES('{username}','{hashed_passw}')"
+    query=f"INSERT INTO userlogin VALUES('{username}','{hashed_passw}','Customer')"
     query2=f"INSERT INTO CUSTOMERINFO VALUES('{username}','{firstname}','{lastname}','{country}','{state}','{city}','{address}','{email}')"
     #execute the database calls
     print(query)
@@ -59,7 +59,7 @@ def CreateBusinessAcc(username,password,name,country,state,city,address,email):
     cursor=connection.cursor()
     hashed_passw=hashPass(password)
     #fill the two tables needed
-    query=f"INSERT INTO userlogin VALUES('{username}','{hashed_passw}')"
+    query=f"INSERT INTO userlogin VALUES('{username}','{hashed_passw}','Business')"
     query2=f"INSERT INTO BUSINESSINFO VALUES('{name}','{email}','{country}','{state}','{city}','{address}','{username}')"
     #execute the database calls
     cursor.execute(query)
@@ -282,6 +282,42 @@ def DeleteBooking(sname,bname,username,timeslot_start,timeslot_end, new_timeslot
     WHERE sname='{sname}', bname='{bname}', username='{username}',
     timeslot_start=TO_DATE('{timeslot_start}', 'MON-DD-YYYY HH24:MI'), 
     timeslot_end=TO_DATE('{timeslot_end}', 'MON-DD-YYYY HH24:MI'))"""
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return
+
+#employee related tasks
+#role is discrete 'Employee' or 'Administrator' 
+def CreateEmployee(bname,username,password,efname,elname,role):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    hashed_passw=hashPass(password)
+    query=f"INSERT INTO userlogin VALUES('{username}','{hashed_passw}','Employee')"
+    query2=f"INSERT INTO employees VALUES('{username}','{efname}','{elname}','{bname}','{role}')"
+    cursor.execute(query)
+    cursor.execute(query2)
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return
+
+def UpdateEmployee(bname,username,efname,elname,role): 
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"UPDATE employees SET efname='{efname}', elname='{elname}', role='{role}' WHERE bname='{bname}' AND username='{username}'" 
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return
+
+#this function is dangerous, be very careful with implementation it should only be called on a visible delete button tied into background checking systems, like a user's profile page
+def DeleteAccount(username):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"DELETE FROM userlogin WHERE username='{username}'"
     cursor.execute(query)
     connection.commit()
     cursor.close()

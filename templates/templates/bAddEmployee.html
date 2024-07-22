@@ -4,8 +4,18 @@
 
 <div>
     <h2>Add Employee</h2>
+    <!-- Flash message container -->
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
 
-    <form>
+    <form action="/employee/add" method="post">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required><br><br>
 
@@ -19,8 +29,7 @@
         <input type="text" id="lastname" name="lastname" required><br><br>
 
         <label>Role</label>
-        <input type="checkbox"> <br><br>
-
+        <input type="checkbox" id="role" name="role"> <br><br>
         <input type="submit">
     </form>
 </div>

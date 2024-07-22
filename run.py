@@ -357,7 +357,7 @@ def singleServiceEditPage(businessname, serviceName):
 
     return render_template("templates/sEdit.html")
 
-@app.route('/employee/add')
+@app.route('/employee/add', methods = ['GET','POST'])
 def addEmployee():
 
     if request.method == 'POST':
@@ -366,8 +366,9 @@ def addEmployee():
         password = request.form['password']
         efname = request.form['firstname']
         elname = request.form['lastname']
-        role = request.form['checkbox']
 
+        #the following below allows for role to checked or unchecked without yeilding a badRequestError 
+        role_checked = 'role' in request.form
         errors = []
          
         #Validate Input, Error Messages will flash to CSignUp
@@ -390,7 +391,7 @@ def addEmployee():
         if errors:
             for error in errors:
                 flash(error)
-            return redirect(url_for('bAddEmployee'))
+            return redirect('/employee/add')
 
         efname = efname.capitalize()
         elname = elname.capitalize()
@@ -399,7 +400,7 @@ def addEmployee():
         BusinessInfo = CallBusinessInfo(session.get('username'))
         bname = BusinessInfo[0]
 
-        CreateEmployee(bname,eusername,password,efname,elname,role)
+        CreateEmployee(bname,eusername,password,efname,elname,role_checked)
 
     return render_template("templates/bAddEmployee.html")
 

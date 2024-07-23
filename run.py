@@ -1,4 +1,5 @@
 #imports
+import os
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, session
 import oracledb
 import requests
@@ -7,8 +8,7 @@ from dotenv import load_dotenv
 import oracledb
 from database import OracleConfig
 from dotenv import load_dotenv
-
-from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo
+import dbfunc
 import inputvalidation
 from flask_session import Session
 import redis
@@ -60,7 +60,7 @@ def login():
         password = request.form['password']
         
         #validate login with the db
-        if not loginCheck(username,password):
+        if not dbfunc.loginCheck(username,password):
             flash("Login Invalid, please try again")
             return redirect(url_for('login'))
         
@@ -125,11 +125,6 @@ def Bsignup():
              errors.append("Invalid Business Name: Business already exists")
             
          if dbfunc.CheckUsername(username):
-         
-         if CheckBusinessName(businessname):
-             errors.append("Invalid Business Name: Business already exists")
-            
-         if CheckUsername(username):
              errors.append("Invalid Username: User already exists")
 
         #Flash errors... retain users in sign up screen
@@ -142,7 +137,7 @@ def Bsignup():
          state = state.capitalize()
          city = city.capitalize()
 
-         CreateBusinessAcc(username,password,businessname,country,state,city,address,email)
+         dbfunc.CreateBusinessAcc(username,password,businessname,country,state,city,address,email)
          
          #Return customer to login page after sucessful account creation
          return redirect(url_for('login'))
@@ -189,7 +184,8 @@ def Csignup():
             errors.append(address_error)
         
          if dbfunc.CheckUsername(username):
-
+                errors.append("Invalid Username: User already exists")
+                
          if errors:
             for error in errors:
                 flash(error)
@@ -202,7 +198,7 @@ def Csignup():
          state = state.capitalize()
          city = city.capitalize()
 
-         CreateCustomerAcc(username,password,firstname,lastname,country,state,city,address,email)
+         dbfunc.CreateCustomerAcc(username,password,firstname,lastname,country,state,city,address,email)
 
         #Return customer to login page after sucessful account creation
          return redirect(url_for('login'))
@@ -221,7 +217,7 @@ def homePage():
     #BusinessInfo = CallBusinessInfo(username)
     #name = BusinessInfo[0]
     name = CustomerInfo[1]
-    CustomerInfo = CallCustomerInfo(username)
+    CustomerInfo = dbfunc.CallCustomerInfo(username)
     name = CustomerInfo[1]
     #BusinessInfo = CallBusinessInfo(username)
     #name = BusinessInfo[0]
@@ -258,7 +254,7 @@ def redirectToHome():
 def businessViewProfilePage(username):
 
     # General Business Information
-    businessInfo = CallBusinessInfo(username)
+    businessInfo = dbfunc.CallBusinessInfo(username)
     
     businessName = businessInfo[0]
     businessAddress = businessInfo[3] + ", " + businessInfo[2]
@@ -374,21 +370,23 @@ def addEmployee():
 @app.route('/maps')
 def viewMap():
     username = session.get('username')
-    CustomerInfo = CallCustomerInfo(username)
-    return render_template('maps.html')
+    CustomerInfo = dbfunc.CallCustomerInfo(username)
+    api_key = os.getenv('API_KEY')
+    return render_template('maps.html', api_key = api_key)
 
 #Geocoding Location for maps
 @app.route('/get-user-location')
 def get_user_location():
     username = session.get('username')
-    customer_info = CallCustomerInfo(username)
+    customer_info = dbfunc.CallCustomerInfo(username)
+    API_KEY = os.getenv('API_KEY')
     address = f"{customer_info[6]}, {customer_info[5]}, {customer_info[4]}, {customer_info[3]}" 
 
     # Print the address for debugging purposes
     # print(f"Address: {address}")
     
     # Use Google Geocoding API to convert address to coordinates
-    geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={address}&key=AIzaSyDX0AZFZl4fZxV9POauPkRDpUQRJs6ZbPc"
+    geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={API_KEY}"
     response = requests.get(geocode_url)
     geocode_data = response.json()
 

@@ -374,7 +374,14 @@ def CheckCoordinates(username):
 def CallBusinessGeo(Customerusername):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
-    coords=CheckCoordinates(Customerusername)
+    coords = CheckCoordinates(Customerusername)
+    if not coords:
+        print(f"No coordinates found for username: {Customerusername}")
+        return []  # Return an empty list if coordinates are not found
+    
+    print(f"Retrieved coordinates: {coords}")
+    
+    user_lat, user_lng = coords
     query=f"""SELECT username,name,
        (
           3959 * ACOS(COS(RADIANS(37)) * COS(RADIANS(lat)) * COS(RADIANS(lng) - RADIANS(-122)) + SIN(RADIANS(37)) * SIN(RADIANS(lat)))

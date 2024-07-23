@@ -22,6 +22,9 @@ load_dotenv()
 #global variable setup
 database= OracleConfig()
 
+#Google Maps API_KEY
+API_KEY= os.getenv('API_KEY')
+
 # Configure server-side session storage
 
 #--Specifies the session type... here it is redis--#
@@ -73,6 +76,12 @@ def login():
         #--stores the logged-in username--#
         session['username'] = username
         
+
+        customer_info = dbfunc.CallCustomerInfo(username)
+        address = f"{customer_info[6]}, {customer_info[5]}, {customer_info[4]}, {customer_info[3]}" 
+        
+        coords = dbfunc.CheckCoordinates(username)
+    
         
         return redirect(url_for('homePage'))
         #return redirect(url_for('home'))
@@ -210,7 +219,7 @@ def homePage():
     #Check if the login cache works
     username = session.get('username')
     # print(username)
-    username = "otest"
+    # username = "otest"
     CustomerInfo = dbfunc.CallCustomerInfo(username)
     print(CustomerInfo)
     # name = "Olivia"
@@ -371,15 +380,13 @@ def addEmployee():
 def viewMap():
     username = session.get('username')
     CustomerInfo = dbfunc.CallCustomerInfo(username)
-    api_key = os.getenv('API_KEY')
-    return render_template('maps.html', api_key = api_key)
+    return render_template('maps.html', api_key = API_KEY)
 
 #Geocoding Location for maps
 @app.route('/get-user-location')
 def get_user_location():
     username = session.get('username')
     customer_info = dbfunc.CallCustomerInfo(username)
-    API_KEY = os.getenv('API_KEY')
     address = f"{customer_info[6]}, {customer_info[5]}, {customer_info[4]}, {customer_info[3]}" 
 
     # Print the address for debugging purposes
@@ -392,10 +399,28 @@ def get_user_location():
 
     if geocode_data['status'] == 'OK':
         location = geocode_data['results'][0]['geometry']['location']
-        return jsonify({'lat': location['lat'], 'lng': location['lng']})
+        user_lat = location['lat']
+        user_lng = location['lng']
+        # This is not working
+        # dbfunc.AddCoordinates(username, user_lat, user_lng)
+        
+        return jsonify({'lat': user_lat, 'lng': user_lng})
     else:
         return jsonify({'error': 'Unable to geocode address'})
+    
 #Need a function to grab all businesses in the area??
+
+@app.route('/get-nearby-business')
+def get_nearby_business():
+    username = session.get('username')
+    #Not working properly
+    coords = dbfunc.CheckCoordinates(username)
+
+    businesses = dbfunc.CallBusinessGeo(username)
+    if not businesses:
+        return jsonify([])
+    
+    return jsonify(businesses)
 
 @app.route('/logout')
 def logout():

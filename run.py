@@ -1,6 +1,7 @@
 #imports
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, session
 import oracledb
+import requests
 from database import OracleConfig
 from dotenv import load_dotenv
 import oracledb
@@ -125,6 +126,11 @@ def Bsignup():
          if not is_valid_address:
             errors.append(address_error)
 
+         if dbfunc.CheckBusinessName(businessname):
+             errors.append("Invalid Business Name: Business already exists")
+            
+         if dbfunc.CheckUsername(username):
+         
          if CheckBusinessName(businessname):
              errors.append("Invalid Business Name: Business already exists")
             
@@ -187,10 +193,8 @@ def Csignup():
          if not is_valid_address:
             errors.append(address_error)
         
-         if CheckUsername(username):
-             errors.append("Invalid Username: User already exists")
+         if dbfunc.CheckUsername(username):
 
-        #Flash errors... retain users in sign up screen
          if errors:
             for error in errors:
                 flash(error)
@@ -213,7 +217,7 @@ def Csignup():
 @app.route('/home')
 def homePage():
     # Get user information
-    username = session.get('username')
+    username = session.get('username')=
 
     # If they are not logged in, redirect them to the login page
     if not username: 
@@ -390,10 +394,10 @@ def servicePage():
         print("Empty Username!")
         return redirect(url_for('login'))
 
-    print(GetBusinessServices("Pozie Jewelry"))
-    print(len(GetBusinessServices("Pozie Jewelry")))
+    print(dbfunc.GetBusinessServices("Pozie Jewelry"))
+    print(len(dbfunc.GetBusinessServices("Pozie Jewelry")))
 
-    return render_template('templates/servicePage.html', service=GetBusinessServices("Pozie Jewelry"))
+    return render_template('templates/servicePage.html', service=dbfunc.GetBusinessServices("Pozie Jewelry"))
 
 @app.route('/add-service', methods = ['GET','POST'])
 def addService():
@@ -437,7 +441,7 @@ def addServiceFunction():
     print(name + " " + price+ " " + bName + " " + slots)
 
     
-    CreateService(bName, name, price, slots)
+    dbfunc.CreateService(bName, name, price, slots)
 
 
     return redirect(url_for('servicePage'))
@@ -508,6 +512,35 @@ def addEmployee():
 
 # Add service page code here
 # @app.route()
+
+#Trial for maps
+@app.route('/maps')
+def viewMap():
+    username = session.get('username')
+    CustomerInfo = CallCustomerInfo(username)
+    return render_template('maps.html')
+
+#Geocoding Location for maps
+@app.route('/get-user-location')
+def get_user_location():
+    username = session.get('username')
+    customer_info = CallCustomerInfo(username)
+    address = f"{customer_info[6]}, {customer_info[5]}, {customer_info[4]}, {customer_info[3]}" 
+
+    # Print the address for debugging purposes
+    # print(f"Address: {address}")
+    
+    # Use Google Geocoding API to convert address to coordinates
+    geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={address}&key=AIzaSyDX0AZFZl4fZxV9POauPkRDpUQRJs6ZbPc"
+    response = requests.get(geocode_url)
+    geocode_data = response.json()
+
+    if geocode_data['status'] == 'OK':
+        location = geocode_data['results'][0]['geometry']['location']
+        return jsonify({'lat': location['lat'], 'lng': location['lng']})
+    else:
+        return jsonify({'error': 'Unable to geocode address'})
+#Need a function to grab all businesses in the area??
 
 @app.route('/logout')
 def logout():

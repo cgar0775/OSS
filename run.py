@@ -7,7 +7,7 @@ import oracledb
 from database import OracleConfig
 from dotenv import load_dotenv
 
-from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability
+from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability, CallBusinessName
 import inputvalidation
 from flask_session import Session
 import redis
@@ -38,12 +38,17 @@ app.config['SESSION_KEY_PREFIX'] = 'session:'
 #--Configures Redis as the storage backend--#
 app.config['SESSION_REDIS'] = redis.StrictRedis(host='localhost', port=6379, db=0)
 
+app.config['SESSON_ROLE'] = 'na'
+
 #initializes the session management in flask application
 Session(app)
 
 #With this configuration, user sessions are stored in Redis, 
 #which ensures that the session persists across different requests
 #and even server restarts, retaining the user login state
+
+
+# run.py General Functions 
 
 
 @app.route("/")
@@ -207,47 +212,112 @@ def Csignup():
 
 @app.route('/home')
 def homePage():
-    #Check if the login cache works
+    # Get user information
     username = session.get('username')
-    # print(username)
-    username = "otest"
-    CustomerInfo = CallCustomerInfo(username)
-    print(CustomerInfo)
-    # name = "Olivia"
-    #BusinessInfo = CallBusinessInfo(username)
-    #name = BusinessInfo[0]
-    name = CustomerInfo[1]
-    return render_template('home.html', name = name)
+
+    # If they are not logged in, redirect them to the login page
+    if not username: 
+        print("Empty Username!")
+        return redirect(url_for('login'))
+    
+    # if they are logged in, what type of account???
+
+    print(CallBusinessInfo(username))
+    # print(CheckBusinessName(CheckBusinessName))
+    print("CallBusinessName: " + str(CallBusinessName(username)))
+    # print(CallBusinessInfo(CallBusinessName(username)))
+
+    if CallBusinessName(username):
+    # if CallBusinessInfo(CallBusinessName(username)[0]):
+        print("Username: " + str(username))
+        BuisnessInfo = CallBusinessInfo(CallBusinessName(username)[0])
+
+        print(BuisnessInfo)
+        
+        
+        return render_template('bHome.html', name = "name") #Change this to the buisness home page!!!
+        
+
+    if CallCustomerInfo(username):
+        print("Username: " + str(username))
+        CustomerInfo = CallCustomerInfo(username)
+        print(CustomerInfo)
+        name = CustomerInfo[1]
+        return render_template('home.html', name = name)
+
+    # Check to see if it is an employee
+    
+    
+    # return render_template('home.html', name = "name")
+    return
+
 
 @app.route('/search')
 def searchPage():
+    # Get user information
+    username = session.get('username')
+
+    # If they are not logged in, redirect them to the login page
+    if not username: 
+        print("Empty Username!")
+        return redirect(url_for('login'))
 
     return render_template('templates/search.html')
 
 @app.route('/profile')
 def profilePage():
+    # Get user information
+    username = session.get('username')
+
+    # If they are not logged in, redirect them to the login page
+    if not username: 
+        print("Empty Username!")
+        return redirect(url_for('login'))
 
     return render_template('Components/profile.html')
 
 @app.route('/bookings')
 def bookingPage():
 
-    
+    # Get user information
+    username = session.get('username')
+
+    # If they are not logged in, redirect them to the login page
+    if not username: 
+        print("Empty Username!")
+        return redirect(url_for('login'))
+
     # return render_template('templates/Bbookings.html')
     return render_template('templates/bookings.html')
 
 @app.route('/employees')
 def employeePage():
+    # Get user information
+    username = session.get('username')
+
+    # If they are not logged in, redirect them to the login page
+    if not username: 
+        print("Empty Username!")
+        return redirect(url_for('login'))
 
     return render_template('templates/bEmployees.html')
 
 
-@app.route('/business/view')
-def redirectToHome():
-    return redirect('/home')
+# @app.route('/business/view')
+# def redirectToHome():
+    
+#     return redirect('/home')
 
 @app.route('/business/view/<username>',  methods = ['GET','POST'])
 def businessViewProfilePage(username):
+
+    # Get user information
+    currentUsername = session.get('username')
+
+    # If they are not logged in, redirect them to the login page
+    if not currentUsername: 
+        print("Empty Username!")
+        return redirect(url_for('login'))
 
     # General Business Information
     businessInfo = CallBusinessInfo(username)
@@ -270,13 +340,26 @@ def businessViewProfilePage(username):
 
 @app.route('/business/edit')
 def businessEditProfilePage():
+    # Get user information
+    currentUsername = session.get('username')
 
+    # If they are not logged in, redirect them to the login page
+    if not currentUsername: 
+        print("Empty Username!")
+        return redirect(url_for('login'))
 
     return render_template('templates/bEdit.html', 
             title="Edit Profile")
 
 @app.route('/profile/view')
 def customerViewProfilePage():
+    # Get user information
+    currentUsername = session.get('username')
+
+    # If they are not logged in, redirect them to the login page
+    if not currentUsername: 
+        print("Empty Username!")
+        return redirect(url_for('login'))
 
     customerName = "Olivia Bisset"
     customerAddress = "11351 W. Broward Blvd"
@@ -286,12 +369,26 @@ def customerViewProfilePage():
 
 @app.route('/profile/edit')
 def customerEditProfilePage(): 
+    # Get user information
+    currentUsername = session.get('username')
+
+    # If they are not logged in, redirect them to the login page
+    if not currentUsername: 
+        print("Empty Username!")
+        return redirect(url_for('login'))
 
     # return render_template('templates/cEdit.html')
     return render_template('templates/bEdit.html')
 
 @app.route('/services')
 def servicePage():
+    # Get user information
+    currentUsername = session.get('username')
+
+    # If they are not logged in, redirect them to the login page
+    if not currentUsername: 
+        print("Empty Username!")
+        return redirect(url_for('login'))
 
     print(GetBusinessServices("Pozie Jewelry"))
     print(len(GetBusinessServices("Pozie Jewelry")))
@@ -300,14 +397,37 @@ def servicePage():
 
 @app.route('/add-service', methods = ['GET','POST'])
 def addService():
+    # Get user information
+    currentUsername = session.get('username')
+
+    # If they are not logged in, redirect them to the login page
+    if not currentUsername: 
+        print("Empty Username!")
+        return redirect(url_for('login'))
 
     if request.method == "POST":
        print("Hello there")
 
     return render_template('templates/addService.html')
 
+def checkLogin():
+    # Get user information
+    currentUsername = session.get('username')
+
+    # If they are not logged in, redirect them to the login page
+    if not currentUsername: 
+        print("Empty Username!")
+        return redirect('/login')
+
 @app.route('/submit-form', methods=['POST', 'GET'])
 def addServiceFunction():
+    # Get user information
+    currentUsername = session.get('username')
+
+    # If they are not logged in, redirect them to the login page
+    if not currentUsername: 
+        print("Empty Username!")
+        return redirect('/login')
     print(request.form)
     name = request.form.get('name')
     price = request.form.get('price')
@@ -324,6 +444,13 @@ def addServiceFunction():
 
 @app.route('/update-form', methods=['POST', 'GET'])
 def updateTime():
+    # Get user information
+    currentUsername = session.get('username')
+
+    # If they are not logged in, redirect them to the login page
+    if not currentUsername: 
+        print("Empty Username!")
+        return redirect('/login')
 
     days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 
@@ -345,17 +472,37 @@ def updateTime():
 
 # @app.route('/service')
 def singleServicePage(businessname, serviceName):
+    # Get user information
+    currentUsername = session.get('username')
+
+    # If they are not logged in, redirect them to the login page
+    if not currentUsername: 
+        print("Empty Username!")
+        return redirect('/login')
     # print(Get)
     return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName)
 
 @app.route('/<businessname>/service/edit/<serviceName>')
 def singleServiceEditPage(businessname, serviceName):
+# Get user information
+    currentUsername = session.get('username')
 
+    # If they are not logged in, redirect them to the login page
+    if not currentUsername: 
+        print("Empty Username!")
+        return redirect('/login')
 
     return render_template("templates/sEdit.html")
 
 @app.route('/employee/add')
 def addEmployee():
+    # Get user information
+    currentUsername = session.get('username')
+
+    # If they are not logged in, redirect them to the login page
+    if not currentUsername: 
+        print("Empty Username!")
+        return redirect('/login')
 
     return render_template("templates/bAddEmployee.html")
 

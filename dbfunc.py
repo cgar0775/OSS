@@ -76,7 +76,21 @@ def CallBusinessInfo(name):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
     #calls a specific business' info from the database
-    query=f"SELECT * FROM BUSINESSINFO WHERE bname='{name}'"
+    query=f"SELECT * FROM BUSINESSINFO WHERE name='{name}'"
+    cursor.execute(query)
+    connection.commit()
+    #store result so we can close db connection
+    val=cursor.fetchone()
+    cursor.close()
+    connection.close()
+    #returns the first (and expectedly only) row
+    return val
+
+def CallBusinessName(username):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    #calls a specific business' info from the database
+    query=f"SELECT * FROM BUSINESSINFO WHERE username='{username}'"
     cursor.execute(query)
     connection.commit()
     #store result so we can close db connection
@@ -128,7 +142,7 @@ def CheckUsername(name):
     return bool(check) 
 
 #creates a service for a business
-#inputs: business name (bname), service name (sname), price (float with 2 decimals), number of available slots (0 for unlimited)(for example only 4 hair stylists may be booked at the same time)
+#inputs: business    name (bname), service name (sname), price (float with 2 decimals), number of available slots (0 for unlimited)(for example only 4 hair stylists may be booked at the same time)
 def CreateService(bname,sname,price,slots):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()

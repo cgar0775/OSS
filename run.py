@@ -403,17 +403,22 @@ def get_user_location():
         return jsonify({'error': 'Unable to geocode address'})
     
 #Need a function to grab all businesses in the area??
-@app.route('/get-nearby-business')
-def get_nearby_business():
+@app.route('/get-nearby-businesses')
+def get_nearby_businesses():
     username = session.get('username')
-    #Not working properly
-    coords = dbfunc.CheckCoordinates(username)
+    user_coords = dbfunc.CheckCoordinates(username)
 
-    businesses = dbfunc.CallBusinessGeo(username)
-    if not businesses:
+    if not user_coords:
+        return jsonify({'error': 'User coordinates not found'})
+
+    user_lat, user_lng = user_coords
+    nearby_businesses = dbfunc.CallBusinessGeo(username)
+
+    if not nearby_businesses:
         return jsonify([])
-    
-    return jsonify(businesses)
+
+    return jsonify(nearby_businesses)
+
 
 @app.route('/logout')
 def logout():

@@ -21,7 +21,7 @@ def hashPass(passw):
 def CheckRole(username):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
-    query=f"SELECT role FROM userlogin WHERE username='{username}'"
+    query=f"SELECT type FROM userlogin WHERE username='{username}'"
     cursor.execute(query)
     connection.commit()
     role=cursor.fetchone()

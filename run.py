@@ -1,14 +1,12 @@
 #imports
-from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, session
+from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, session, g
 import oracledb
-import requests
-from database import OracleConfig
-from dotenv import load_dotenv
-import oracledb
+# import requests
 from database import OracleConfig
 from dotenv import load_dotenv
 
-from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability, CallBusinessName
+
+from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability, CallBusinessName, CheckRole
 import inputvalidation
 from flask_session import Session
 import redis
@@ -39,8 +37,6 @@ app.config['SESSION_KEY_PREFIX'] = 'session:'
 #--Configures Redis as the storage backend--#
 app.config['SESSION_REDIS'] = redis.StrictRedis(host='localhost', port=6379, db=0)
 
-app.config['SESSON_ROLE'] = 'na'
-
 #initializes the session management in flask application
 Session(app)
 
@@ -51,9 +47,22 @@ Session(app)
 
 # run.py General Functions 
 
+@app.before_request
+def before_request():
+    username = session.get('username')
+    if username:
+        
+        g.role = CheckRole(username)[0]
+        if g.role == "Business":
+            g.data = CallBusinessInfo(CallBusinessName(username)[0])
+            # print("g.data: ")
+            # print(g.data)
+        elif g.role == "Customer":
+            g.data = CallCustomerInfo(username)
 
 @app.route("/")
 def hello_world():
+    # See if they are logged in and then redirect them
     return render_template('splash.html')
 
 @app.route('/login', methods = ['GET','POST'])
@@ -126,10 +135,10 @@ def Bsignup():
          if not is_valid_address:
             errors.append(address_error)
 
-         if dbfunc.CheckBusinessName(businessname):
+         if CheckBusinessName(businessname):
              errors.append("Invalid Business Name: Business already exists")
             
-         if dbfunc.CheckUsername(username):
+        #  if CheckUsername(username):
          
          if CheckBusinessName(businessname):
              errors.append("Invalid Business Name: Business already exists")
@@ -193,7 +202,7 @@ def Csignup():
          if not is_valid_address:
             errors.append(address_error)
         
-         if dbfunc.CheckUsername(username):
+        #  if CheckUsername(username):
 
          if errors:
             for error in errors:
@@ -217,7 +226,7 @@ def Csignup():
 @app.route('/home')
 def homePage():
     # Get user information
-    username = session.get('username')=
+    username = session.get('username')
 
     # If they are not logged in, redirect them to the login page
     if not username: 
@@ -225,27 +234,23 @@ def homePage():
         return redirect(url_for('login'))
     
     # if they are logged in, what type of account???
-
-    print(CallBusinessInfo(username))
-    # print(CheckBusinessName(CheckBusinessName))
-    print("CallBusinessName: " + str(CallBusinessName(username)))
-    # print(CallBusinessInfo(CallBusinessName(username)))
+    
 
     if CallBusinessName(username):
     # if CallBusinessInfo(CallBusinessName(username)[0]):
-        print("Username: " + str(username))
+        
         BuisnessInfo = CallBusinessInfo(CallBusinessName(username)[0])
 
-        print(BuisnessInfo)
+        
         
         
         return render_template('bHome.html', name = "name") #Change this to the buisness home page!!!
         
 
-    if CallCustomerInfo(username):
-        print("Username: " + str(username))
+    if CheckRole(username)[0] == 'Customer':
+        # print("Username: " + str(username))
         CustomerInfo = CallCustomerInfo(username)
-        print(CustomerInfo)
+        # print(CustomerInfo)
         name = CustomerInfo[1]
         return render_template('home.html', name = name)
 
@@ -253,7 +258,7 @@ def homePage():
     
     
     # return render_template('home.html', name = "name")
-    return
+    return render_template('home.html')
 
 
 @app.route('/search')
@@ -278,7 +283,7 @@ def profilePage():
         print("Empty Username!")
         return redirect(url_for('login'))
 
-    return render_template('Components/profile.html')
+    return render_template('templates/cEdit.html')
 
 @app.route('/bookings')
 def bookingPage():
@@ -307,31 +312,44 @@ def employeePage():
     return render_template('templates/bEmployees.html')
 
 
-# @app.route('/business/view')
-# def redirectToHome():
-    
-#     return redirect('/home')
+# Redirect to the current logged in buisness view page
+@app.route('/business/view')
+def redirectToHome():
+    redir = '/business/view/' + CallBusinessName(session.get('username'))[0]
+    return redirect(redir)
 
 @app.route('/business/view/<username>',  methods = ['GET','POST'])
 def businessViewProfilePage(username):
 
     # Get user information
     currentUsername = session.get('username')
+    print(currentUsername)
 
     # If they are not logged in, redirect them to the login page
     if not currentUsername: 
         print("Empty Username!")
         return redirect(url_for('login'))
 
+    # debuig this - there might be an error!!!
+
     # General Business Information
+    print(CallBusinessName(username))
     businessInfo = CallBusinessInfo(username)
+    # businessInfo = CallBusinessInfo(CallBusinessName(username)[0])
+    # print(businessInfo)
+
     
     businessName = businessInfo[0]
     businessAddress = businessInfo[3] + ", " + businessInfo[2]
+    businessUsername = businessInfo[6]
 
     stars = "4"
 
     # Get array for services
+
+    arrServices = GetBusinessServices(businessName)
+    print("arrServices")
+    print(arrServices)
 
     # Time Table
 
@@ -339,7 +357,7 @@ def businessViewProfilePage(username):
 
     # Reviews
 
-    return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, stars=stars, title='View Buisness')
+    return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, stars=stars, title='View Buisness', businessUsername=businessUsername, arrServices=arrServices)
 
 
 @app.route('/business/edit')
@@ -394,10 +412,10 @@ def servicePage():
         print("Empty Username!")
         return redirect(url_for('login'))
 
-    print(dbfunc.GetBusinessServices("Pozie Jewelry"))
-    print(len(dbfunc.GetBusinessServices("Pozie Jewelry")))
+    print(CallBusinessName(currentUsername))
+    # print(CallBusinessInfo(CallBusinessName(currentUsername)))
 
-    return render_template('templates/servicePage.html', service=dbfunc.GetBusinessServices("Pozie Jewelry"))
+    return render_template('templates/servicePage.html', service=GetBusinessServices(CallBusinessName(currentUsername)[0]))
 
 @app.route('/add-service', methods = ['GET','POST'])
 def addService():
@@ -436,12 +454,12 @@ def addServiceFunction():
     name = request.form.get('name')
     price = request.form.get('price')
     slots = request.form.get('slots')
-    bName = "Pozie Jewelry" #for test
+    bName = CallBusinessName(currentUsername)[0]
 
-    print(name + " " + price+ " " + bName + " " + slots)
+    # print(name + " " + price + " " + bName + " " + slots)
 
-    
-    dbfunc.CreateService(bName, name, price, slots)
+    # Create the swervice with both the given and known information
+    CreateService(bName, name, price, slots)
 
 
     return redirect(url_for('servicePage'))
@@ -483,6 +501,9 @@ def singleServicePage(businessname, serviceName):
     if not currentUsername: 
         print("Empty Username!")
         return redirect('/login')
+
+    # Get avalible service times 
+
     # print(Get)
     return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName)
 

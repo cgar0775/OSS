@@ -336,6 +336,9 @@ def employeePage():
         print("Empty Username!")
         return redirect(url_for('login'))
 
+
+
+
     return render_template('templates/bEmployees.html')
 
 
@@ -546,7 +549,7 @@ def singleServiceEditPage(businessname, serviceName):
 
     return render_template("templates/sEdit.html")
 
-@app.route('/employee/add')
+@app.route('/employee/add', methods = ['GET','POST'])
 def addEmployee():
     # Get user information
     currentUsername = session.get('username')
@@ -555,6 +558,48 @@ def addEmployee():
     if not currentUsername: 
         print("Empty Username!")
         return redirect('/login')
+
+    if request.method == 'POST':
+
+        eusername = request.form['username']
+        password = request.form['password']
+        efname = request.form['firstname']
+        elname = request.form['lastname']
+
+        #the following below allows for role to checked or unchecked without yeilding a badRequestError 
+        role_checked = 'role' in request.form
+        errors = []
+         
+        #Validate Input, Error Messages will flash to CSignUp
+        is_valid_username, username_error = inputvalidation.validate_username(eusername)
+        is_valid_password, password_error = inputvalidation.validate_password(password)
+        is_valid_name, name_error = inputvalidation.validate_name(efname, elname)
+
+        if CheckUsername(eusername):
+            errors.append("Invalid Username: User already exists")
+
+        if not is_valid_username:
+             errors.append(username_error)
+
+        if not is_valid_password:
+            errors.append(password_error)
+
+        if not is_valid_name:
+            errors.extend(name_error)
+
+        if errors:
+            for error in errors:
+                flash(error)
+            return redirect('/employee/add')
+
+        efname = efname.capitalize()
+        elname = elname.capitalize()
+
+        #invoke database to get business name based on current logged in user session because only buiness admins can make employee acc.
+        BusinessInfo = CallBusinessInfo(session.get('username'))
+        bname = BusinessInfo[0]
+
+        CreateEmployee(bname,eusername,password,efname,elname,role_checked)
 
     return render_template("templates/bAddEmployee.html")
 

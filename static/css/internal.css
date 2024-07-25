@@ -180,6 +180,11 @@ h2{
     
 }
 
+#serviceContanier h4{
+    padding: 0px;
+    margin: 0px;
+}
+
 #sidebar{
     flex:25%;
 

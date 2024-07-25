@@ -1,22 +1,32 @@
 <div id="navheader">
     <nav class="navbar">
         <a href="/home"><img src="{{ url_for('static', filename='/images/logo/logo1.png')}}" id="headerlogo"></a>
-        <!-- <ul>
+
+
+
+        {% if g.role == 'Customer' %}
+        <ul>
             <li><a href="/home">Home</a></li>
             <li><a href="/search">Search</a></li>
-            <li><a href="/bookings">Bookings</a></li>
-            <li><a>Profile</a></li>
+            <li><a href="/bookings">My Bookings</a></li>
+            <li><a href="/profile">Profile</a></li>
             <li><a href="/">Logout</a></li>
-        </ul> -->
+        </ul>
+        {% endif %}
 
+        {% if g.role == 'Business' %}
         <ul>
             <!-- <li><a href="/home">Home</a></li> -->
             <li><a href="/services">Services</a></li>
             <li><a href="/bookings">Bookings</a></li>
             <li><a href="/employees">Employees</a></li>
             <!-- <li><a href="profile/edit">Profile</a></li>  -->
-            <li><a><img src="/static/images/icons/profile.png" style="width:50px;"></a></li>
-            <!-- <li><a href="/logout">Logout</a></li> -->
+            <li><a href="/logout">Logout</a></li>
+            <li><a href="/business/view"><img src="/static/images/icons/profile.png" style="width:50px;"></a></li>
+            <!-- <li><a href="/profile"><img src="/static/images/icons/profile.png" style="width:50px;"></a></li> -->
+            
         </ul>
+        {% endif %}
+
     </nav>
 </div>

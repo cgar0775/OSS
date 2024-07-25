@@ -76,13 +76,6 @@ def login():
         #--stores the logged-in username--#
         session['username'] = username
         
-
-        customer_info = dbfunc.CallCustomerInfo(username)
-        address = f"{customer_info[6]}, {customer_info[5]}, {customer_info[4]}, {customer_info[3]}" 
-        
-        coords = dbfunc.CheckCoordinates(username)
-    
-        
         return redirect(url_for('homePage'))
         #return redirect(url_for('home'))
 
@@ -218,18 +211,19 @@ def Csignup():
 def homePage():
     #Check if the login cache works
     username = session.get('username')
-    # print(username)
+    print(username)
     # username = "otest"
     CustomerInfo = dbfunc.CallCustomerInfo(username)
-    print(CustomerInfo)
+    #print(CustomerInfo)
     # name = "Olivia"
     #BusinessInfo = CallBusinessInfo(username)
     #name = BusinessInfo[0]
     name = CustomerInfo[1]
-    CustomerInfo = dbfunc.CallCustomerInfo(username)
-    name = CustomerInfo[1]
-    #BusinessInfo = CallBusinessInfo(username)
+    #CustomerInfo = dbfunc.CallCustomerInfo(username)
+    #name = CustomerInfo[1]
+    #BusinessInfo = dbfunc.CallBusinessInfo(username)
     #name = BusinessInfo[0]
+    print(name)
     return render_template('home.html', name = name)
 
 @app.route('/search')
@@ -402,14 +396,13 @@ def get_user_location():
         user_lat = location['lat']
         user_lng = location['lng']
         # This is not working
-        # dbfunc.AddCoordinates(username, user_lat, user_lng)
+        dbfunc.AddCoordinates(username, user_lat, user_lng)
         
         return jsonify({'lat': user_lat, 'lng': user_lng})
     else:
         return jsonify({'error': 'Unable to geocode address'})
     
 #Need a function to grab all businesses in the area??
-
 @app.route('/get-nearby-business')
 def get_nearby_business():
     username = session.get('username')

@@ -1,5 +1,4 @@
 let map;
-let service;
 let infowindow;
 
 function initialize_Map() {
@@ -16,7 +15,7 @@ function initialize_Map() {
                 zoom: 13
             });
 
-            infowindow = new google.maps.InfoWindow(); // Initialize infowindow
+            infowindow = new google.maps.InfoWindow();
 
             const userMarker = new google.maps.Marker({
                 position: userLocation,
@@ -25,47 +24,33 @@ function initialize_Map() {
                 title: 'Your Location'
             });
 
-            // Add click event listener to userMarker (Use for Business)
             userMarker.addListener('click', function() {
                 infowindow.setContent('You Are Here');
                 infowindow.open(map, userMarker);
             });
 
-            const request = {
-                location: userLocation,
-                radius: '32186',  // 20 miles in meters
-                type: ['store']   // Search for stores; you can change the type as needed
-            };
+            fetch('/get-nearby-businesses')
+                .then(response => response.json())
+                .then(businesses => {
+                    businesses.forEach(business => {
+                        const businessLocation = new google.maps.LatLng(business[2], business[3]);
+                        const businessMarker = new google.maps.Marker({
+                            position: businessLocation,
+                            map: map,
+                            icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                            title: business[1]
+                        });
 
-            service = new google.maps.places.PlacesService(map);
-            service.nearbySearch(request, callback);
+                        businessMarker.addListener('click', function() {
+                            infowindow.setContent(`<div><strong>${business[1]}</strong><br>
+                                                   Location: ${business[2]}, ${business[3]}</div>`);
+                            infowindow.open(map, businessMarker);
+                        });
+                    });
+                })
+                .catch(error => console.error('Error fetching nearby businesses:', error));
         })
         .catch(error => console.error('Error fetching user location:', error));
-}
-
-function callback(results, status) {
-    if (status === google.maps.places.PlacesServiceStatus.OK) {
-        for (let i = 0; i < results.length; i++) {
-            createMarker(results[i]);
-        }
-    }
-}
-
-function createMarker(place) {
-    const placeLoc = place.geometry.location;
-    const marker = new google.maps.Marker({
-        map: map,
-        position: placeLoc,
-        icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
-    });
-
-    google.maps.event.addListener(marker, 'click', function() {
-        infowindow.setContent(`<div><strong>${place.name}</strong><br>
-                               Address: ${place.vicinity}<br>
-                               <img src="${place.photos ? place.photos[0].getUrl() : ''}" alt="Image" style="width:100px;height:100px;"><br>
-                               Location: ${placeLoc}</div>`);
-        infowindow.open(map, marker);
-    });
 }
 
 document.addEventListener('DOMContentLoaded', function() {

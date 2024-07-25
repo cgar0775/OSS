@@ -1,12 +1,19 @@
 #imports
+import os
+from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, session
+import oracledb
+import requests
+from database import OracleConfig
+from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, session, g
 import oracledb
 # import requests
 from database import OracleConfig
 from dotenv import load_dotenv
-
+import dbfunc
 
 from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability, CallBusinessName, CheckRole
+
 import inputvalidation
 from flask_session import Session
 import redis
@@ -19,6 +26,9 @@ load_dotenv()
 
 #global variable setup
 database= OracleConfig()
+
+#Google Maps API_KEY
+API_KEY= os.getenv('API_KEY')
 
 # Configure server-side session storage
 
@@ -74,7 +84,7 @@ def login():
         password = request.form['password']
         
         #validate login with the db
-        if not loginCheck(username,password):
+        if not dbfunc.loginCheck(username,password):
             flash("Login Invalid, please try again")
             return redirect(url_for('login'))
         
@@ -86,7 +96,6 @@ def login():
 
         #--stores the logged-in username--#
         session['username'] = username
-        
         
         return redirect(url_for('homePage'))
         #return redirect(url_for('home'))
@@ -138,6 +147,8 @@ def Bsignup():
          if CheckBusinessName(businessname):
              errors.append("Invalid Business Name: Business already exists")
             
+
+         # if dbfunc.CheckUsername(username):
         #  if CheckUsername(username):
          
          if CheckBusinessName(businessname):
@@ -156,7 +167,7 @@ def Bsignup():
          state = state.capitalize()
          city = city.capitalize()
 
-         CreateBusinessAcc(username,password,businessname,country,state,city,address,email)
+         dbfunc.CreateBusinessAcc(username,password,businessname,country,state,city,address,email)
          
          #Return customer to login page after sucessful account creation
          return redirect(url_for('login'))
@@ -202,6 +213,9 @@ def Csignup():
          if not is_valid_address:
             errors.append(address_error)
         
+         if dbfunc.CheckUsername(username):
+                errors.append("Invalid Username: User already exists")
+                
         #  if CheckUsername(username):
 
          if errors:
@@ -216,7 +230,7 @@ def Csignup():
          state = state.capitalize()
          city = city.capitalize()
 
-         CreateCustomerAcc(username,password,firstname,lastname,country,state,city,address,email)
+         dbfunc.CreateCustomerAcc(username,password,firstname,lastname,country,state,city,address,email)
 
         #Return customer to login page after sucessful account creation
          return redirect(url_for('login'))
@@ -227,6 +241,20 @@ def Csignup():
 def homePage():
     # Get user information
     username = session.get('username')
+    print(username)
+    # username = "otest"
+    CustomerInfo = dbfunc.CallCustomerInfo(username)
+    #print(CustomerInfo)
+    # name = "Olivia"
+    #BusinessInfo = CallBusinessInfo(username)
+    #name = BusinessInfo[0]
+    name = CustomerInfo[1]
+    #CustomerInfo = dbfunc.CallCustomerInfo(username)
+    #name = CustomerInfo[1]
+    #BusinessInfo = dbfunc.CallBusinessInfo(username)
+    #name = BusinessInfo[0]
+    print(name)
+    return render_template('home.html', name = name)
 
     # If they are not logged in, redirect them to the login page
     if not username: 
@@ -259,7 +287,6 @@ def homePage():
     
     # return render_template('home.html', name = "name")
     return render_template('home.html')
-
 
 @app.route('/search')
 def searchPage():
@@ -333,11 +360,11 @@ def businessViewProfilePage(username):
     # debuig this - there might be an error!!!
 
     # General Business Information
+    businessInfo = dbfunc.CallBusinessInfo(username)
     print(CallBusinessName(username))
     businessInfo = CallBusinessInfo(username)
     # businessInfo = CallBusinessInfo(CallBusinessName(username)[0])
     # print(businessInfo)
-
     
     businessName = businessInfo[0]
     businessAddress = businessInfo[3] + ", " + businessInfo[2]
@@ -538,30 +565,52 @@ def addEmployee():
 @app.route('/maps')
 def viewMap():
     username = session.get('username')
-    CustomerInfo = CallCustomerInfo(username)
-    return render_template('maps.html')
+    CustomerInfo = dbfunc.CallCustomerInfo(username)
+    return render_template('maps.html', api_key = API_KEY)
 
 #Geocoding Location for maps
 @app.route('/get-user-location')
 def get_user_location():
     username = session.get('username')
-    customer_info = CallCustomerInfo(username)
+    customer_info = dbfunc.CallCustomerInfo(username)
     address = f"{customer_info[6]}, {customer_info[5]}, {customer_info[4]}, {customer_info[3]}" 
 
     # Print the address for debugging purposes
     # print(f"Address: {address}")
     
     # Use Google Geocoding API to convert address to coordinates
-    geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={address}&key=AIzaSyDX0AZFZl4fZxV9POauPkRDpUQRJs6ZbPc"
+    geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={API_KEY}"
     response = requests.get(geocode_url)
     geocode_data = response.json()
 
     if geocode_data['status'] == 'OK':
         location = geocode_data['results'][0]['geometry']['location']
-        return jsonify({'lat': location['lat'], 'lng': location['lng']})
+        user_lat = location['lat']
+        user_lng = location['lng']
+        # This is not working
+        dbfunc.AddCoordinates(username, user_lat, user_lng)
+        
+        return jsonify({'lat': user_lat, 'lng': user_lng})
     else:
         return jsonify({'error': 'Unable to geocode address'})
+    
 #Need a function to grab all businesses in the area??
+@app.route('/get-nearby-businesses')
+def get_nearby_businesses():
+    username = session.get('username')
+    user_coords = dbfunc.CheckCoordinates(username)
+
+    if not user_coords:
+        return jsonify({'error': 'User coordinates not found'})
+
+    user_lat, user_lng = user_coords
+    nearby_businesses = dbfunc.CallBusinessGeo(username)
+
+    if not nearby_businesses:
+        return jsonify([])
+
+    return jsonify(nearby_businesses)
+
 
 @app.route('/logout')
 def logout():

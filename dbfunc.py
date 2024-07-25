@@ -4,7 +4,7 @@ import oracledb
 import hashlib
 from database import OracleConfig
 from dotenv import load_dotenv
-
+import math
 load_dotenv()
 #setup the database connection
 database= OracleConfig()
@@ -377,14 +377,19 @@ def CallBusinessGeo(Customerusername):
     coords=CheckCoordinates(Customerusername)
     query=f"""SELECT username,name,
        (
-          3959 * ACOS(COS(RADIANS(37)) * COS(RADIANS(lat)) * COS(RADIANS(lng) - RADIANS(-122)) + SIN(RADIANS(37)) * SIN(RADIANS(lat)))
-       ) AS distance
+            3958.8 *
+            ACOS(
+               COS({coords[0]} * 0.017453293) * COS(lat * 0.017453293) * COS((lng - {coords[1]}) * 0.017453293) +
+               SIN({coords[0]} * 0.017453293) * SIN(lat * 0.017453293))
+       ) AS distance_miles
 FROM geocoordinates
 INNER JOIN Businessinfo b ON geocoordinates.username=b.username
-WHERE lat BETWEEN {coords[0]} - (20 / 69.172) AND {coords[0]} + (20 / 69.172)
-  AND lng BETWEEN {coords[1]} - (20 / (69.172 * COS(RADIANS(37)))) AND {coords[1]} + (20 / (69.172 * COS(RADIANS(37)))))
-HAVING distance < 20
-ORDER BY distance"""
+WHERE
+    3958.8 *
+    ACOS(
+        COS({coords[0]} * 0.017453293) * COS(lat * 0.017453293) * COS((lng - {coords[1]}) * 0.017453293) +
+        SIN({coords[0]} * 0.017453293) * SIN(lat * 0.017453293)) <=20
+ORDER BY distance_miles"""
     cursor.execute(query)
     connection.commit()
     info=cursor.fetchall()

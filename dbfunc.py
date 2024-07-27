@@ -137,10 +137,12 @@ def CheckUsername(name):
 
 #creates a service for a business
 #inputs: business name (bname), service name (sname), price (float with 2 decimals), number of available slots (0 for unlimited)(for example only 4 hair stylists may be booked at the same time)
-def CreateService(bname,sname,price,slots):
+#time: time in hours and minutes that each service will take in the form of a float 1.40=1 hour 40 minutes in implementation CHECK THAT THE USER HASN't INPUTTED 60 MINUTES, this function doesn't check
+#if someone inputs 1.60 into this function it will just send it 
+def CreateService(bname,sname,price,slots,time):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
-    query=f"INSERT INTO services VALUES('{bname}','{sname}',{price},{slots})"  
+    query=f"INSERT INTO services VALUES('{bname}','{sname}',{price},{slots},{time})"  
     cursor.execute(query)
     connection.commit()
     cursor.close()
@@ -160,18 +162,10 @@ def UpdateAvailability(bname,sname,weekday,opentime,closetime,breakstart,breaken
     if bool(cursor.fetchone()[0]):
         #if the row exists merely update it otherwise insert new row
         query2=f"""UPDATE servicehours 
-            SET opentime=TO_DATE('JAN-01-2002 {opentime}', 'MON-DD-YYYY HH24:MI'), 
-                closetime=TO_DATE('JAN-01-2002 {closetime}', 'MON-DD-YYYY HH24:MI'),
-                breakstart=TO_DATE('JAN-01-2002 {breakstart}', 'MON-DD-YYYY HH24:MI'),
-                breakend=TO_DATE('JAN-01-2002 {breakend}', 'MON-DD-YYYY HH24:MI') 
+            SET opentime={opentime}, closetime={closetime}, breakstart={breakstart},breakend={breakend} 
             WHERE bname='{bname}' AND sname='{sname}' AND weekday='{weekday}'"""
     else:
-        query2=f"""INSERT INTO servicehours 
-        VALUES('{sname}','{bname}','{weekday}',
-            TO_DATE('JAN-01-2002 {opentime}', 'MON-DD-YYYY HH24:MI'),
-            TO_DATE('JAN-01-2002 {closetime}', 'MON-DD-YYYY HH24:MI'),
-            TO_DATE('JAN-01-2002 {breakstart}', 'MON-DD-YYYY HH24:MI'),
-            TO_DATE('JAN-01-2002 {breakend}', 'MON-DD-YYYY HH24:MI'))"""
+        query2=f"""INSERT INTO servicehours VALUES('{sname}','{bname}','{weekday}',{opentime},{closetime},{breakstart},{breakend})"""
     cursor.close()
     cursor2=connection.cursor()
     cursor2.execute(query2)
@@ -189,7 +183,15 @@ def GetBusinessServices(bname):
     services=cursor.fetchall()
     cursor.close()
     connection.close()
-    return services
+    newservice=[]
+    for tup in services:
+        temp_list= list(tup)
+        temp_list[2] += "$"
+        temp_list[4]=str(temp_list[2]).replace('.',':')
+        new_tup=tuple(temp_list)
+        newservice.append(new_tup)
+    return newservice
+
 
 #gets the info of a specific service
 def GetService(sname,bname):
@@ -202,14 +204,21 @@ def GetService(sname,bname):
     service=cursor.fetchone()
     cursor.close()
     connection.close()
-    return service
+    newservice=[]
+    for tup in service:
+        temp_list= list(tup)
+        temp_list[2] += "$"
+        temp_list[4]=str(temp_list[2]).replace('.',':')
+        new_tup=tuple(temp_list)
+        newservice.append(new_tup)
+    return newservice
 
 #update services
-def UpdateService(sname,bname,price,slots):
+def UpdateService(sname,bname,price,slots, time):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
     query=f"""UPDATE services 
-    SET sname='{sname}', bname='{bname}', price={price}, slots={slots}
+    SET sname='{sname}', bname='{bname}', price={price}, slots={slots}, time={time}
     WHERE sname='{sname}', bname='{bname}'"""
     cursor.execute(query)
     connection.commit()
@@ -226,6 +235,28 @@ def DeleteService(sname,bname):
     cursor.close()
     connection.close()
     return 
+#get the hours table for any service
+def GetHours(sname,bname):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"""SELECT * FROM servicehours WHERE sname='{sname}' AND bname='{bname}'"""
+    cursor.execute(query)
+    connection.commit()
+    hours=cursor.fetchall()
+    cursor.close()
+    connection.close()
+    newhours=[]
+    for tup in hours:
+        temp_list= list(tup)
+        temp_list[2]=str(temp_list[2]).replace('.',':')
+        temp_list[3]=str(temp_list[3]).replace('.',':')
+        temp_list[4]=str(temp_list[4]).replace('.',':')
+        temp_list[5]=str(temp_list[5]).replace('.',':')
+        temp_list[6]=str(temp_list[6]).replace('.',':')
+        new_tup=tuple(temp_list)
+        newhours.append(new_tup)
+    return newhours
+        
 
 
 #create booking
@@ -392,3 +423,32 @@ ORDER BY distance_miles"""
     cursor.close()
     connection.close()
     return info
+#used both for updating and creating descriptions for services
+def UpdateDescription(sname,bname,description):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    #check if this row already exists
+    query1=f"SELECT COUNT(*) FROM servicedescription WHERE bname='{bname}' AND sname='{sname}'"
+    cursor.execute(query1)
+    connection.commit()
+    if bool(cursor.fetchone()[0]):
+        #if the row exists merely update it otherwise insert new row
+        query2=f"""UPDATE servicedescription 
+            SET description={description} 
+            WHERE bname='{bname}' AND sname='{sname}'"""
+    else:
+        query2=f"""INSERT INTO servicedescription VALUES('{sname}','{bname}',{description})"""
+    cursor.execute(query2)
+    connection.commit()
+    return
+
+def GetDescription(sname,bname):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query1=f"SELECT description FROM servicedescription WHERE bname='{bname}' AND sname='{sname}'"
+    cursor.execute(query1)
+    connection.commit()
+    desc=cursor.fetchone()
+    cursor.close()
+    connection.close()
+    return desc

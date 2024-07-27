@@ -21,7 +21,7 @@ def hashPass(passw):
 def CheckRole(username):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
-    query=f"SELECT role FROM userlogin WHERE username='{username}'"
+    query=f"SELECT type FROM userlogin WHERE username='{username}'"
     cursor.execute(query)
     connection.commit()
     role=cursor.fetchone()
@@ -60,6 +60,8 @@ def CreateCustomerAcc(username,password,firstname,lastname,country,state,city,ad
     cursor.close()
     connection.close()
     #end func
+    #testing purposes erase later
+    print("done")
     return
 
 def CreateBusinessAcc(username,password,name,country,state,city,address,email):
@@ -77,6 +79,8 @@ def CreateBusinessAcc(username,password,name,country,state,city,address,email):
     cursor.close()
     connection.close()
     #end func
+    #testing purposes erase later
+    print("done")
     return
 
 #returns an array/tuple
@@ -84,7 +88,21 @@ def CallBusinessInfo(name):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
     #calls a specific business' info from the database
-    query=f"SELECT * FROM BUSINESSINFO WHERE bname='{name}'"
+    query=f"SELECT * FROM BUSINESSINFO WHERE name='{name}'"
+    cursor.execute(query)
+    connection.commit()
+    #store result so we can close db connection
+    val=cursor.fetchone()
+    cursor.close()
+    connection.close()
+    #returns the first (and expectedly only) row
+    return val
+
+def CallBusinessName(username):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    #calls a specific business' info from the database
+    query=f"SELECT * FROM BUSINESSINFO WHERE username='{username}'"
     cursor.execute(query)
     connection.commit()
     #store result so we can close db connection

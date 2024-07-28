@@ -335,11 +335,13 @@ def employeePage():
     if not username: 
         print("Empty Username!")
         return redirect(url_for('login'))
+    
+    BusinessInfo = CallBusinessName(username)
+    bname = BusinessInfo[0]
+    
+    employees = dbfunc.CallBusinessEmployees(bname)
 
-
-
-
-    return render_template('templates/bEmployees.html')
+    return render_template('templates/bEmployees.html', employees = employees)
 
 
 # Redirect to the current logged in buisness view page

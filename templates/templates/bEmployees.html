@@ -6,18 +6,14 @@
     <h1>Our Employees</h1>
 
     <div class="containter">
+        {% for employee in employees %}
         <div class="block">
             <img src="/static/images/icons/profile.png">
-            <h2>Name</h2>
-            <h3>Type</h3>
+            <h2>{{employee[1]}} {{employee[2]}}</h2>
+            <h3>{{employee[4]}}</h3>
             <button>Edit Employee</button>
         </div>
-        <div class="block">
-            <img src="/static/images/icons/profile.png">
-            <h2>Name</h2>
-            <h3>Type</h3>
-            <button>Edit Employee</button>
-        </div>
+        {% endfor %}
 
         <div class="block">
             <a href="/employee/add"><button>Add Employee</button></a>

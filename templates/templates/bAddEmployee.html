@@ -28,8 +28,14 @@
         <label for="lastname">Last Name:</label>
         <input type="text" id="lastname" name="lastname" required><br><br>
 
-        <label>Role</label>
-        <input type="checkbox" id="role" name="role"> <br><br>
+        <label for="role">Role: </label><br>
+        <!--<input type="text" id="role" name="role" required><br><br>-->
+        <!--<input type="checkbox" id="role" name="role"> <br><br> -->
+        <label> Administrator </label>
+        <input type="radio" id="admin" name="role" value="Administrator" required>
+        <label> Employee </label>
+        <input type="radio" id="employee" name="role" value="Employee" required> <br><br>
+
         <input type="submit">
     </form>
 </div>

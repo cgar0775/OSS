@@ -243,18 +243,18 @@ def homePage():
     username = session.get('username')
     print(username)
     # username = "otest"
-    CustomerInfo = dbfunc.CallCustomerInfo(username)
+    #CustomerInfo = dbfunc.CallCustomerInfo(username)
     #print(CustomerInfo)
     # name = "Olivia"
     #BusinessInfo = CallBusinessInfo(username)
     #name = BusinessInfo[0]
-    name = CustomerInfo[1]
+    #name = CustomerInfo[1]
     #CustomerInfo = dbfunc.CallCustomerInfo(username)
     #name = CustomerInfo[1]
     #BusinessInfo = dbfunc.CallBusinessInfo(username)
     #name = BusinessInfo[0]
-    print(name)
-    return render_template('home.html', name = name)
+    #print(name)
+    #return render_template('home.html', name = name)
 
     # If they are not logged in, redirect them to the login page
     if not username: 
@@ -565,9 +565,10 @@ def addEmployee():
         password = request.form['password']
         efname = request.form['firstname']
         elname = request.form['lastname']
+        role = request.form.get('role')
 
         #the following below allows for role to checked or unchecked without yeilding a badRequestError 
-        role_checked = 'role' in request.form
+        #role_checked = 'role' in request.form
         errors = []
          
         #Validate Input, Error Messages will flash to CSignUp
@@ -596,11 +597,17 @@ def addEmployee():
         elname = elname.capitalize()
 
         #invoke database to get business name based on current logged in user session because only buiness admins can make employee acc.
-        BusinessInfo = CallBusinessInfo(session.get('username'))
+        #BusinessInfo = dbfunc.CallBusinessInfo(session.get('username'))
+        BusinessInfo = dbfunc.CallBusinessName(currentUsername)
         bname = BusinessInfo[0]
 
-        CreateEmployee(bname,eusername,password,efname,elname,role_checked)
+        #Add role based on checked box
+        dbfunc.CreateEmployee(bname,eusername,password,efname,elname,role)
+        #dbfunc.CreateEmployee(eusername,password,efname,elname,bname,role_checked)
 
+        flash("Employee account created successfully.")
+        return redirect('/employee/add')
+    
     return render_template("templates/bAddEmployee.html")
 
 # Add service page code here

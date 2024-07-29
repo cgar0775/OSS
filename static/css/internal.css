@@ -537,3 +537,78 @@ input[type="submit"] {
     
     border-radius: 30px
 }
+
+.calendar {
+    border: 1px solid #ddd;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    align-items: center;
+
+    margin: auto;   
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f7f7f7;
+    padding: 10px;
+}
+
+.calendar-header button {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+}
+
+.month-year {
+    font-weight: bold;
+}
+
+.calendar-body {
+    padding: 10px;
+}
+
+.calendar-weekdays {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.calendar-weekdays div {
+    width: 14.2%;
+    text-align: center;
+    font-weight: bold;
+}
+
+.calendar-dates {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.calendar-dates div {
+    width: 14.2%;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.calendar-dates div.booked {
+    background-color: #f0c0c0;
+    cursor: not-allowed;
+}
+
+.calendar-dates div.available {
+    background-color: #c0f0c0;
+}
+
+#bookingGroup{
+    display: flex;
+}
+
+.times{
+    width: 50%;
+}

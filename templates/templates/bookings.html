@@ -13,8 +13,9 @@
                     <tr>
                         <th>Service</th>
                         <th>Name</th>
-                        <th>Email</th>
-                        <th>Time Slot</th>
+                        <!-- <th>Email</th> -->
+                        <th>Time Start</th>
+                        <th>Time End</th>
                         <th>Price</th>
                         <th>Edit</th>
                         <th>Delete</th>
@@ -22,7 +23,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for items in service%}
+                    {% for items in bookings%}
                         <tr>
                             {%for data in items %}
                                 <td>{{ data }}</td>

@@ -441,6 +441,7 @@ ORDER BY distance_miles"""
     cursor.close()
     connection.close()
     return info
+
 #used both for updating and creating descriptions for services
 def UpdateDescription(sname,bname,description):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)

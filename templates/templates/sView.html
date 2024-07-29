@@ -29,6 +29,7 @@
     </div>
 
     <div id="bookingGroup">
+        <h2>Avalible Times: </h2>
         <table>
             <thead>
                 <tr>
@@ -44,8 +45,7 @@
                             <td>{{ data }}</td>
                         {% endfor %}
                         <!-- <td>{{ items[0] }}</td> -->
-                        <td><a href="/{{items[0]}}/service/edit/{{items[1]}}"><button>Edit</button></a></td>
-                        <td><a href="/{{items[0]}}/service/{{items[1]}}"><button>View</button></a></td>
+                        
                     </tr>
                 {% endfor %}
                 <!-- Add dynamic data here -->

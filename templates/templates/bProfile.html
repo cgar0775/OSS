@@ -22,6 +22,13 @@
 
         <!-- TODO: Turn this izznto a resopnsive image -->
         <h4>⭐️⭐️⭐️⭐️⭐️</h4>
+
+        <!-- Show edit button if they should be able to edit it -->
+        {% if g.data[0] == businessName %}
+            <div>
+                <button><a href="/business/edit">Edit Profile</a></button>
+            </div>
+        {%endif%}
     </div>
 
     <div id="contentArea">
@@ -32,15 +39,11 @@
             
             <!-- Add Services Here -->
             <div id="servicesContainer">
-                {% include 'components/services.html' %}
-                {% include 'components/services.html' %}
-                {% include 'components/services.html' %}
-                {% include 'components/services.html' %}
-                {% include 'components/services.html' %}
-                {% include 'components/services.html' %}
-                {% include 'components/services.html' %}
-                
-                
+                {% for service in arrServices %}
+                    {% include 'components/services.html' %}
+                    <!-- {{arrServices[0][0]}}
+                    {{arrServices}} -->
+                {% endfor %}
             </div>
         </div>
         <div id="sidebar">

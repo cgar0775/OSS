@@ -157,10 +157,10 @@ def CheckUsername(name):
 #inputs: business name (bname), service name (sname), price (float with 2 decimals), number of available slots (0 for unlimited)(for example only 4 hair stylists may be booked at the same time)
 #time: time in hours and minutes that each service will take in the form of a float 1.40=1 hour 40 minutes in implementation CHECK THAT THE USER HASN't INPUTTED 60 MINUTES, this function doesn't check
 #if someone inputs 1.60 into this function it will just send it 
-def CreateService(bname,sname,price,slots,time):
+def CreateService(bname,sname,price,slots,time,discount):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
-    query=f"INSERT INTO services VALUES('{bname}','{sname}',{price},{slots},{time})"  
+    query=f"INSERT INTO services VALUES('{bname}','{sname}',{price},{slots},{time},{discount})"  
     cursor.execute(query)
     connection.commit()
     cursor.close()
@@ -232,11 +232,11 @@ def GetService(sname,bname):
     return newservice
 
 #update services
-def UpdateService(sname,bname,price,slots, time):
+def UpdateService(sname,bname,price,slots, time, discount):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
     query=f"""UPDATE services 
-    SET sname='{sname}', bname='{bname}', price={price}, slots={slots}, time={time}
+    SET sname='{sname}', bname='{bname}', price={price}, slots={slots}, time={time}, discount={discount}
     WHERE sname='{sname}', bname='{bname}'"""
     cursor.execute(query)
     connection.commit()
@@ -280,10 +280,10 @@ def GetHours(sname,bname):
 #create booking
 #inputs service name (sname), businessname (bname), username of the customer, timeslot_start the time and date of the start of the service, timeslot_end the ending time and date of the service
 #both are in the format of MON-DD-YYYY HH:MM that being MON=3 letter shortening of the year Jan Feb etc, DD day 01,25 etc, YYYY the full year 2024 etc, HH:MM the time in 24 hour standard 09:30 for 9:30 AM
-def CreateBooking(sname,bname,username,timeslot_start,timeslot_end):
+def CreateBooking(sname,bname,username,timeslot_start,timeslot_end,discount):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
-    query=f"INSERT INTO bookings VALUES('{sname}','{bname}','{username}',TO_DATE('{timeslot_start}', 'MON-DD-YYYY HH24:MI'),TO_DATE('{timeslot_end}', 'MON-DD-YYYY HH24:MI'))"
+    query=f"INSERT INTO bookings VALUES('{sname}','{bname}','{username}',TO_DATE('{timeslot_start}', 'MON-DD-YYYY HH24:MI'),TO_DATE('{timeslot_end}', 'MON-DD-YYYY HH24:MI'),{discount})"
     cursor.execute(query)
     connection.commit()
     cursor.close()
@@ -316,7 +316,7 @@ def getBusinessBookings(name):
 
 #update an existing booking
 #same inputs as creating a booking with additional new timeslots to be updated to
-def UpdateBooking(sname,bname,username,timeslot_start,timeslot_end, new_timeslot_start, new_timeslot_end):
+def UpdateBooking(sname,bname,username,timeslot_start,timeslot_end, new_timeslot_start, new_timeslot_end, discount):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
     query=f"""UPDATE bookings 
@@ -325,7 +325,7 @@ def UpdateBooking(sname,bname,username,timeslot_start,timeslot_end, new_timeslot
     timeslot_end=TO_DATE('{new_timeslot_end}', 'MON-DD-YYYY HH24:MI'))
     WHERE sname='{sname}', bname='{bname}', username='{username}',
     timeslot_start=TO_DATE('{timeslot_start}', 'MON-DD-YYYY HH24:MI'), 
-    timeslot_end=TO_DATE('{timeslot_end}', 'MON-DD-YYYY HH24:MI'))"""
+    timeslot_end=TO_DATE('{timeslot_end}', 'MON-DD-YYYY HH24:MI'),{discount})"""
     cursor.execute(query)
     connection.commit()
     cursor.close()

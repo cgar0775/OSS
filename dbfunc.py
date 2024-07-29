@@ -351,7 +351,7 @@ def CreateEmployee(bname,username,password,efname,elname,role):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
     hashed_passw=hashPass(password)
-    query=f"INSERT INTO userlogin VALUES('{username}','{hashed_passw}','Employee')"
+    query=f"INSERT INTO userlogin VALUES('{username}','{hashed_passw}','{role}')"
     query2=f"INSERT INTO employees VALUES('{username}','{efname}','{elname}','{bname}','{role}')"
     cursor.execute(query)
     cursor.execute(query2)
@@ -484,3 +484,99 @@ def GetDescription(sname,bname):
     cursor.close()
     connection.close()
     return desc
+
+#reviews
+#header limit of 100 chars
+#body limit of 1,000 chars
+#rating is from 0 to 10
+def CreateReview(username,fname,lname,header,body,rating,bname,sname):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"INSERT INTO creviews (username,fname,lname,header,body,rating,bname,sname) VALUES('{username}','{fname}','{lname}','{header}','{body}',{rating},'{bname}','{sname}')"
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return
+
+#allows editing of reviews via the unique id, should be used in tandem with getuserreviews
+def editReview(id,header,body):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"UPDATE creviews SET header='{header}', body='{body}'WHERE id={id}"
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return
+
+#returns a list of the ids of review created by a specific username
+def getUserReviews(username):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"SELECT id FROM creviews WHERE username='{username}'"
+    cursor.execute(query)
+    connection.commit()
+    rev=cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return rev
+
+#gets a list of all reviews for a specific service
+def getReviews(bname,sname):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"SELECT * FROM creviews WHERE bname='{bname}' and sname='{sname}'"
+    cursor.execute(query)
+    connection.commit()
+    rev=cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return rev
+
+#gets only the review ids, useful for responses
+def getReviewIds(bname,sname):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"SELECT id FROM creviews WHERE bname='{bname}' and sname='{sname}'"
+    cursor.execute(query)
+    connection.commit()
+    rev=cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return rev
+
+#create a response to a review
+#id is the id of the review being responded to, reference getreviews to get the id since it would have already been called to display the reviews
+def CreateResponse(bname,id,body):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"INSERT INTO bresponse VALUES({id},{bname},'{body}')"
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return
+
+#edits a reponse, should only be called when applicable as this doesn't check if you should be eligable to do so
+def EditResponse(id,body):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"UPDATE bresponse SET body='{body}' WHERE id={id}"
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return
+
+#gets the responses to reviews
+def GetResponse(bname,sname):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"SELECT bresponse.name, bresponse.body FROM bresponse INNER JOIN creviews c ON refid=id WHERE c.bname='{bname}' AND c.sname='{sname}'"
+    cursor.execute(query)
+    connection.commit()
+    res=cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return res

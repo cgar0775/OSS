@@ -386,7 +386,7 @@ def CallEmployeeInfo(name):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
     #calls a specific business' info from the database
-    query=f"SELECT * FROM EMPLOYEEINFO WHERE username='{name}'"
+    query=f"SELECT * FROM employees WHERE username='{name}'"
     cursor.execute(query)
     connection.commit()
     #store result so we can close db connection

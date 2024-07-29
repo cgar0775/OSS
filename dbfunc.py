@@ -44,13 +44,13 @@ def loginCheck(user,passw):
     connection.close()
     return bool(check) 
 
-def CreateCustomerAcc(username,password,firstname,lastname,country,state,city,address,email):
+def CreateCustomerAcc(username,password,firstname,lastname,country,state,city,address,email,phone):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
     hashed_passw=hashPass(password)
     #fill the two tables needed
     query=f"INSERT INTO userlogin VALUES('{username}','{hashed_passw}','Customer')"
-    query2=f"INSERT INTO CUSTOMERINFO VALUES('{username}','{firstname}','{lastname}','{country}','{state}','{city}','{address}','{email}')"
+    query2=f"INSERT INTO CUSTOMERINFO VALUES('{username}','{firstname}','{lastname}','{country}','{state}','{city}','{address}','{email}','{phone}')"
     #execute the database calls
     print(query)
     cursor.execute(query)
@@ -64,13 +64,13 @@ def CreateCustomerAcc(username,password,firstname,lastname,country,state,city,ad
     print("done")
     return
 
-def CreateBusinessAcc(username,password,name,country,state,city,address,email):
+def CreateBusinessAcc(username,password,name,country,state,city,address,email,phone):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
     hashed_passw=hashPass(password)
     #fill the two tables needed
     query=f"INSERT INTO userlogin VALUES('{username}','{hashed_passw}','Business')"
-    query2=f"INSERT INTO BUSINESSINFO VALUES('{name}','{email}','{country}','{state}','{city}','{address}','{username}')"
+    query2=f"INSERT INTO BUSINESSINFO VALUES('{name}','{email}','{country}','{state}','{city}','{address}','{username}','{phone}')"
     #execute the database calls
     cursor.execute(query)
     cursor.execute(query2)

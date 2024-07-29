@@ -97,6 +97,7 @@ def login():
         #--stores the logged-in username--#
         session['username'] = username
         
+            
         return redirect(url_for('homePage'))
         #return redirect(url_for('home'))
 
@@ -115,7 +116,8 @@ def Bsignup():
          city = request.form['city']
          address = request.form['address']
          email = request.form['email']
-
+         
+            
          errors = []
 
          #Validate Input, Error Messages will flash to CSignUp
@@ -166,9 +168,25 @@ def Bsignup():
          country = country.capitalize()
          state = state.capitalize()
          city = city.capitalize()
-
+        
          dbfunc.CreateBusinessAcc(username,password,businessname,country,state,city,address,email)
-         
+         full_address = f"{address}, {city}, {state}, {country}"
+         # Print the address for debugging purposes
+         # print(f"Address: {full_address}")
+    
+        # Use Google Geocoding API to convert address to coordinates
+         geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={full_address}&key={API_KEY}"
+         response = requests.get(geocode_url)
+         geocode_data = response.json()
+
+         if geocode_data['status'] == 'OK':
+            location = geocode_data['results'][0]['geometry']['location']
+            user_lat = location['lat']
+            user_lng = location['lng']
+            
+            #if username doesn't exist
+            dbfunc.AddCoordinates(username, user_lat, user_lng)
+            
          #Return customer to login page after sucessful account creation
          return redirect(url_for('login'))
          
@@ -231,7 +249,23 @@ def Csignup():
          city = city.capitalize()
 
          dbfunc.CreateCustomerAcc(username,password,firstname,lastname,country,state,city,address,email)
+         full_address = f"{address}, {city}, {state}, {country}"
+         # Print the address for debugging purposes
+         # print(f"Address: {full_address}")
+    
+        # Use Google Geocoding API to convert address to coordinates
+         geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={full_address}&key={API_KEY}"
+         response = requests.get(geocode_url)
+         geocode_data = response.json()
 
+         if geocode_data['status'] == 'OK':
+            location = geocode_data['results'][0]['geometry']['location']
+            user_lat = location['lat']
+            user_lng = location['lng']
+            
+            #if username doesn't exist
+            dbfunc.AddCoordinates(username, user_lat, user_lng)
+            
         #Return customer to login page after sucessful account creation
          return redirect(url_for('login'))
              
@@ -626,27 +660,14 @@ def viewMap():
 @app.route('/get-user-location')
 def get_user_location():
     username = session.get('username')
-    customer_info = dbfunc.CallCustomerInfo(username)
-    address = f"{customer_info[6]}, {customer_info[5]}, {customer_info[4]}, {customer_info[3]}" 
+    user_coords = dbfunc.CheckCoordinates(username)
 
-    # Print the address for debugging purposes
-    # print(f"Address: {address}")
-    
-    # Use Google Geocoding API to convert address to coordinates
-    geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={API_KEY}"
-    response = requests.get(geocode_url)
-    geocode_data = response.json()
+    if not user_coords:
+        app.logger.error(f"Coordinates not found for user {username}")
+        return jsonify({'error': 'User coordinates not found'}), 404
 
-    if geocode_data['status'] == 'OK':
-        location = geocode_data['results'][0]['geometry']['location']
-        user_lat = location['lat']
-        user_lng = location['lng']
-        # This is not working
-        dbfunc.AddCoordinates(username, user_lat, user_lng)
-        
-        return jsonify({'lat': user_lat, 'lng': user_lng})
-    else:
-        return jsonify({'error': 'Unable to geocode address'})
+    user_lat, user_lng = user_coords
+    return jsonify({'lat': user_lat, 'lng': user_lng})
     
 #Need a function to grab all businesses in the area??
 @app.route('/get-nearby-businesses')
@@ -655,16 +676,29 @@ def get_nearby_businesses():
     user_coords = dbfunc.CheckCoordinates(username)
 
     if not user_coords:
-        return jsonify({'error': 'User coordinates not found'})
+        app.logger.error(f"Coordinates not found for user {username}")
+        return jsonify({'error': 'User coordinates not found'}), 404
 
     user_lat, user_lng = user_coords
-    nearby_businesses = dbfunc.CallBusinessGeo(username)
+
+    try:
+        nearby_businesses = dbfunc.CallBusinessGeo(username)
+    except Exception as e:
+        app.logger.error(f"Error fetching nearby businesses for {username}: {str(e)}")
+        return jsonify({'error': 'Error fetching nearby businesses'}), 500
 
     if not nearby_businesses:
         return jsonify([])
 
-    return jsonify(nearby_businesses)
+    formatted_businesses = [{
+        'username': business[0],
+        'name': business[1],
+        'lat': dbfunc.CheckCoordinates(business[0])[0],
+        'lng': dbfunc.CheckCoordinates(business[0])[1]
+        
+    } for business in nearby_businesses]
 
+    return jsonify(formatted_businesses)
 
 @app.route('/logout')
 def logout():

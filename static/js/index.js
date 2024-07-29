@@ -33,17 +33,17 @@ function initialize_Map() {
                 .then(response => response.json())
                 .then(businesses => {
                     businesses.forEach(business => {
-                        const businessLocation = new google.maps.LatLng(business[2], business[3]);
+                        const businessLocation = new google.maps.LatLng(business.lat, business.lng);
                         const businessMarker = new google.maps.Marker({
                             position: businessLocation,
                             map: map,
                             icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
-                            title: business[1]
+                            title: business.name
                         });
 
                         businessMarker.addListener('click', function() {
-                            infowindow.setContent(`<div><strong>${business[1]}</strong><br>
-                                                   Location: ${business[2]}, ${business[3]}</div>`);
+                            infowindow.setContent(`<div><strong>${business.name}</strong><br>
+                                                   Location: ${business.lat}, ${business.lng}</div>`);
                             infowindow.open(map, businessMarker);
                         });
                     });

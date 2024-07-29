@@ -64,8 +64,8 @@ def before_request():
     if username:
         
         g.role = CheckRole(username)[0]
-        bname = CallBusinessName(username)[0]
         if g.role == "Business":
+            bname = CallBusinessName(username)[0]
             g.data = CallBusinessInfo(bname)
             # print("g.data: ")
             # print(g.data)

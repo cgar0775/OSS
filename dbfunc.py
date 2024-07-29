@@ -382,6 +382,20 @@ def CallBusinessEmployees(bname):
     connection.close()
     return fetch
 
+def CallEmployeeInfo(name):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    #calls a specific business' info from the database
+    query=f"SELECT * FROM EMPLOYEEINFO WHERE username='{name}'"
+    cursor.execute(query)
+    connection.commit()
+    #store result so we can close db connection
+    val=cursor.fetchone()
+    cursor.close()
+    connection.close()
+    #returns the first (and expectedly only) row
+    return val
+
 #this function is dangerous, be very careful with implementation it should only be called on a visible delete button tied into background checking systems, like a user's profile page
 def DeleteAccount(username):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)

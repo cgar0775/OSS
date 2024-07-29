@@ -432,8 +432,8 @@ INNER JOIN Businessinfo b ON geocoordinates.username=b.username
 WHERE
     3958.8 *
     ACOS(
-        COS({coords[0]} * 0.017453293) * COS(lat * 0.017453293) * COS((lng - {coords[1]}) * 0.017453293) +
-        SIN({coords[0]} * 0.017453293) * SIN(lat * 0.017453293)) <=20
+        GREATEST(LEAST(COS({coords[0]} * 0.017453293) * COS(lat * 0.017453293) * COS((lng - {coords[1]}) * 0.017453293) +
+        SIN({coords[0]} * 0.017453293) * SIN(lat * 0.017453293)))) <=20
 ORDER BY distance_miles"""
     cursor.execute(query)
     connection.commit()

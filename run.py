@@ -12,7 +12,7 @@ from database import OracleConfig
 from dotenv import load_dotenv
 import dbfunc
 
-from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability, CallBusinessName, CheckRole
+from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability, CallBusinessName, CheckRole,CallEmployeeInfo
 
 import inputvalidation
 from flask_session import Session
@@ -59,14 +59,22 @@ Session(app)
 
 @app.before_request
 def before_request():
+
     username = session.get('username')
     if username:
         
         g.role = CheckRole(username)[0]
+        bname = CallBusinessName(username)[0]
         if g.role == "Business":
-            g.data = CallBusinessInfo(CallBusinessName(username)[0])
+            g.data = CallBusinessInfo(bname)
             # print("g.data: ")
             # print(g.data)
+        elif g.role == "Employee":
+            g.data = CallEmployeeInfo(username)
+        
+        elif g.role == "Administrator":
+            g.data = CallEmployeeInfo(username)
+        
         elif g.role == "Customer":
             g.data = CallCustomerInfo(username)
 

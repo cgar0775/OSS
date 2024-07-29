@@ -377,12 +377,20 @@ def employeePage():
     if not username: 
         print("Empty Username!")
         return redirect(url_for('login'))
-    
-    BusinessInfo = CallBusinessName(username)
-    bname = BusinessInfo[0]
-    
-    employees = dbfunc.CallBusinessEmployees(bname)
 
+    if g.role == "Business":
+        
+        BusinessInfo = CallBusinessName(username)
+        bname = BusinessInfo[0]
+        employees = dbfunc.CallBusinessEmployees(bname)
+
+    elif g.role == "Administrator":
+        
+        bname = dbfunc.CallEmployeeInfo(username)[3]
+        employees = dbfunc.CallBusinessEmployees(bname)
+
+
+        
     return render_template('templates/bEmployees.html', employees = employees)
 
 

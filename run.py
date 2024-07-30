@@ -18,6 +18,7 @@ from datetime import datetime, timedelta, date
 
 from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability, CallBusinessName, CheckRole, UpdateDescription, GetHours, getBusinessBookings
 
+
 import inputvalidation
 from flask_session import Session
 import redis
@@ -70,14 +71,22 @@ est = pytz.timezone('America/New_York')  # EST is part of the America/New_York t
 
 @app.before_request
 def before_request():
+
     username = session.get('username')
     if username:
         
         g.role = CheckRole(username)[0]
         if g.role == "Business":
-            g.data = CallBusinessInfo(CallBusinessName(username)[0])
+            bname = CallBusinessName(username)[0]
+            g.data = CallBusinessInfo(bname)
             # print("g.data: ")
             # print(g.data)
+        elif g.role == "Employee":
+            g.data = CallEmployeeInfo(username)
+        
+        elif g.role == "Administrator":
+            g.data = CallEmployeeInfo(username)
+        
         elif g.role == "Customer":
             g.data = CallCustomerInfo(username)
 
@@ -402,12 +411,20 @@ def employeePage():
     if not username: 
         print("Empty Username!")
         return redirect(url_for('login'))
-    
-    BusinessInfo = CallBusinessName(username)
-    bname = BusinessInfo[0]
-    
-    employees = dbfunc.CallBusinessEmployees(bname)
 
+    if g.role == "Business":
+        
+        BusinessInfo = CallBusinessName(username)
+        bname = BusinessInfo[0]
+        employees = dbfunc.CallBusinessEmployees(bname)
+
+    elif g.role == "Administrator":
+        
+        bname = dbfunc.CallEmployeeInfo(username)[3]
+        employees = dbfunc.CallBusinessEmployees(bname)
+
+
+        
     return render_template('templates/bEmployees.html', employees = employees)
 
 

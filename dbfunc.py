@@ -345,6 +345,18 @@ def getBusinessBookings(name):
     connection.close()
     return bookings
 
+#return a business' bookings
+def getBusinessBookingsOnDate(name, date):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"SELECT * FROM bookings WHERE bname='{name}' AND timeslot_start = TO_DATE('{date}',  'DD-MON-YY HH24:MI:SS')"
+    cursor.execute(query)
+    connection.commit()
+    bookings=cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return bookings
+
 #update an existing booking
 #same inputs as creating a booking with additional new timeslots to be updated to
 def UpdateBooking(sname,bname,username,timeslot_start,timeslot_end, new_timeslot_start, new_timeslot_end, discount):

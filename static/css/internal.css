@@ -24,6 +24,9 @@ body{
     font-style: normal;
     font-variation-settings:
       "wdth" 100; */
+
+
+    padding-bottom: 50px;
 }
 
 /* Navigation Styles */
@@ -345,7 +348,7 @@ h2{
 }
 /* Search Page */
 
-#searchForm #textInput, #addService #textInput{
+#searchForm #textInput{
     width: 400px;
     height: 40px;
     /* width: 900px; */
@@ -432,8 +435,9 @@ th, td {
 }
 
 th {
-    background-color: #f2f2f2;
-    color: #333;
+    background-color: #023047;
+    color: white;
+
 }
 
 tr:nth-child(even) {
@@ -470,12 +474,22 @@ input[type="submit"] {
     background-color: red;
 }
 
-#servicePage button, #bookingContainer button{
+#serviceTable button, #bookingContainer button{
     background: white;
     padding: 10px;
     border-radius: 20px;
     border: black, solid, 1px;
     font-size: 15px;
+
+}
+
+#addServiceButton{
+    margin-top: 30px;
+    background: #023047;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 50px;
 }
 
 #nearContainer{
@@ -500,7 +514,7 @@ input[type="submit"] {
 
 }
 
-#addService label{
+#addService label, #serviceEdit label{
     font-size: 30px;
 }
 

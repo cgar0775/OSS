@@ -368,9 +368,10 @@ def bookingPage():
         bookingData = []
 
         # print(allBookings)
-        for booking in allBookings: 
+        for booking in allBookings:
+            print(dbfunc.CallCustomerInfo(booking[2])) 
             customerName = dbfunc.CallCustomerInfo(booking[2])[1] + " " + dbfunc.CallCustomerInfo(booking[2])[2]
-            tempData = [booking[0], customerName , booking[3], booking[4]]
+            tempData = [booking[0], customerName , booking[3], booking[4], dbfunc.CallCustomerInfo(booking[2])[8], dbfunc.CallCustomerInfo(booking[2])[8]]
 
             bookingData.append(tempData)
 
@@ -384,7 +385,9 @@ def bookingPage():
         bookingData = []
 
         for booking in allBookings: 
-            bookingData.append([booking[0], booking[1], booking[3], booking[4]])
+            price = "$" + str(dbfunc.GetService(booking[0], booking[1])[4][0]) + "0"
+            # print(price)
+            bookingData.append([booking[0], booking[1], booking[3], booking[4], price])
 
         # for booking in allBookings:
             # tempData = [book,]
@@ -513,8 +516,9 @@ def servicePage():
 
     print(CallBusinessName(currentUsername))
     # print(CallBusinessInfo(CallBusinessName(currentUsername)))
-
-    return render_template('templates/servicePage.html', service=GetBusinessServices(CallBusinessName(currentUsername)[0]))
+    print(GetBusinessServices(CallBusinessName(currentUsername)[0]))
+    return render_template('templates/servicePage.html', service=[[row[1], "$" + str(row[2]) + "0", row[3], row[4]]for row in GetBusinessServices(CallBusinessName(currentUsername)[0])], nextLink=[CallBusinessName(currentUsername)])
+    # return render_template('templates/servicePage.html', service=GetBusinessServices(CallBusinessName(currentUsername)[0]))
 
 @app.route('/add-service', methods = ['GET','POST'])
 def addService():
@@ -560,7 +564,7 @@ def addServiceFunction():
     # print(name + " " + price + " " + bName + " " + slots)
 
     # Create the swervice with both the given and known information
-    CreateService(bName, name, price, slots, time)
+    CreateService(bName, name, price, slots, time, "0")
 
 
     # Retrieve break times
@@ -644,7 +648,11 @@ def singleServiceEditPage(businessname, serviceName):
         print("Empty Username!")
         return redirect('/login')
 
-    return render_template("templates/sEdit.html")
+    # Get Current Service Information
+    currentService = dbfunc.GetService('thingy11', 'TestB')
+    print(currentService)
+    currentServiceDescription = dbfunc.GetDescription(serviceName, businessname)
+    return render_template("templates/sEdit.html", currentService=currentService, currentServiceDescription=currentServiceDescription)
 
 @app.route('/employee/add', methods = ['GET','POST'])
 def addEmployee():
@@ -791,41 +799,55 @@ def run_python():
     second = date_obj.second
     microsecond = date_obj.microsecond
 
-    # print(year)
-    # print(month)
-    # print(day)
-
+    # print(year)\
+    # CHATGBT Function
+    def get_month_code(month_number):
+        # Ensure the input is an integer between 1 and 12
+        if 1 <= month_number <= 12:
+            # Create a datetime object for the first day of the given month
+            date = datetime(2024, month_number, 1)  # Year doesn't matter here
+            # Format the month as a 3-letter uppercase code
+            month_code = date.strftime('%b').upper()
+            return month_code
+            
     # Get the bookings for that date
     hours = dbfunc.GetHoursDay("hair appointment", "TestB", "Monday") #TODO: Make this dynamic
 
-    bookings = getBusinessBookings("pozie") #TODO: Fix this 
+    
 
-    if bookings == []: 
-        # Show all of the timeslots
+    # Show all of the timeslots
 
-        # Calculate time slots
-        timeSlots = []
-        time_format = "%H:%M"  # Time format
-        startHours = datetime.strptime(hours[0][3], time_format)
-        endHours = datetime.strptime(hours[0][4], time_format)
-        breakStart = datetime.strptime(hours[0][5], time_format)
-        breakEnd = datetime.strptime(hours[0][6], time_format)
+    # Calculate time slots
+    timeSlots = []
+    time_format = "%H:%M"  # Time format
+    startHours = datetime.strptime(hours[0][3], time_format)
+    endHours = datetime.strptime(hours[0][4], time_format)
+    breakStart = datetime.strptime(hours[0][5], time_format)
+    breakEnd = datetime.strptime(hours[0][6], time_format)
 
-        while startHours < endHours: 
-            print(startHours)
-        # startHours = datetimr
-            # startHours = datetime(2020, 3, 3)
+
+
+    # TODO: Make this faster
+    while startHours < endHours: 
+        # is this time already booked? 
+        if startHours.hour > 12:
+            time = str(day) + "-" + get_month_code(month) + "-" + str(year) + " " + str(startHours.hour - 12) + ":" + str(startHours.minute)
+        else: 
+            time = str(day) + "-" + get_month_code(month) + "-" + str(year) + " " + str(startHours.hour) + ":" + str(startHours.minute)
+        currentBookings = dbfunc.getBusinessBookingsOnDate("TestB", time)
+        if currentBookings == []:
             timeSlots.append(startHours)
-            print(startHours.minute)
+            # print(startHours.minute)
             startHours_est = est.localize(startHours)
             timeSlots[len(timeSlots) - 1] = datetime(year, month, day, startHours.hour, startHours.minute, startHours.second)
             timeSlots[len(timeSlots) - 1] = startHours_est
             timeSlots[len(timeSlots) - 1] += timedelta(minutes=4) #IDK why this needs to be here, but it does
-            timeDelta = timedelta(minutes=30)
-            startHours += timeDelta
-    
+        
+        timeDelta = timedelta(minutes=30) #TODO: Make this dynamic
+        startHours += timeDelta
 
-            print(len(timeSlots))
+
+    #         # print(len(timeSlots))
     return jsonify(result=timeSlots)
 
 @app.route('/run_python_function', methods=['POST'])
@@ -833,14 +855,7 @@ def run_python_function():
     data = request.json  # Get JSON data sent from JavaScript
     button_id = data.get('buttonId')  # Extract button id from the data
 
-    print(data.get("date"))
     username = session.get('username')
-
-    print(f"Button clicked: {button_id}")
-    
-    # Call your Python function here
-    print(request.path)
-    print(data.get("location"))
     
 
     parsed_url = urlparse(data.get("location"))
@@ -860,14 +875,6 @@ def run_python_function():
     test = path_components[1] if len(path_components) > 1 else None
     test_detail = path_components[2] if len(path_components) > 2 else None
 
-    print(data.get("buttonId"))
-    print()
-    # date_obj = datetime.strptime(data['dateInfo'][:-1]  , "%Y-%m-%dT%H:%M:%S.%f")
-
-    specific_date = date(2024, 7, 29)  # year, month, day
-    print()
-
-
     # Regular expression to capture the components
     pattern = r'(\w{3}) (\w{3}) (\d{2}) (\d{4}) (\d{2}:\d{2}:\d{2}) GMT([+-]\d{4}) \((.*)\)'
 
@@ -881,7 +888,9 @@ def run_python_function():
         year = match.group(4)
         # time = match.group(5)
         time = data.get("buttonId")
-        # time2 = datetime.strptime(time, '%H:%M') + timedelta(minutes = 20)
+        time2 = datetime.strptime(time, '%H:%M') + timedelta(minutes = 20)
+        new_time_str = time2.strftime('%H:%M')
+
         timezone_offset = match.group(6)
         timezone_name = match.group(7)
 
@@ -889,16 +898,18 @@ def run_python_function():
         # Combine date and time
         # date_time_str = f"{day} {month} {year} {time}"
         date_time_str = f"{month} {day} {year} {time}"
+        print("TOMATO")
+        print(date_time_str)
         # date_time_str2 = f"{day} {month} {year} {time2}"
+        date_time_str2 = f"{month} {day} {year} {new_time_str}"
+        print(date_time_str2)
+        # print(date_time_str2)
         
         # Parse the combined string into a datetime object
         date_time_obj = datetime.strptime(date_time_str, '%b %d %Y %H:%M')
         # date_time_obj2 = datetime.strptime(date_time_str2, '%d %b %Y %H:%M:%S')
         
-    print(day)
-    print(date_time_obj)
-    print(date_time_str)
-    print()
+    
     date_time_obj2 = date_time_obj + timedelta(minutes = 20)
     # print(date_time_obj2)
     # print(date_time_str2)
@@ -912,7 +923,9 @@ def run_python_function():
     print(username)
     print("========")
 
-    dbfunc.CreateBooking(test_detail, service, username, "Jul 31 2024 10:30", date_time_str)
+    
+
+    dbfunc.CreateBooking(test_detail, service, username, date_time_str, date_time_str2, "null")
     # result = my_python_function(button_id)
 
     print(dbfunc.getUserBookings("ctest"))

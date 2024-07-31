@@ -12,12 +12,13 @@
                 <tr>
                     <th>Service</th>
                     <th>Name</th>
-                    <th>Time</th>
+                    <th>Time Start</th>
+                    <th>Time End</th>
                     <th>See More</th>
                 </tr>
             </thead>
             <tbody>
-                {% for items in service%}
+                {% for items in bookings%}
                     <tr>
                         {%for data in items %}
                             <td>{{ data }}</td>

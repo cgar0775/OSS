@@ -204,7 +204,7 @@ def GetBusinessServices(bname):
     newservice=[]
     for tup in services:
         temp_list= list(tup)
-        temp_list[2] += "$"
+        # temp_list[2] += "$"
         temp_list[4]=str(temp_list[2]).replace('.',':')
         new_tup=tuple(temp_list)
         newservice.append(new_tup)
@@ -224,11 +224,19 @@ def GetService(sname,bname):
     connection.close()
     newservice=[]
     for tup in service:
-        temp_list= list(tup)
-        temp_list[2] += "$"
-        temp_list[4]=str(temp_list[2]).replace('.',':')
-        new_tup=tuple(temp_list)
-        newservice.append(new_tup)
+        if isinstance(tup, (list, tuple)):  # Check if tup is an iterable
+            temp_list = list(tup)
+            if len(temp_list) > 2:  # Ensure there are enough elements to modify
+                temp_list[2] = str(temp_list[2]) + "$"
+            if len(temp_list) > 4:  # Ensure there are enough elements to modify
+                temp_list[4] = str(temp_list[4]).replace('.', ':')
+            new_tup = tuple(temp_list)
+            newservice.append(new_tup)
+        else:
+            # Handle the non-iterable case
+            # print(f"Processing non-iterable item: {tup}")
+            # You can decide how to handle this - here we'll convert it to a tuple with a single element
+            newservice.append((tup,))
     return newservice
 
 #update services
@@ -274,7 +282,30 @@ def GetHours(sname,bname):
         new_tup=tuple(temp_list)
         newhours.append(new_tup)
     return newhours
-        
+
+
+#get the hours table for any service
+def GetHoursDay(sname,bname,day):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"""SELECT * FROM servicehours WHERE sname='{sname}' AND bname='{bname}' AND weekday='{day}'"""
+    cursor.execute(query)
+    connection.commit()
+    hours=cursor.fetchall()
+    cursor.close()
+    connection.close()
+    newhours=[]
+    for tup in hours:
+        temp_list= list(tup)
+        temp_list[2]=str(temp_list[2]).replace('.',':')
+        temp_list[3]=str(temp_list[3]).replace('.',':')
+        temp_list[4]=str(temp_list[4]).replace('.',':')
+        temp_list[5]=str(temp_list[5]).replace('.',':')
+        temp_list[6]=str(temp_list[6]).replace('.',':')
+        new_tup=tuple(temp_list)
+        newhours.append(new_tup)
+    return newhours
+
 
 
 #create booking
@@ -283,7 +314,7 @@ def GetHours(sname,bname):
 def CreateBooking(sname,bname,username,timeslot_start,timeslot_end,discount):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
-    query=f"INSERT INTO bookings VALUES('{sname}','{bname}','{username}',TO_DATE('{timeslot_start}', 'MON-DD-YYYY HH24:MI'),TO_DATE('{timeslot_end}', 'MON-DD-YYYY HH24:MI'),{discount})"
+    query=f"INSERT INTO bookings VALUES('{sname}','{bname}','{username}',TO_DATE('{timeslot_start}', 'MON-DD-YYYY HH24:MI'),TO_DATE('{timeslot_end}', 'MON-DD-YYYY HH24:MI'), NULL)"
     cursor.execute(query)
     connection.commit()
     cursor.close()
@@ -307,6 +338,18 @@ def getBusinessBookings(name):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
     query=f"SELECT * FROM bookings WHERE bname='{name}'"
+    cursor.execute(query)
+    connection.commit()
+    bookings=cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return bookings
+
+#return a business' bookings
+def getBusinessBookingsOnDate(name, date):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"SELECT * FROM bookings WHERE bname='{name}' AND timeslot_start = TO_DATE('{date}',  'DD-MON-YY HH24:MI:SS')"
     cursor.execute(query)
     connection.commit()
     bookings=cursor.fetchall()
@@ -455,6 +498,7 @@ ORDER BY distance_miles"""
     cursor.close()
     connection.close()
     return info
+
 #used both for updating and creating descriptions for services
 def UpdateDescription(sname,bname,description):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
@@ -469,7 +513,7 @@ def UpdateDescription(sname,bname,description):
             SET description={description} 
             WHERE bname='{bname}' AND sname='{sname}'"""
     else:
-        query2=f"""INSERT INTO servicedescription VALUES('{sname}','{bname}',{description})"""
+        query2=f"""INSERT INTO servicedescription VALUES('{sname}','{bname}','{description}')"""
     cursor.execute(query2)
     connection.commit()
     return

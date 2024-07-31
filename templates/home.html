@@ -22,11 +22,15 @@
         <div id="nearContainer">
             <h2>Near You: </h2>
             <div id="nearCol">
-                
-                {% include 'components/serviceBox.html' %}
-                {% include 'components/serviceBox.html' %}
-                {% include 'components/serviceBox.html' %}
-                
+                {% for business in nearby_business %}
+                <div id="bookingBox">
+                    <img>
+                    <h4>service</h4>
+                    <h2>{{business[1]}}</h2>
+                    <p>???</p>
+                    <button>Book Now!</button>
+                </div>
+                {% endfor %}
             </div>
         </div>
         

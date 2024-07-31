@@ -191,7 +191,7 @@ def Bsignup():
          city = city.capitalize()
          phonenumber = inputvalidation.format_phonenum(phonenumber)
                  
-         dbfunc.CreateBusinessAcc(username,password,businessname,country,state,city,address,email)
+         dbfunc.CreateBusinessAcc(username,password,businessname,country,state,city,address,email,phonenumber)
          full_address = f"{address}, {city}, {state}, {country}"
          # Print the address for debugging purposes
          # print(f"Address: {full_address}")
@@ -275,7 +275,7 @@ def Csignup():
          phonenumber = inputvalidation.format_phonenum(phonenumber)
 
 
-         dbfunc.CreateCustomerAcc(username,password,firstname,lastname,country,state,city,address,email)
+         dbfunc.CreateCustomerAcc(username,password,firstname,lastname,country,state,city,address,email,phonenumber)
          full_address = f"{address}, {city}, {state}, {country}"
          # Print the address for debugging purposes
          # print(f"Address: {full_address}")

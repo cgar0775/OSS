@@ -20,6 +20,18 @@ def validate_password(password):
         return False, "Password cannot contain spaces."
     return True, ""
 
+def validate_phonenum(phonenum):
+
+    if not re.match(r'^[0-9]{10}$,',phonenum):
+        return False, "Phone number must contain 10 digits and only digits! No spaces  or special characters"
+    return True, ""
+
+def format_phonenum(phonenum):
+    
+    formatted_number = f"({phonenum[:3]}) {phonenum[3:6]}-{phonenum[6:]}"
+    return formatted_number
+
+
 #PASSED
 #Customer and Business Validation
 def validate_name(firstname, lastname):

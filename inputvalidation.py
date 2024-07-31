@@ -22,7 +22,7 @@ def validate_password(password):
 
 def validate_phonenum(phonenum):
 
-    if not re.match(r'^[0-9]{10}$,',phonenum):
+    if not re.match(r'^[0-9]{10}$',phonenum):
         return False, "Phone number must contain 10 digits and only digits! No spaces  or special characters"
     return True, ""
 

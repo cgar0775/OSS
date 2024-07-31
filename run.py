@@ -283,6 +283,7 @@ def Csignup():
 def homePage():
     # Get user information
     username = session.get('username')
+    
     print(username)
     # username = "otest"
     #CustomerInfo = dbfunc.CallCustomerInfo(username)
@@ -322,7 +323,8 @@ def homePage():
         CustomerInfo = CallCustomerInfo(username)
         # print(CustomerInfo)
         name = CustomerInfo[1]
-        return render_template('home.html', name = name)
+        nearby_business = dbfunc.CallBusinessGeo(username)
+        return render_template('home.html', name = name, nearby_business = nearby_business)
 
     # Check to see if it is an employee
     
@@ -405,7 +407,11 @@ def businessViewProfilePage(username):
 
     # Get user information
     currentUsername = session.get('username')
-    print(currentUsername)
+    print("Current username: " , currentUsername)
+    print("username: ", username)
+    
+    business_username = dbfunc.CallBusinessInfo(username)[6]
+    print("Business Username: ", business_username) 
 
     # If they are not logged in, redirect them to the login page
     if not currentUsername: 
@@ -419,7 +425,7 @@ def businessViewProfilePage(username):
     print(CallBusinessName(username))
     businessInfo = CallBusinessInfo(username)
     # businessInfo = CallBusinessInfo(CallBusinessName(username)[0])
-    # print(businessInfo)
+    print(businessInfo)
     
     businessName = businessInfo[0]
     businessAddress = businessInfo[3] + ", " + businessInfo[2]
@@ -436,10 +442,18 @@ def businessViewProfilePage(username):
     # Time Table
 
     # Map
-
+    bcoords = dbfunc.CheckCoordinates(business_username)
+    b_lat, b_lng = bcoords
+    print(b_lat, b_lng)
+    fullAddress = businessInfo[5] + " " + businessInfo[4] + " " + businessInfo[3] + ", " + businessInfo[2]
+    print(fullAddress)
+    #If we want to do direction maps??
+    user_coords = dbfunc.CheckCoordinates(currentUsername)
+    user_lat, user_lng = user_coords
+    
     # Reviews
 
-    return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, stars=stars, title='View Buisness', businessUsername=businessUsername, arrServices=arrServices)
+    return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, stars=stars, title='View Buisness', businessUsername=businessUsername, arrServices=arrServices, api_key=API_KEY, b_lat=b_lat, b_lng=b_lng, fullAddress=fullAddress)
 
 
 @app.route('/business/edit')
@@ -574,7 +588,7 @@ def updateTime():
 
 @app.route('/<businessname>/service/<serviceName>')
 
-# @app.route('/service')
+#@app.route('/service')
 def singleServicePage(businessname, serviceName):
     # Get user information
     currentUsername = session.get('username')

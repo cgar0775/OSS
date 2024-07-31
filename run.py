@@ -117,6 +117,7 @@ def Bsignup():
          username = request.form['username']
          password = request.form['password']
          businessname = request.form['business name']
+         phonenumber = request.form['phone number']
          firstname = request.form['firstname']
          lastname = request.form['lastname']
          country = request.form['country']
@@ -128,10 +129,11 @@ def Bsignup():
             
          errors = []
 
-         #Validate Input, Error Messages will flash to CSignUp
+         #Validate Input, Error Messages will flash to BSignUp
          is_valid_username, username_error = inputvalidation.validate_username(username)
          is_valid_password, password_error = inputvalidation.validate_password(password)
          is_valid_businessname, businessname_error = inputvalidation.validate_businessname(businessname)
+         is_valid_phonenumber, phonenumber_error = inputvalidation.validate_phonenum(phonenumber)
          is_valid_name, name_error = inputvalidation.validate_name(firstname, lastname)
          is_valid_location, location_error = inputvalidation.validate_location(country, state, city)
          is_valid_address, address_error = inputvalidation.validate_address(address)
@@ -145,6 +147,9 @@ def Bsignup():
          if not is_valid_businessname:
              errors.append(businessname_error)
 
+         if not is_valid_phonenumber:
+             errors.append(phonenumber_error)
+
          if not is_valid_name:
            errors.extend(name_error)
             
@@ -156,10 +161,6 @@ def Bsignup():
 
          if CheckBusinessName(businessname):
              errors.append("Invalid Business Name: Business already exists")
-            
-
-         # if dbfunc.CheckUsername(username):
-        #  if CheckUsername(username):
          
          if CheckBusinessName(businessname):
              errors.append("Invalid Business Name: Business already exists")
@@ -176,7 +177,8 @@ def Bsignup():
          country = country.capitalize()
          state = state.capitalize()
          city = city.capitalize()
-        
+         phonenumber = inputvalidation.format_phonenum(phonenumber)
+                 
          dbfunc.CreateBusinessAcc(username,password,businessname,country,state,city,address,email)
          full_address = f"{address}, {city}, {state}, {country}"
          # Print the address for debugging purposes
@@ -206,6 +208,7 @@ def Csignup():
     if request.method == 'POST':
          username = request.form['username']
          password = request.form['password']
+         phonenumber = request.form['phone number']
          firstname = request.form['firstname']
          lastname = request.form['lastname']
          country = request.form['country']
@@ -220,6 +223,7 @@ def Csignup():
          #Validate Input, Error Messages will flash to CSignUp
          is_valid_username, username_error = inputvalidation.validate_username(username)
          is_valid_password, password_error = inputvalidation.validate_password(password)
+         is_valid_phonenumber, phonenumber_error = inputvalidation.validate_phonenum(phonenumber)
          is_valid_name, name_error = inputvalidation.validate_name(firstname, lastname)
          is_valid_location, location_error = inputvalidation.validate_location(country, state, city)
          is_valid_address, address_error = inputvalidation.validate_address(address)
@@ -229,6 +233,9 @@ def Csignup():
 
          if not is_valid_password:
             errors.append(password_error)
+         
+         if not is_valid_phonenumber:
+             errors.append(phonenumber_error)
 
          if not is_valid_name:
             errors.extend(name_error)
@@ -242,8 +249,6 @@ def Csignup():
          if dbfunc.CheckUsername(username):
                 errors.append("Invalid Username: User already exists")
                 
-        #  if CheckUsername(username):
-
          if errors:
             for error in errors:
                 flash(error)
@@ -255,6 +260,8 @@ def Csignup():
          country = country.capitalize()
          state = state.capitalize()
          city = city.capitalize()
+         phonenumber = inputvalidation.format_phonenum(phonenumber)
+
 
          dbfunc.CreateCustomerAcc(username,password,firstname,lastname,country,state,city,address,email)
          full_address = f"{address}, {city}, {state}, {country}"

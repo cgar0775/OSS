@@ -12,11 +12,19 @@ from database import OracleConfig
 from dotenv import load_dotenv
 import dbfunc
 
-from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability, CallBusinessName, CheckRole,CallEmployeeInfo
+from urllib.parse import urlparse
+
+from datetime import datetime, timedelta, date
+
+from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability, CallBusinessName, CheckRole, UpdateDescription, GetHours, getBusinessBookings
+
 
 import inputvalidation
 from flask_session import Session
 import redis
+import re
+
+import pytz
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -49,6 +57,10 @@ app.config['SESSION_REDIS'] = redis.StrictRedis(host='localhost', port=6379, db=
 
 #initializes the session management in flask application
 Session(app)
+
+# Timezone Configuration
+est = pytz.timezone('America/New_York')  # EST is part of the America/New_York timezone
+
 
 #With this configuration, user sessions are stored in Redis, 
 #which ensures that the session persists across different requests
@@ -290,6 +302,7 @@ def Csignup():
 def homePage():
     # Get user information
     username = session.get('username')
+    
     print(username)
     # username = "otest"
     #CustomerInfo = dbfunc.CallCustomerInfo(username)
@@ -297,13 +310,6 @@ def homePage():
     # name = "Olivia"
     #BusinessInfo = CallBusinessInfo(username)
     #name = BusinessInfo[0]
-    #name = CustomerInfo[1]
-    #CustomerInfo = dbfunc.CallCustomerInfo(username)
-    #name = CustomerInfo[1]
-    #BusinessInfo = dbfunc.CallBusinessInfo(username)
-    #name = BusinessInfo[0]
-    #print(name)
-    #return render_template('home.html', name = name)
 
     # If they are not logged in, redirect them to the login page
     if not username: 
@@ -329,7 +335,8 @@ def homePage():
         CustomerInfo = CallCustomerInfo(username)
         # print(CustomerInfo)
         name = CustomerInfo[1]
-        return render_template('home.html', name = name)
+        nearby_business = dbfunc.CallBusinessGeo(username)
+        return render_template('home.html', name = name, nearby_business = nearby_business)
 
     # Check to see if it is an employee
     
@@ -372,8 +379,40 @@ def bookingPage():
         print("Empty Username!")
         return redirect(url_for('login'))
 
+    # Get all of the bookings for the business
+    if CheckRole(username)[0] == 'Business':
+        name = CallBusinessName(username)[0]
+        allBookings = dbfunc.getBusinessBookings(name)
+        bookingData = []
+
+        # print(allBookings)
+        for booking in allBookings:
+            print(dbfunc.CallCustomerInfo(booking[2])) 
+            customerName = dbfunc.CallCustomerInfo(booking[2])[1] + " " + dbfunc.CallCustomerInfo(booking[2])[2]
+            tempData = [booking[0], customerName , booking[3], booking[4], dbfunc.CallCustomerInfo(booking[2])[8], dbfunc.CallCustomerInfo(booking[2])[8]]
+
+            bookingData.append(tempData)
+
+        print (bookingData)
+        return render_template("templates/bBookings.html", bookings = bookingData)
+
+    if CheckRole(username)[0] == 'Customer':
+        name = username
+        allBookings = dbfunc.getUserBookings(name)
+        print(allBookings)
+        bookingData = []
+
+        for booking in allBookings: 
+            price = "$" + str(dbfunc.GetService(booking[0], booking[1])[4][0]) + "0"
+            # print(price)
+            bookingData.append([booking[0], booking[1], booking[3], booking[4], price])
+
+        # for booking in allBookings:
+            # tempData = [book,]
+        return render_template('templates/bookings.html', bookings = bookingData)
+
     # return render_template('templates/Bbookings.html')
-    return render_template('templates/bookings.html')
+    return
 
 @app.route('/employees')
 def employeePage():
@@ -412,7 +451,11 @@ def businessViewProfilePage(username):
 
     # Get user information
     currentUsername = session.get('username')
-    print(currentUsername)
+    print("Current username: " , currentUsername)
+    print("username: ", username)
+    
+    business_username = dbfunc.CallBusinessInfo(username)[6]
+    print("Business Username: ", business_username) 
 
     # If they are not logged in, redirect them to the login page
     if not currentUsername: 
@@ -426,7 +469,7 @@ def businessViewProfilePage(username):
     print(CallBusinessName(username))
     businessInfo = CallBusinessInfo(username)
     # businessInfo = CallBusinessInfo(CallBusinessName(username)[0])
-    # print(businessInfo)
+    print(businessInfo)
     
     businessName = businessInfo[0]
     businessAddress = businessInfo[3] + ", " + businessInfo[2]
@@ -437,16 +480,25 @@ def businessViewProfilePage(username):
     # Get array for services
 
     arrServices = GetBusinessServices(businessName)
-    print("arrServices")
-    print(arrServices)
+    
+    # get descriptions
+    
 
     # Time Table
 
     # Map
-
+    bcoords = dbfunc.CheckCoordinates(business_username)
+    b_lat, b_lng = bcoords
+    print(b_lat, b_lng)
+    fullAddress = businessInfo[5] + " " + businessInfo[4] + " " + businessInfo[3] + ", " + businessInfo[2]
+    print(fullAddress)
+    #If we want to do direction maps??
+    user_coords = dbfunc.CheckCoordinates(currentUsername)
+    user_lat, user_lng = user_coords
+    
     # Reviews
 
-    return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, stars=stars, title='View Buisness', businessUsername=businessUsername, arrServices=arrServices)
+    return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, stars=stars, title='View Buisness', businessUsername=businessUsername, arrServices=arrServices, api_key=API_KEY, b_lat=b_lat, b_lng=b_lng, fullAddress=fullAddress)
 
 
 @app.route('/business/edit')
@@ -459,8 +511,7 @@ def businessEditProfilePage():
         print("Empty Username!")
         return redirect(url_for('login'))
 
-    return render_template('templates/bEdit.html', 
-            title="Edit Profile")
+    return render_template('templates/bEdit.html', title="Edit Profile")
 
 @app.route('/profile/view')
 def customerViewProfilePage():
@@ -503,8 +554,9 @@ def servicePage():
 
     print(CallBusinessName(currentUsername))
     # print(CallBusinessInfo(CallBusinessName(currentUsername)))
-
-    return render_template('templates/servicePage.html', service=GetBusinessServices(CallBusinessName(currentUsername)[0]))
+    print(GetBusinessServices(CallBusinessName(currentUsername)[0]))
+    return render_template('templates/servicePage.html', service=[[row[1], "$" + str(row[2]) + "0", row[3], row[4]]for row in GetBusinessServices(CallBusinessName(currentUsername)[0])], nextLink=[CallBusinessName(currentUsername)])
+    # return render_template('templates/servicePage.html', service=GetBusinessServices(CallBusinessName(currentUsername)[0]))
 
 @app.route('/add-service', methods = ['GET','POST'])
 def addService():
@@ -543,13 +595,39 @@ def addServiceFunction():
     name = request.form.get('name')
     price = request.form.get('price')
     slots = request.form.get('slots')
+    time = request.form.get('time')
+
     bName = CallBusinessName(currentUsername)[0]
 
     # print(name + " " + price + " " + bName + " " + slots)
 
     # Create the swervice with both the given and known information
-    CreateService(bName, name, price, slots)
+    CreateService(bName, name, price, slots, time, "0")
 
+
+    # Retrieve break times
+    break_start = request.form.get('break-start')
+    break_end = request.form.get('break-end')
+
+
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+    # UpdateAvailability(bName, name, 'Monday', '03.00', '04.00', '05.00', '06.00')
+    
+    for i in days:
+        startLabel = i.lower() + '-start'    
+        endLabel = i.lower() + '-end'   
+        # print(request.form.get(startLabel))
+        if request.form.get(startLabel) != "":  
+            # Add to the database
+            UpdateAvailability(bName, name, i, request.form.get(startLabel).replace(':','.'), request.form.get(endLabel).replace(':','.'), break_start.replace(':','.'), break_end.replace(':','.'))
+        else:
+            # TODO: Updaet this with the default hours for the business 
+            UpdateAvailability(bName, name, i, '10.00', '17.00', '12.00', '13.00')
+            
+        
+    # come back to this
+    UpdateDescription(name, bName, request.form.get('description'))
 
     return redirect(url_for('servicePage'))
 
@@ -580,8 +658,6 @@ def updateTime():
     return redirect(url_for('servicePage'))
 
 @app.route('/<businessname>/service/<serviceName>')
-
-# @app.route('/service')
 def singleServicePage(businessname, serviceName):
     # Get user information
     currentUsername = session.get('username')
@@ -592,9 +668,13 @@ def singleServicePage(businessname, serviceName):
         return redirect('/login')
 
     # Get avalible service times 
+    print("hi there")
+    print(GetHours(serviceName, businessname))
+
+    hours = GetHours(serviceName, businessname)
 
     # print(Get)
-    return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName)
+    return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours)
 
 @app.route('/<businessname>/service/edit/<serviceName>')
 def singleServiceEditPage(businessname, serviceName):
@@ -606,7 +686,11 @@ def singleServiceEditPage(businessname, serviceName):
         print("Empty Username!")
         return redirect('/login')
 
-    return render_template("templates/sEdit.html")
+    # Get Current Service Information
+    currentService = dbfunc.GetService('thingy11', 'TestB')
+    print(currentService)
+    currentServiceDescription = dbfunc.GetDescription(serviceName, businessname)
+    return render_template("templates/sEdit.html", currentService=currentService, currentServiceDescription=currentServiceDescription)
 
 @app.route('/employee/add', methods = ['GET','POST'])
 def addEmployee():
@@ -729,6 +813,162 @@ def logout():
     session.pop('username',None)
     flash('You have been logged out.')
     return redirect('/')
+
+
+
+@app.route('/run_python', methods=['POST'])
+def run_python():
+    data = request.get_json()
+
+    # print(data)
+    print("asjksdfhkjs")
+    print(data['dateInfo'])
+    # print(data['dateInfo'][:-1])
+
+    date_obj = data['dateInfo'][:-1]
+    date_obj = datetime.strptime(data['dateInfo'][:-1]  , "%Y-%m-%dT%H:%M:%S.%f")
+
+
+    year = date_obj.year
+    month = date_obj.month
+    day = date_obj.day
+    hour = date_obj.hour
+    minute = date_obj.minute
+    second = date_obj.second
+    microsecond = date_obj.microsecond
+
+    # print(year)\
+    # CHATGBT Function
+    def get_month_code(month_number):
+        # Ensure the input is an integer between 1 and 12
+        if 1 <= month_number <= 12:
+            # Create a datetime object for the first day of the given month
+            date = datetime(2024, month_number, 1)  # Year doesn't matter here
+            # Format the month as a 3-letter uppercase code
+            month_code = date.strftime('%b').upper()
+            return month_code
+            
+    # Get the bookings for that date
+    hours = dbfunc.GetHoursDay("hair appointment", "TestB", "Monday") #TODO: Make this dynamic
+
+    
+
+    # Show all of the timeslots
+
+    # Calculate time slots
+    timeSlots = []
+    time_format = "%H:%M"  # Time format
+    startHours = datetime.strptime(hours[0][3], time_format)
+    endHours = datetime.strptime(hours[0][4], time_format)
+    breakStart = datetime.strptime(hours[0][5], time_format)
+    breakEnd = datetime.strptime(hours[0][6], time_format)
+
+
+
+    # TODO: Make this faster
+    while startHours < endHours: 
+        # is this time already booked? 
+        if startHours.hour > 12:
+            time = str(day) + "-" + get_month_code(month) + "-" + str(year) + " " + str(startHours.hour - 12) + ":" + str(startHours.minute)
+        else: 
+            time = str(day) + "-" + get_month_code(month) + "-" + str(year) + " " + str(startHours.hour) + ":" + str(startHours.minute)
+        currentBookings = dbfunc.getBusinessBookingsOnDate("TestB", time)
+        if currentBookings == []:
+            timeSlots.append(startHours)
+            # print(startHours.minute)
+            startHours_est = est.localize(startHours)
+            timeSlots[len(timeSlots) - 1] = datetime(year, month, day, startHours.hour, startHours.minute, startHours.second)
+            timeSlots[len(timeSlots) - 1] = startHours_est
+            timeSlots[len(timeSlots) - 1] += timedelta(minutes=4) #IDK why this needs to be here, but it does
+        
+        timeDelta = timedelta(minutes=30) #TODO: Make this dynamic
+        startHours += timeDelta
+
+
+    #         # print(len(timeSlots))
+    return jsonify(result=timeSlots)
+
+@app.route('/run_python_function', methods=['POST'])
+def run_python_function():
+    data = request.json  # Get JSON data sent from JavaScript
+    button_id = data.get('buttonId')  # Extract button id from the data
+
+    username = session.get('username')
+    
+
+    parsed_url = urlparse(data.get("location"))
+
+    # Extract different components
+    scheme = parsed_url.scheme  # e.g., 'http'
+    netloc = parsed_url.netloc  # e.g., '127.0.0.1:5000'
+    path = parsed_url.path      # e.g., '/TestB/service/test1s'
+    query = parsed_url.query    # e.g., '' (empty if no query string)
+    fragment = parsed_url.fragment  # e.g., '' (empty if no fragment)
+
+    # Split the path into components
+    path_components = path.strip('/').split('/')
+    
+    # Extract specific path components
+    service = path_components[0] if len(path_components) > 0 else None
+    test = path_components[1] if len(path_components) > 1 else None
+    test_detail = path_components[2] if len(path_components) > 2 else None
+
+    # Regular expression to capture the components
+    pattern = r'(\w{3}) (\w{3}) (\d{2}) (\d{4}) (\d{2}:\d{2}:\d{2}) GMT([+-]\d{4}) \((.*)\)'
+
+    # Match the pattern
+    match = re.match(pattern, data.get("date"))
+
+    if match:
+        day_of_week = match.group(1)
+        month = match.group(2)
+        day = match.group(3)
+        year = match.group(4)
+        # time = match.group(5)
+        time = data.get("buttonId")
+        time2 = datetime.strptime(time, '%H:%M') + timedelta(minutes = 20)
+        new_time_str = time2.strftime('%H:%M')
+
+        timezone_offset = match.group(6)
+        timezone_name = match.group(7)
+
+        
+        # Combine date and time
+        # date_time_str = f"{day} {month} {year} {time}"
+        date_time_str = f"{month} {day} {year} {time}"
+        print("TOMATO")
+        print(date_time_str)
+        # date_time_str2 = f"{day} {month} {year} {time2}"
+        date_time_str2 = f"{month} {day} {year} {new_time_str}"
+        print(date_time_str2)
+        # print(date_time_str2)
+        
+        # Parse the combined string into a datetime object
+        date_time_obj = datetime.strptime(date_time_str, '%b %d %Y %H:%M')
+        # date_time_obj2 = datetime.strptime(date_time_str2, '%d %b %Y %H:%M:%S')
+        
+    
+    date_time_obj2 = date_time_obj + timedelta(minutes = 20)
+    # print(date_time_obj2)
+    # print(date_time_str2)
+
+    print("========")
+    test_detail = test_detail.replace("%20", " ")
+    print(test_detail)
+    service = service.replace("%20", " ")
+    print(service)
+    # username = "otest"
+    print(username)
+    print("========")
+
+    
+
+    dbfunc.CreateBooking(test_detail, service, username, date_time_str, date_time_str2, "null")
+    # result = my_python_function(button_id)
+
+    print(dbfunc.getUserBookings("ctest"))
+    result="hi there"
+    return jsonify(result=result)
 
 if __name__ == '__main__':
     app.run(debug=True)

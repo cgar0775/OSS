@@ -24,6 +24,9 @@ body{
     font-style: normal;
     font-variation-settings:
       "wdth" 100; */
+
+
+    padding-bottom: 50px;
 }
 
 /* Navigation Styles */
@@ -345,7 +348,7 @@ h2{
 }
 /* Search Page */
 
-#searchForm #textInput, #addService #textInput{
+#searchForm #textInput{
     width: 400px;
     height: 40px;
     /* width: 900px; */
@@ -432,8 +435,9 @@ th, td {
 }
 
 th {
-    background-color: #f2f2f2;
-    color: #333;
+    background-color: #023047;
+    color: white;
+
 }
 
 tr:nth-child(even) {
@@ -470,12 +474,22 @@ input[type="submit"] {
     background-color: red;
 }
 
-#servicePage button, #bookingContainer button{
+#serviceTable button, #bookingContainer button{
     background: white;
     padding: 10px;
     border-radius: 20px;
     border: black, solid, 1px;
     font-size: 15px;
+
+}
+
+#addServiceButton{
+    margin-top: 30px;
+    background: #023047;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 50px;
 }
 
 #nearContainer{
@@ -500,7 +514,7 @@ input[type="submit"] {
 
 }
 
-#addService label{
+#addService label, #serviceEdit label{
     font-size: 30px;
 }
 
@@ -536,4 +550,79 @@ input[type="submit"] {
     text-align: center;
     
     border-radius: 30px
+}
+
+.calendar {
+    border: 1px solid #ddd;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    align-items: center;
+
+    margin: auto;   
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f7f7f7;
+    padding: 10px;
+}
+
+.calendar-header button {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+}
+
+.month-year {
+    font-weight: bold;
+}
+
+.calendar-body {
+    padding: 10px;
+}
+
+.calendar-weekdays {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.calendar-weekdays div {
+    width: 14.2%;
+    text-align: center;
+    font-weight: bold;
+}
+
+.calendar-dates {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.calendar-dates div {
+    width: 14.2%;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.calendar-dates div.booked {
+    background-color: #f0c0c0;
+    cursor: not-allowed;
+}
+
+.calendar-dates div.available {
+    background-color: #c0f0c0;
+}
+
+#bookingGroup{
+    display: flex;
+}
+
+.times{
+    width: 50%;
 }

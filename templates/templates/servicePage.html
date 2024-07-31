@@ -4,17 +4,19 @@
 
 <div id="servicePage">
 
-    <h1>Our Services</h1>
+    <h1>Your Services</h1>
     <div>
-        <table>
+        <table id="serviceTable">
             <thead>
                 <tr>
-                    <th>Buisness</th>
+                    <!-- <th>Buisness</th> -->
                     <th>Service Name</th>
                     <th>Price</th>
-                    <th>Slots Avalible</th>
+                    <th style="width: 15%">Slots Avalible</th>
+                    <th>Total Time</th>
                     <th>Edit</th>
                     <th>View</th>
+                    <th>Delete</th>
                     <!-- <th>Edit</th> -->
                 </tr>
             </thead>
@@ -25,8 +27,9 @@
                             <td>{{ data }}</td>
                         {% endfor %}
                         <!-- <td>{{ items[0] }}</td> -->
-                        <td><a href="/{{items[0]}}/service/edit/{{items[1]}}"><button>Edit</button></a></td>
-                        <td><a href="/{{items[0]}}/service/{{items[1]}}"><button>View</button></a></td>
+                        <td><a href="/{{nextLink[0][0]}}/service/edit/{{items[0]}}"><button>Edit</button></a></td>
+                        <td><a href="/{{nextLink[0][0]}}/service/{{items[0]}}"><button>View</button></a></td>
+                        <td><a href=""><button>Delete</button></a></td>
                     </tr>
                 {% endfor %}
                 <!-- Add dynamic data here -->
@@ -34,7 +37,7 @@
         </table>
     </div>
     
-    <a href="/add-service"><button>Add new service</button></a>
+    <a href="/add-service"><button id="addServiceButton">Add new service</button></a>
 
 </div>
 

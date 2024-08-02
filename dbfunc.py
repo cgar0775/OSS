@@ -477,20 +477,17 @@ def CallBusinessGeo(Customerusername):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
     coords=CheckCoordinates(Customerusername)
-    query=f"""SELECT b.username,b.name,
-       (
-            3958.8 *
-            ACOS(
-               GREATEST(LEAST(COS({coords[0]} * 0.017453293) * COS(lat * 0.017453293) * COS((lng - {coords[1]}) * 0.017453293) +
-               SIN({coords[0]} * 0.017453293) * SIN(lat * 0.017453293),-1)
-       ,1))) AS distance_miles
+    query=f"""SELECT b.username, b.name,
+       3958.8 * ACOS(
+          COS({coords[0]} * 0.017453293) * COS(lat * 0.017453293) * COS((lng - {coords[1]}) * 0.017453293) +
+          SIN({coords[0]} * 0.017453293) * SIN(lat * 0.017453293)
+       ) AS distance_miles
 FROM geocoordinates
-INNER JOIN Businessinfo b ON geocoordinates.username=b.username
-WHERE
-    3958.8 *
-    ACOS(
-        GREATEST(LEAST(COS({coords[0]} * 0.017453293) * COS(lat * 0.017453293) * COS((lng - {coords[1]}) * 0.017453293) +
-        SIN({coords[0]} * 0.017453293) * SIN(lat * 0.017453293),-1),1)) <=20
+INNER JOIN Businessinfo b ON geocoordinates.username = b.username
+WHERE 3958.8 * ACOS(
+          COS({coords[0]} * 0.017453293) * COS(lat * 0.017453293) * COS((lng - {coords[1]}) * 0.017453293) +
+          SIN({coords[0]} * 0.017453293) * SIN(lat * 0.017453293)
+       ) <= 20
 ORDER BY distance_miles"""
     cursor.execute(query)
     connection.commit()

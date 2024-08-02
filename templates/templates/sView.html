@@ -220,10 +220,10 @@
         <h2>User Reviews</h2>
         <div class="review-list" id="review-list">
             {% for review in reviews[:10] %}
-            <div class="review">
-                <p>{{review.content}}</p>
-                <p>Rating: {{review.rating}}</p>
-            </div>
+                <div class="review">
+                    <p>{{review.content}}</p>
+                    <p>Rating: {{review.rating}}</p>
+                </div>
             {% endfor %}
         </div>
         <button id = "loadMoreBtn" onclick="loadMoreReviews()">Load More</button>
@@ -235,22 +235,32 @@
         function loadMoreReviews(businessName,serviceName){
 
             const url = `/load_more_reviews?businessname=${encodeURIComponent(businessName)}&servicename=${encodeURIComponent(serviceName)}&start=${currentReviewIndex}`;
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    const reviewList = document.getElementById('review-list');
-                    data.reviews.forEach(review => {
-                        const reviewDiv = document.createElement('div');
-                        reviewDiv.classList.add('review');
-                        reviewDiv.innerHTML = `<p>${review.content}</p><p>Rating: ${review.rating}</p>`;
-                        reviewList.appendChild(reviewDiv);
-                    });
-                    currentReviewIndex += data.reviews.length;
-                    if (data.reviews.length < 10) {
-                        document.getElementById('loadMoreBtn').style.display = 'none';
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+            fetch('/load_more_reviews', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({  })
+            })
+            
+            .then(response => response.json())
+            .then(data => {
+                const reviewList = document.getElementById('review-list');
+                console.log("here!!!")
+                console.log(data.reviews)
+                console.log(data.reviews)
+                data.reviews.forEach(review => {
+                    const reviewDiv = document.createElement('div');
+                    reviewDiv.classList.add('review');
+                    reviewDiv.innerHTML = `<p>${review.content}</p><p>Rating: ${review.rating}</p>`;
+                    reviewList.appendChild(reviewDiv);
+                });
+                currentReviewIndex += data.reviews.length;
+                if (data.reviews.length < 10) {
+                    document.getElementById('loadMoreBtn').style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error:', error));
         }
     </script>
 </div>

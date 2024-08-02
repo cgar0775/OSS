@@ -728,8 +728,13 @@ def singleServicePage(businessname, serviceName):
 
     hours = GetHours(serviceName, businessname)
 
+    reviews = dbfunc.getReviews(businessname, serviceName)
+
+    print("reviews")
+    print(reviews)
+
     # print(Get)
-    return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours, reviews ="")
+    return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours, reviews = reviews)
 
 @app.route('/<businessname>/service/edit/<serviceName>')
 def singleServiceEditPage(businessname, serviceName):
@@ -944,7 +949,7 @@ def run_python():
     return jsonify(result=timeSlots)
 
 
-@app.route('/load_more_reviews',methods=['GET'])
+@app.route('/load_more_reviews',methods=['GET', 'POST'])
 def load_more_reviews():
     
     businessname = request.args.get('businessname')
@@ -952,7 +957,8 @@ def load_more_reviews():
 
     reviews = getReviews(businessname,servicename)
 
-    return render_template('sView.html', reviews=reviews)
+    # return render_template('sView.html', reviews=reviews)
+    return reviews
 
 
 @app.route('/run_python_function', methods=['POST'])

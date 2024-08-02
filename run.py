@@ -729,7 +729,7 @@ def singleServicePage(businessname, serviceName):
     hours = GetHours(serviceName, businessname)
 
     # print(Get)
-    return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours)
+    return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours, reviews ="")
 
 @app.route('/<businessname>/service/edit/<serviceName>')
 def singleServiceEditPage(businessname, serviceName):

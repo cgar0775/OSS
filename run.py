@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 
 from datetime import datetime, timedelta, date
 
-from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability, CallBusinessName, CheckRole, UpdateDescription, GetHours, getBusinessBookings
+from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability, CallBusinessName, CheckRole, UpdateDescription, GetHours, getBusinessBookings,getReviews
 
 
 import inputvalidation
@@ -24,7 +24,7 @@ from flask_session import Session
 import redis
 import re
 
-import pytz
+#import pytz
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -59,7 +59,7 @@ app.config['SESSION_REDIS'] = redis.StrictRedis(host='localhost', port=6379, db=
 Session(app)
 
 # Timezone Configuration
-est = pytz.timezone('America/New_York')  # EST is part of the America/New_York timezone
+#est = pytz.timezone('America/New_York')  # EST is part of the America/New_York timezone
 
 
 #With this configuration, user sessions are stored in Redis, 
@@ -942,6 +942,18 @@ def run_python():
 
     #         # print(len(timeSlots))
     return jsonify(result=timeSlots)
+
+
+@app.route('/load_more_reviews',methods=['GET'])
+def load_more_reviews():
+    
+    businessname = request.args.get('businessname')
+    servicename = request.args.get('service_name')
+
+    reviews = getReviews(businessname,servicename)
+
+    return render_template('sView.html', reviews=reviews)
+
 
 @app.route('/run_python_function', methods=['POST'])
 def run_python_function():

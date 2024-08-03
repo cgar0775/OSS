@@ -478,16 +478,16 @@ def CallBusinessGeo(Customerusername):
     cursor=connection.cursor()
     coords=CheckCoordinates(Customerusername)
     query=f"""SELECT b.username, b.name,
-       3958.8 * ACOS(
+       3958.8 * ACOS(ROUND(
           COS({coords[0]} * 0.017453293) * COS(lat * 0.017453293) * COS((lng - {coords[1]}) * 0.017453293) +
           SIN({coords[0]} * 0.017453293) * SIN(lat * 0.017453293)
-       ) AS distance_miles
+       ,8)) AS distance_miles
 FROM geocoordinates
 INNER JOIN Businessinfo b ON geocoordinates.username = b.username
-WHERE 3958.8 * ACOS(
+WHERE 3958.8 * ACOS(ROUND(
           COS({coords[0]} * 0.017453293) * COS(lat * 0.017453293) * COS((lng - {coords[1]}) * 0.017453293) +
           SIN({coords[0]} * 0.017453293) * SIN(lat * 0.017453293)
-       ) <= 20
+       ,8)) <= 20
 ORDER BY distance_miles"""
     cursor.execute(query)
     connection.commit()

@@ -317,102 +317,44 @@ def homePage():
         return redirect(url_for('login'))
     
     # if they are logged in, what type of account???
+    
 
-    if CheckRole(username)[0] == 'Customer':
-        CustomerInfo = CallCustomerInfo(username)
-        name = CustomerInfo[1]
-
-        # nearby_business = dbfunc.CallBusinessGeo(username)
-        # return render_template('home.html', name = name)
-        
-        nearby_businesses = dbfunc.CallBusinessGeo(username)
-        businesses = []
-        connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
-        cursor=connection.cursor()
-        for business in nearby_businesses:
-            business_name = business[3]
-            business_services = dbfunc.GetBusinessServicesUnbound(business_name,connection,cursor)
-            services = []
-            
-            for service in business_services:
-                service_name = service[1]  # Extract 'Haircut' from ('Test123', 'Haircut', 300.0, 3, '300:0', 0)
-                service_price = service[2]  # Extract the price (300.0)
-                services.append({
-                    'name': service_name,
-                    'price': service_price
-                })
-            #print("service", service)
-            businesses.append({
-                'username': business[2],
-                'name': business_name,
-                'services': services,
-                'profile_url': url_for('businessViewProfilePage', username=business[2])
-            })
-            #print("nearby", nearby_businesses)
-            print("business", businesses)
-        cursor.close()
-        connection.close()
-        return render_template('home.html', name=name, nearby_businesses=businesses)
-    elif CheckRole(username)=='Business':
+    if CallBusinessName(username):
     # if CallBusinessInfo(CallBusinessName(username)[0]):
         
-        BusinessInfo = CallBusinessInfo(CallBusinessName(username)[0])
-        return render_template('bHome.html', name = BusinessInfo[0]) #Change this to the buisness home page!!!
+        BuisnessInfo = CallBusinessInfo(CallBusinessName(username)[0])
+
+        
+        
+        
+        return render_template('bHome.html', name = "name") #Change this to the buisness home page!!!
+        
+
+    if CheckRole(username)[0] == 'Customer':
+        # print("Username: " + str(username))
+        CustomerInfo = CallCustomerInfo(username)
+        # print(CustomerInfo)
+        name = CustomerInfo[1]
+        # nearby_business = dbfunc.CallBusinessGeo(username)
+        return render_template('home.html', name = name)
+
     # Check to see if it is an employee
     
     
     # return render_template('home.html', name = "name")
     return render_template('home.html')
 
-@app.route('/search', methods=['GET', 'POST'])
+@app.route('/search')
 def searchPage():
+    # Get user information
     username = session.get('username')
 
     # If they are not logged in, redirect them to the login page
-    if not username:
+    if not username: 
+        print("Empty Username!")
         return redirect(url_for('login'))
 
-    user_coords = dbfunc.CheckCoordinates(username)
-    if not user_coords:
-        return render_template('search.html', error="Unable to fetch user location")
-
-    user_lat, user_lng = user_coords
-
-    if request.method == 'POST':
-        query = request.form.get('query', '').strip()
-        if not query:
-            return render_template('search.html', error="Search query cannot be empty")
-
-        try:
-            # Fetch all businesses within a 20-mile radius of the user
-            nearby_businesses = dbfunc.CallBusinessGeo(username)
-            matching_businesses = []
-
-            for business in nearby_businesses:
-                business_username = business[0]
-                business_name = business[1]
-                services = GetBusinessServices(business_username)
-
-                for service in services:
-                    if query.lower() in service[1].lower():  # Case-insensitive search
-                        matching_businesses.append({
-                            'username': business_username,
-                            'business_name': business_name,
-                            'service_name': service[1],  # Assuming service[1] is the service name
-                            'service_price': service[2]  # Assuming service[2] is the price
-                        })
-
-            if not matching_businesses:
-                return render_template('templates/search.html', error="No matching services found.")
-
-            return render_template('templates/search.html', businesses=matching_businesses)
-
-        except Exception as e:
-            app.logger.error(f"Error fetching businesses for query '{query}': {str(e)}")
-            return render_template('templates/search.html', error="Error fetching businesses")
-
     return render_template('templates/search.html')
-
 
 @app.route('/profile')
 def profilePage():
@@ -527,6 +469,9 @@ def businessViewProfilePage(username):
     print("Current username: " , currentUsername)
     print("username: ", username)
     
+    # business_username = dbfunc.CallBusinessInfo(username)
+    # print("Business Username: ", business_username) 
+
     # If they are not logged in, redirect them to the login page
     if not currentUsername: 
         print("Empty Username!")
@@ -546,7 +491,7 @@ def businessViewProfilePage(username):
         businessInfo = dbfunc.CallBusinessInfo(username)
     print(CallBusinessName(username))
     # print(bus)
-    #businessInfo = CallBusinessInfo(username)
+    # businessInfo = CallBusinessInfo(username)
     # businessInfo = CallBusinessInfo(CallBusinessName(username)[0])
     # print(businessInfo)
     
@@ -562,7 +507,7 @@ def businessViewProfilePage(username):
     arrServices = GetBusinessServices(businessName)
     
     # get descriptions
-    #serviceDescription = dbfunc.GetDescription(arrServices, business_username)
+    
 
     # Time Table
 

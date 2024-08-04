@@ -317,14 +317,6 @@ def homePage():
         return redirect(url_for('login'))
     
     # if they are logged in, what type of account???
-    
-
-    if CallBusinessName(username):
-    # if CallBusinessInfo(CallBusinessName(username)[0]):
-        
-        BuisnessInfo = CallBusinessInfo(CallBusinessName(username)[0])
-        return render_template('bHome.html', name = "name") #Change this to the buisness home page!!!
-        
 
     if CheckRole(username)[0] == 'Customer':
         CustomerInfo = CallCustomerInfo(username)
@@ -332,13 +324,14 @@ def homePage():
 
         # nearby_business = dbfunc.CallBusinessGeo(username)
         # return render_template('home.html', name = name)
-
+        
         nearby_businesses = dbfunc.CallBusinessGeo(username)
         businesses = []
-        
+        connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+        cursor=connection.cursor()
         for business in nearby_businesses:
-            business_name = business[1]
-            business_services = GetBusinessServices(business_name)
+            business_name = business[3]
+            business_services = dbfunc.GetBusinessServicesUnbound(business_name,connection,cursor)
             services = []
             
             for service in business_services:
@@ -348,18 +341,23 @@ def homePage():
                     'name': service_name,
                     'price': service_price
                 })
-            print("service", service)
+            #print("service", service)
             businesses.append({
-                'username': business[0],
+                'username': business[2],
                 'name': business_name,
                 'services': services,
-                'profile_url': url_for('businessViewProfilePage', username=business[0])
+                'profile_url': url_for('businessViewProfilePage', username=business[2])
             })
-            print("nearby", nearby_businesses)
+            #print("nearby", nearby_businesses)
             print("business", businesses)
-            
+        cursor.close()
+        connection.close()
         return render_template('home.html', name=name, nearby_businesses=businesses)
-
+    elif CheckRole(username)=='Business':
+    # if CallBusinessInfo(CallBusinessName(username)[0]):
+        
+        BusinessInfo = CallBusinessInfo(CallBusinessName(username)[0])
+        return render_template('bHome.html', name = BusinessInfo[0]) #Change this to the buisness home page!!!
     # Check to see if it is an employee
     
     
@@ -548,7 +546,7 @@ def businessViewProfilePage(username):
         businessInfo = dbfunc.CallBusinessInfo(username)
     print(CallBusinessName(username))
     # print(bus)
-    # businessInfo = CallBusinessInfo(username)
+    #businessInfo = CallBusinessInfo(username)
     # businessInfo = CallBusinessInfo(CallBusinessName(username)[0])
     # print(businessInfo)
     

@@ -763,9 +763,21 @@ def singleServicePage(businessname, serviceName):
 
     print("reviews")
     print(reviews)
+    
+    formatted_reviews = [{
+        'id': r[0],
+        'username': r[1],
+        'fname': r[2],
+        'lname': r[3],
+        'header': r[4],
+        'body': r[5],
+        'rating': r[6],
+        'businessname': r[7],
+        'servicename': r[8]
+    } for r in reviews]
 
     # print(Get)
-    return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours, reviews = reviews)
+    return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours, reviews = formatted_reviews)
 
 @app.route('/<businessname>/service/edit/<serviceName>', methods=['GET', 'POST'])
 def singleServiceEditPage(businessname, serviceName):

@@ -626,3 +626,7 @@ input[type="submit"] {
 .times{
     width: 50%;
 }
+
+#serviceEdit .tablinks{
+    height: 60px; 
+}

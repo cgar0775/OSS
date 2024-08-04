@@ -16,11 +16,7 @@ from urllib.parse import urlparse
 
 from datetime import datetime, timedelta, date
 
-<<<<<<< HEAD
 from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability, CallBusinessName, CheckRole, UpdateDescription, GetHours, getBusinessBookings,getReviews
-=======
-from dbfunc import CallEmployeeInfo, CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability, CallBusinessName, CheckRole, UpdateDescription, GetHours, getBusinessBookings
->>>>>>> main
 
 
 import inputvalidation
@@ -756,6 +752,9 @@ def singleServicePage(businessname, serviceName):
 
     # Get avalible service times 
     print("hi there")
+    print(serviceName)
+    print(businessname)
+
     print(GetHours(serviceName, businessname))
 
     hours = GetHours(serviceName, businessname)
@@ -1019,16 +1018,20 @@ def run_python():
     return jsonify(result=timeSlots)
 
 
-@app.route('/load_more_reviews',methods=['GET', 'POST'])
+@app.route('/load_more_reviews',methods=['POST'])
 def load_more_reviews():
     
-    businessname = request.args.get('businessname')
-    servicename = request.args.get('service_name')
+    data = request.json
+    
+    businessname = data.get('businessname')
+    servicename = data.get('service_name')
+    #current_index = data.get('current_index', 10)
+
 
     reviews = getReviews(businessname,servicename)
 
     # return render_template('sView.html', reviews=reviews)
-    return reviews
+    return jsonify({'reviews': reviews})
 
 
 @app.route('/run_python_function', methods=['POST'])

@@ -221,8 +221,10 @@
         <div class="review-list" id="review-list">
             {% for review in reviews[:10] %}
                 <div class="review">
-                    <p>{{review.content}}</p>
+                    <h3> {{review.header}}</h3>
+                    <p>{{review.body}}</p>
                     <p>Rating: {{review.rating}}</p>
+                    <p>By: {{review.fname}} {{review.lname}} ({{review.username}})</p>
                 </div>
             {% endfor %}
         </div>
@@ -232,9 +234,8 @@
     <script>
         let currentReviewIndex = 10;
 
-        function loadMoreReviews(businessName,serviceName){
+        function loadMoreReviews(){
 
-            const url = `/load_more_reviews?businessname=${encodeURIComponent(businessName)}&servicename=${encodeURIComponent(serviceName)}&start=${currentReviewIndex}`;
             fetch('/load_more_reviews', {
                 method: 'POST',
                 headers: {
@@ -245,15 +246,22 @@
             
             .then(response => response.json())
             .then(data => {
-                const reviewList = document.getElementById('review-list');
                 console.log("here!!!")
                 console.log(data.reviews)
                 console.log(data.reviews)
+                const reviewList = document.getElementById('review-list');
                 data.reviews.forEach(review => {
                     const reviewDiv = document.createElement('div');
                     reviewDiv.classList.add('review');
-                    reviewDiv.innerHTML = `<p>${review.content}</p><p>Rating: ${review.rating}</p>`;
-                    reviewList.appendChild(reviewDiv);
+                    
+                    reviewDiv.innerHTML = `
+                        <h3>${review.header}</h3>
+                        <p>${review.body}</p>
+                        <p>Rating: ${review.rating}</p>
+                        <p>By: ${review.fname} ${review.lname} (${review.username})</p>
+                `;                
+               
+                reviewList.appendChild(reviewDiv);
                 });
                 currentReviewIndex += data.reviews.length;
                 if (data.reviews.length < 10) {

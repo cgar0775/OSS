@@ -343,10 +343,10 @@ def homePage():
                 })
             #print("service", service)
             businesses.append({
-                'username': business[2],
+                'username': business[3],
                 'name': business_name,
                 'services': services,
-                'profile_url': url_for('businessViewProfilePage', username=business[2])
+                'profile_url': url_for('businessViewProfilePage', username=business[3])
             })
             #print("nearby", nearby_businesses)
             print("business", businesses)

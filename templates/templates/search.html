@@ -1,20 +1,28 @@
 {% extends 'frame.html' %}
 
 {% block content %}
-
 <div>
     <h1>Search</h1>
-    <form id="searchForm">
-        <input type="text" id="textInput">
-        <!-- need to add css -->
-        <input type="submit">
-        
-
+    <form id="searchForm" method="POST" action="{{ url_for('searchPage') }}">
+        <input type="text" name="query" id="textInput" placeholder="Search for a service" required>
+        <input type="submit" value="Search">
     </form>
 
-    <div>
-        
-    </div>
+    {% if businesses %}
+        <h2>Search Results</h2>
+        <ul>
+            {% for business in businesses %}
+                <li>
+                    <strong>{{ business.business_name }}</strong><br>
+                    Service: {{ business.service_name }} - ${{ business.service_price }}<br>
+                    <a href="{{ url_for('businessViewProfilePage', username=business.username) }}">View Profile</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% elif error %}
+        <p>{{ error }}</p>
+    {% else %}
+        <p>No results found.</p>
+    {% endif %}
 </div>
-
 {% endblock %}

@@ -15,13 +15,11 @@
     </div>
 
     <div id="profileContainer">
-        
-        <!-- make it a circle crop -->
         <h2>{{ businessName }}</h2>
-        <h3>{{ businessAddress }}</h3>
+        <h3>{{fullAddress}}</h3>
 
         <!-- TODO: Turn this izznto a resopnsive image -->
-        <h4>⭐️⭐️⭐️⭐️⭐️</h4>
+        <!-- <h4>⭐️⭐️⭐️⭐️⭐️</h4> -->
 
         <!-- Show edit button if they should be able to edit it -->
         {% if g.data[0] == businessName %}

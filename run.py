@@ -10,6 +10,7 @@ import oracledb
 # import requests
 from database import OracleConfig
 from dotenv import load_dotenv
+from math import radians, cos, sin, asin, sqrt
 import dbfunc
 
 from urllib.parse import urlparse
@@ -364,6 +365,18 @@ def homePage():
     # return render_template('home.html', name = "name")
     return render_template('home.html')
 
+def get_distance(lat1, lng1, lat2, lng2):
+    # Convert decimal degrees to radians
+    lat1, lng1, lat2, lng2 = map(radians, [lat1, lng1, lat2, lng2])
+
+    # Haversine formula
+    dlat = lat2 - lat1 
+    dlng = lng2 - lng1 
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlng/2)**2
+    c = 2 * asin(sqrt(a))
+    r = 3958.8  # Radius of Earth in miles
+    return c * r
+
 @app.route('/search', methods=['GET', 'POST'])
 def searchPage():
     username = session.get('username')
@@ -374,44 +387,65 @@ def searchPage():
 
     user_coords = dbfunc.CheckCoordinates(username)
     if not user_coords:
-        return render_template('search.html', error="Unable to fetch user location")
+        return render_template('templates/search.html', error="Unable to fetch user location")
 
     user_lat, user_lng = user_coords
 
     if request.method == 'POST':
         query = request.form.get('query', '').strip()
         if not query:
-            return render_template('search.html', error="Search query cannot be empty")
+            return render_template('templates/search.html', error="Search query cannot be empty")
 
         try:
             # Fetch all businesses within a 20-mile radius of the user
             nearby_businesses = dbfunc.CallBusinessGeo(username)
             matching_businesses = []
-
+            connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+            cursor=connection.cursor()
             for business in nearby_businesses:
-                business_username = business[0]
-                business_name = business[1]
-                services = GetBusinessServices(business_username)
-
-                for service in services:
-                    if query.lower() in service[1].lower():  # Case-insensitive search
-                        matching_businesses.append({
-                            'username': business_username,
-                            'business_name': business_name,
-                            'service_name': service[1],  # Assuming service[1] is the service name
-                            'service_price': service[2]  # Assuming service[2] is the price
-                        })
-
+                business_username = business[2]
+                business_name = business[3]
+                businessInfo = dbfunc.CallBusinessInfo(business_name,connection,cursor)
+                business_services = dbfunc.GetBusinessServices(business_name)
+                address = f"{businessInfo[5]} {businessInfo[4]} {businessInfo[3]}, {businessInfo[2]}"
+                business_lat, business_lng = dbfunc.CheckCoordinates(business_username)
+                distance = get_distance(user_lat, user_lng, business_lat, business_lng)
+                
+             
+                if query.lower() in business_name.lower():  # Case-insensitive search for business name
+                    matching_businesses.append({
+                        'username': business_username,
+                        'business_name': business_name,
+                        'services': business_services,
+                        'address': address,
+                        'lat': business_lat,
+                        'lng': business_lng
+                    })
+                else:
+                    for service in business_services:
+                        if query.lower() in service[1].lower():  # Case-insensitive search for service name
+                            matching_businesses.append({
+                                'username': business_username,
+                                'business_name': business_name,
+                                'service_name': service[1],
+                                'service_price': service[2],
+                                'address': address, 
+                                'lat': business_lat,
+                                'lng': business_lng
+                            })
+                            break  # Only add the business once if any service matches
+            cursor.close()
+            connection.close()                 
             if not matching_businesses:
-                return render_template('templates/search.html', error="No matching services found.")
+                return render_template('templates/search.html', error="No matching businesses or services found.")
 
-            return render_template('templates/search.html', businesses=matching_businesses)
+            return render_template('templates/search.html', businesses=matching_businesses, address = address)
 
         except Exception as e:
             app.logger.error(f"Error fetching businesses for query '{query}': {str(e)}")
             return render_template('templates/search.html', error="Error fetching businesses")
 
-    return render_template('templates/search.html')
+    return render_template('templates/search.html', api_key = API_KEY)
 
 
 @app.route('/profile')
@@ -535,9 +569,9 @@ def businessViewProfilePage(username):
     # debuig this - there might be an error!!!
 
     # General Business Information
-    businessInfo = dbfunc.CallBusinessInfo(username)
-    print("businessInfo")
-    print(businessInfo)
+    #businessInfo = dbfunc.CallBusinessInfo(username)
+    #print("businessInfo")
+    #print(businessInfo)
     print(dbfunc.CallBusinessInfo(username))
     print(dbfunc.CallBusinessName(username))
     if dbfunc.CallBusinessInfo(username) != None: 
@@ -547,7 +581,7 @@ def businessViewProfilePage(username):
     print(CallBusinessName(username))
     # print(bus)
     #businessInfo = CallBusinessInfo(username)
-    # businessInfo = CallBusinessInfo(CallBusinessName(username)[0])
+    businessInfo = CallBusinessInfo(CallBusinessName(username)[0])
     # print(businessInfo)
     
     businessName = businessInfo[0]
@@ -879,8 +913,19 @@ def addEmployee():
 @app.route('/maps')
 def viewMap():
     username = session.get('username')
-    CustomerInfo = dbfunc.CallCustomerInfo(username)
-    return render_template('maps.html', api_key = API_KEY)
+    if not username:
+        return redirect(url_for('login'))
+
+    lat = request.args.get('lat')
+    lng = request.args.get('lng')
+    name = request.args.get('name')
+    address = request.args.get('address')
+
+    if not lat or not lng or not name or not address:
+        return "Invalid parameters", 400
+
+    return render_template('maps.html', api_key=API_KEY, lat=lat, lng=lng, name=name, address=address)
+
 
 #Geocoding Location for maps
 @app.route('/get-user-location')

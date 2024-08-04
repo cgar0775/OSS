@@ -232,7 +232,15 @@
     </div>
 
     <script>
+
+        const businessName = "{{ businessName }}";
+        const serviceName = "{{ serviceName }}";
+
         let currentReviewIndex = 10;
+
+        console.log(businessName)
+        console.log(serviceName)
+
 
         function loadMoreReviews(){
 
@@ -241,7 +249,11 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({  })
+                body: JSON.stringify({ 
+                    
+                    businessName: businessName,
+                    serviceName: serviceName,
+                 })
             })
             
             .then(response => response.json())

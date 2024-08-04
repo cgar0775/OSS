@@ -742,6 +742,10 @@ def updateTime():
 
 @app.route('/<businessname>/service/<serviceName>')
 def singleServicePage(businessname, serviceName):
+    
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor(scrollable=True)
+
     # Get user information
     currentUsername = session.get('username')
 
@@ -751,18 +755,21 @@ def singleServicePage(businessname, serviceName):
         return redirect('/login')
 
     # Get avalible service times 
-    print("hi there")
-    print(serviceName)
-    print(businessname)
+    #print("hi there")
+    #print(serviceName)
+    #print(businessname)
 
-    print(GetHours(serviceName, businessname))
+    #print(GetHours(serviceName, businessname))
 
     hours = GetHours(serviceName, businessname)
 
-    reviews = dbfunc.getReviews(businessname, serviceName)
+    #gets inital reviews
+    reviews = dbfunc.getReviewScrollStart(10,businessname,serviceName,cursor,connection)
 
-    print("reviews")
-    print(reviews)
+    #reviews = dbfunc.getReviews(businessname, serviceName)
+
+    #print("reviews")
+    #print(reviews)
     
     formatted_reviews = [{
         'id': r[0],
@@ -776,7 +783,10 @@ def singleServicePage(businessname, serviceName):
         'servicename': r[8]
     } for r in reviews]
 
-    # print(Get)
+    #if leave page do the following
+    #cursor.close()
+    #connection.close()
+
     return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours, reviews = formatted_reviews)
 
 @app.route('/<businessname>/service/edit/<serviceName>', methods=['GET', 'POST'])
@@ -1033,14 +1043,30 @@ def run_python():
 @app.route('/load_more_reviews',methods=['POST'])
 def load_more_reviews():
     
-    data = request.json
+    data = request.get_json()
+    businessname = data.get('businessName')
+    servicename = data.get('serviceName')
     
-    businessname = data.get('businessname')
-    servicename = data.get('service_name')
-    #current_index = data.get('current_index', 10)
-
+    print(businessname)
+    print(servicename)
 
     reviews = getReviews(businessname,servicename)
+    
+
+    print("reviews")
+    print(reviews)
+
+    formatted_reviews = [{
+        'id': r[0],
+        'username': r[1],
+        'fname': r[2],
+        'lname': r[3],
+        'header': r[4],
+        'body': r[5],
+        'rating': r[6],
+        'businessname': r[7],
+        'servicename': r[8]
+    } for r in reviews]
 
     # return render_template('sView.html', reviews=reviews)
     return jsonify({'reviews': reviews})

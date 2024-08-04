@@ -4,7 +4,7 @@
 <div>
     <h1>Search</h1>
     <form id="searchForm" method="POST" action="{{ url_for('searchPage') }}">
-        <input type="text" name="query" id="textInput" placeholder="Search for a service" required>
+        <input type="text" name="query" id="textInput" placeholder="Search for a service or business" required>
         <input type="submit" value="Search">
     </form>
 
@@ -12,11 +12,13 @@
         <h2>Search Results</h2>
         <ul>
             {% for business in businesses %}
-                <li>
-                    <strong>{{ business.business_name }}</strong><br>
-                    Service: {{ business.service_name }} - ${{ business.service_price }}<br>
-                    <a href="{{ url_for('businessViewProfilePage', username=business.username) }}">View Profile</a>
-                </li>
+            
+                    <strong><a href="{{ url_for('businessViewProfilePage', username=business.username) }}">{{ business.business_name }}</strong></a><br>
+                    <strong>Service: </strong>
+                        {{ business.service_name }} - ${{ business.service_price }}<br>
+                    Address: {{ business.address }}<br>
+                    <a href="{{ url_for('viewMap', lat=business.lat, lng=business.lng, name=business.business_name, address=business.address) }}">View on Map</a><br>
+                
             {% endfor %}
         </ul>
     {% elif error %}

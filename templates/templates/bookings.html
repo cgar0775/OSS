@@ -7,6 +7,24 @@
 
     <div id="bookingContainer">
         <div>
+
+            <script>
+                async function deleteBooking(bookingID) {
+                    try {
+                        const response = await fetch('/deleteBookingFunction', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ bookingID: bookingID })
+                        });
+                        const result = await response.json();
+                        alert('Python Function Response: ' + result.message);
+                    } catch (error) {
+                        console.error('Error:', error);
+                    }
+                }
+            </script>
         
             <table>
                 <thead>
@@ -14,24 +32,28 @@
                         <th>Service</th>
                         <th>Business</th>
                         <!-- <th>Email</th> -->
-                        <th>Time Start</th>
+                        <th>Date</th>
+                        <th>Time Start</th> 
                         <th>Time End</th>
                         <th>Price</th>
-                        <th>Edit</th>
-                        <th>Delete</th>
+                        <!-- <th>Edit</th> -->
+                        <th>Cancel</th>
                         
                     </tr>
                 </thead>
                 <tbody>
                     {% for items in bookings%}
                         <tr>
-                            {%for data in items %}
-                                <td>{{ data }}</td>
+                            {%for data in items %}  
+                                {% if loop.index != 7 %}
+                                    <td>{{ data }}</td>
+                                {% endif %}
                             {% endfor %}
                             <!-- <td>{{ items[0] }}</td> -->
                             <!-- <td></td> -->
-                            <td><a href="/{{items[0]}}/service/edit/{{items[1]}}"><button>Edit</button></a></td>
-                            <td><a href="/{{items[0]}}/service/delete/{{items[1]}}"><button id="cancel">Cancel</button></a></td>
+                            <!-- <td><a href="/{{items[0]}}/booking/edit/{{items[1]}}"><button>Edit</button></a></td> -->
+                            <!-- <td>{{items[6]}}</td> -->
+                            <td><button id="cancel" onclick="deleteBooking(items[6])">Cancel</button></td>
                         </tr>
                         {% endfor %}
                     <!-- Add dynamic data here -->

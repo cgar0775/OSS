@@ -244,8 +244,8 @@ def UpdateService(sname,bname,price,slots, time, discount):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
     query=f"""UPDATE services 
-    SET sname='{sname}', bname='{bname}', price={price}, slots={slots}, time={time}, discount={discount}
-    WHERE sname='{sname}', bname='{bname}'"""
+    SET sname='{sname}', bname='{bname}', price={price}, slots={slots}, discount={discount}
+    WHERE sname='{sname}' AND bname='{bname}'"""
     cursor.execute(query)
     connection.commit()
     cursor.close()
@@ -306,7 +306,17 @@ def GetHoursDay(sname,bname,day):
         newhours.append(new_tup)
     return newhours
 
-
+def maxBookingId():
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"""SELECT MAX(id)
+            FROM bookings"""
+    cursor.execute(query)
+    maxID = cursor.fetchone()
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return maxID
 
 #create booking
 #inputs service name (sname), businessname (bname), username of the customer, timeslot_start the time and date of the start of the service, timeslot_end the ending time and date of the service
@@ -314,7 +324,8 @@ def GetHoursDay(sname,bname,day):
 def CreateBooking(sname,bname,username,timeslot_start,timeslot_end,discount):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
-    query=f"INSERT INTO bookings VALUES('{sname}','{bname}','{username}',TO_DATE('{timeslot_start}', 'MON-DD-YYYY HH24:MI'),TO_DATE('{timeslot_end}', 'MON-DD-YYYY HH24:MI'), NULL)"
+    naxtID = maxBookingId()[0] + 1
+    query=f"INSERT INTO bookings VALUES('{sname}','{bname}','{username}',TO_DATE('{timeslot_start}', 'MON-DD-YYYY HH24:MI'),TO_DATE('{timeslot_end}', 'MON-DD-YYYY HH24:MI'), NULL, {naxtID})"
     cursor.execute(query)
     connection.commit()
     cursor.close()
@@ -382,6 +393,16 @@ def DeleteBooking(sname,bname,username,timeslot_start,timeslot_end, new_timeslot
     WHERE sname='{sname}', bname='{bname}', username='{username}',
     timeslot_start=TO_DATE('{timeslot_start}', 'MON-DD-YYYY HH24:MI'), 
     timeslot_end=TO_DATE('{timeslot_end}', 'MON-DD-YYYY HH24:MI'))"""
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return
+
+def DeleteServiceBookings(bname):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"""DELETE FROM bookings WHERE bname='{bname}'"""
     cursor.execute(query)
     connection.commit()
     cursor.close()
@@ -477,20 +498,17 @@ def CallBusinessGeo(Customerusername):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
     coords=CheckCoordinates(Customerusername)
-    query=f"""SELECT b.username,b.name,
-       (
-            3958.8 *
-            ACOS(
-               GREATEST(LEAST(COS({coords[0]} * 0.017453293) * COS(lat * 0.017453293) * COS((lng - {coords[1]}) * 0.017453293) +
-               SIN({coords[0]} * 0.017453293) * SIN(lat * 0.017453293),-1)
-       ,1))) AS distance_miles
+    query=f"""SELECT b.username, b.name,
+       3958.8 * ACOS(ROUND(
+          COS({coords[0]} * 0.017453293) * COS(lat * 0.017453293) * COS((lng - {coords[1]}) * 0.017453293) +
+          SIN({coords[0]} * 0.017453293) * SIN(lat * 0.017453293)
+       ,8)) AS distance_miles
 FROM geocoordinates
-INNER JOIN Businessinfo b ON geocoordinates.username=b.username
-WHERE
-    3958.8 *
-    ACOS(
-        GREATEST(LEAST(COS({coords[0]} * 0.017453293) * COS(lat * 0.017453293) * COS((lng - {coords[1]}) * 0.017453293) +
-        SIN({coords[0]} * 0.017453293) * SIN(lat * 0.017453293),-1),1)) <=20
+INNER JOIN Businessinfo b ON geocoordinates.username = b.username
+WHERE 3958.8 * ACOS(ROUND(
+          COS({coords[0]} * 0.017453293) * COS(lat * 0.017453293) * COS((lng - {coords[1]}) * 0.017453293) +
+          SIN({coords[0]} * 0.017453293) * SIN(lat * 0.017453293)
+       ,8)) <= 20
 ORDER BY distance_miles"""
     cursor.execute(query)
     connection.commit()

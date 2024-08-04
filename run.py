@@ -365,8 +365,8 @@ def profilePage():
     if not username: 
         print("Empty Username!")
         return redirect(url_for('login'))
-
-    return render_template('templates/cEdit.html')
+    name = dbfunc.CallCustomerInfo(username)[1] + " " + dbfunc.CallCustomerInfo(username)[2]
+    return render_template('templates/cEdit.html', name=name)
 
 @app.route('/bookings')
 def bookingPage():
@@ -694,13 +694,18 @@ def singleServicePage(businessname, serviceName):
         return redirect('/login')
 
     # Get avalible service times 
-    print("hi there")
-    print(GetHours(serviceName, businessname))
-
     hours = GetHours(serviceName, businessname)
 
     # print(Get)
     return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours)
+
+@app.route('/exitingServicePage', methods = ['post'])
+def exitingServicePage():
+    print("hi there")
+    
+    dbfunc.closeConnections()
+
+    return
 
 @app.route('/<businessname>/service/edit/<serviceName>', methods=['GET', 'POST'])
 def singleServiceEditPage(businessname, serviceName):
@@ -951,6 +956,28 @@ def run_python():
 
     #         # print(len(timeSlots))
     return jsonify(result=timeSlots)
+
+@app.route('/analytics')
+def analyticsPage():
+
+    username = session.get('username')
+    
+    # Get the data that goes on the chart    
+    dailyBookingsInfo = {}
+    
+    current_date = datetime.now().date()
+    for i in range (7):
+        print(current_date - timedelta(days=i))
+        print(current_date.strftime("%A"))
+        thing = current_date - timedelta(days=i)
+        print(dbfunc.getBusinessBookingsOnDate('TestB', thing))
+        dailyBookingsInfo[current_date - timedelta(days=i)] = (current_date - timedelta(days=i)).strftime("%A")
+
+    print("Current date:", current_date)
+    print(dailyBookingsInfo)
+
+    return render_template('templates/analytics.html')
+
 
 @app.route('/run_python_function', methods=['POST'])
 def run_python_function():

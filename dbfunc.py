@@ -5,6 +5,7 @@ import hashlib
 from database import OracleConfig
 from dotenv import load_dotenv
 import math
+from haversine import haversine,Unit
 load_dotenv()
 #setup the database connection
 database= OracleConfig()
@@ -210,6 +211,21 @@ def GetBusinessServices(bname):
         newservice.append(new_tup)
     return newservice
 
+#same as before except doesn't open its own connection
+def GetBusinessServicesUnbound(bname,connection,cursor):
+    #returns all services by x business
+    query=f"SELECT * FROM services WHERE bname='{bname}'"
+    cursor.execute(query)
+    connection.commit()
+    services=cursor.fetchall()
+    newservice=[]
+    for tup in services:
+        temp_list= list(tup)
+        # temp_list[2] += "$"
+        temp_list[4]=str(temp_list[2]).replace('.',':')
+        new_tup=tuple(temp_list)
+        newservice.append(new_tup)
+    return newservice
 
 #gets the info of a specific service
 def GetService(sname,bname):
@@ -261,6 +277,7 @@ def DeleteService(sname,bname):
     cursor.close()
     connection.close()
     return 
+
 #get the hours table for any service
 def GetHours(sname,bname):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
@@ -495,31 +512,32 @@ def CheckCoordinates(username):
     connection.close()
     return coords
 
+#faster implementation of haversine calculating it locally rather than serverside
 def CallBusinessGeo(Customerusername):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
     coords=CheckCoordinates(Customerusername)
-    query=f"""SELECT b.username,b.name,
-       (
-            3958.8 *
-            ACOS(
-               GREATEST(LEAST(COS({coords[0]} * 0.017453293) * COS(lat * 0.017453293) * COS((lng - {coords[1]}) * 0.017453293) +
-               SIN({coords[0]} * 0.017453293) * SIN(lat * 0.017453293),-1)
-       ,1))) AS distance_miles
-FROM geocoordinates
-INNER JOIN Businessinfo b ON geocoordinates.username=b.username
-WHERE
-    3958.8 *
-    ACOS(
-        GREATEST(LEAST(COS({coords[0]} * 0.017453293) * COS(lat * 0.017453293) * COS((lng - {coords[1]}) * 0.017453293) +
-        SIN({coords[0]} * 0.017453293) * SIN(lat * 0.017453293),-1),1)) <=20
-ORDER BY distance_miles"""
+    query=f"""SELECT lat,lng,b.username, b.name
+    From geocoordinates
+    INNER JOIN businessinfo b ON geocoordinates.username=b.username"""
     cursor.execute(query)
     connection.commit()
     info=cursor.fetchall()
+    i=0
+    info2=[]
+    #simple function that copies the rows produced via the query that result in distances less than 20 miles using haversine
+    for entries in info:
+        coords1=(info[i][0],info[i][1])
+        dist=haversine(coords,coords1,unit='mi')
+        if dist<20.0:
+            info2.append(info[i])
+        i=i+1
     cursor.close()
     connection.close()
-    return info
+    return info2
+
+
+
 
 #used both for updating and creating descriptions for services
 def UpdateDescription(sname,bname,description):
@@ -587,6 +605,16 @@ def getUserReviews(username):
     cursor.close()
     connection.close()
     return rev
+
+def getReviewScrollStart(amount,bname,sname,cursor,connection):
+    query=f"SELECT * FROM creviews WHERE bname='{bname}' and sname='{sname}'"
+    cursor.execute(query)
+    connection.commit()
+    rev=cursor.fetchmany(amount)
+    return rev
+
+def getReviewScrollContinue(amount,cursor,connection):
+    return cursor.fetchmany(amount)
 
 #gets a list of all reviews for a specific service
 def getReviews(bname,sname):

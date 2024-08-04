@@ -1,3 +1,6 @@
+let map;
+let infowindow;
+
 function getDistance(lat1, lng1, lat2, lng2) {
     const R = 3958.8; // Radius of Earth in miles
     const dLat = (lat2 - lat1) * Math.PI / 180;

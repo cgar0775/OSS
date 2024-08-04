@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 
 from datetime import datetime, timedelta, date
 
-from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability, CallBusinessName, CheckRole, UpdateDescription, GetHours, getBusinessBookings
+from dbfunc import CallEmployeeInfo, CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability, CallBusinessName, CheckRole, UpdateDescription, GetHours, getBusinessBookings
 
 
 import inputvalidation
@@ -323,20 +323,42 @@ def homePage():
     # if CallBusinessInfo(CallBusinessName(username)[0]):
         
         BuisnessInfo = CallBusinessInfo(CallBusinessName(username)[0])
-
-        
-        
-        
         return render_template('bHome.html', name = "name") #Change this to the buisness home page!!!
         
 
     if CheckRole(username)[0] == 'Customer':
-        # print("Username: " + str(username))
         CustomerInfo = CallCustomerInfo(username)
-        # print(CustomerInfo)
         name = CustomerInfo[1]
-        nearby_business = dbfunc.CallBusinessGeo(username)
-        return render_template('home.html', name = name, nearby_business = nearby_business)
+
+        # nearby_business = dbfunc.CallBusinessGeo(username)
+        # return render_template('home.html', name = name)
+
+        nearby_businesses = dbfunc.CallBusinessGeo(username)
+        businesses = []
+        
+        for business in nearby_businesses:
+            business_name = business[1]
+            business_services = GetBusinessServices(business_name)
+            services = []
+            
+            for service in business_services:
+                service_name = service[1]  # Extract 'Haircut' from ('Test123', 'Haircut', 300.0, 3, '300:0', 0)
+                service_price = service[2]  # Extract the price (300.0)
+                services.append({
+                    'name': service_name,
+                    'price': service_price
+                })
+            print("service", service)
+            businesses.append({
+                'username': business[0],
+                'name': business_name,
+                'services': services,
+                'profile_url': url_for('businessViewProfilePage', username=business[0])
+            })
+            print("nearby", nearby_businesses)
+            print("business", businesses)
+            
+        return render_template('home.html', name=name, nearby_businesses=businesses)
 
     # Check to see if it is an employee
     
@@ -344,17 +366,55 @@ def homePage():
     # return render_template('home.html', name = "name")
     return render_template('home.html')
 
-@app.route('/search')
+@app.route('/search', methods=['GET', 'POST'])
 def searchPage():
-    # Get user information
     username = session.get('username')
 
     # If they are not logged in, redirect them to the login page
-    if not username: 
-        print("Empty Username!")
+    if not username:
         return redirect(url_for('login'))
 
+    user_coords = dbfunc.CheckCoordinates(username)
+    if not user_coords:
+        return render_template('search.html', error="Unable to fetch user location")
+
+    user_lat, user_lng = user_coords
+
+    if request.method == 'POST':
+        query = request.form.get('query', '').strip()
+        if not query:
+            return render_template('search.html', error="Search query cannot be empty")
+
+        try:
+            # Fetch all businesses within a 20-mile radius of the user
+            nearby_businesses = dbfunc.CallBusinessGeo(username)
+            matching_businesses = []
+
+            for business in nearby_businesses:
+                business_username = business[0]
+                business_name = business[1]
+                services = GetBusinessServices(business_username)
+
+                for service in services:
+                    if query.lower() in service[1].lower():  # Case-insensitive search
+                        matching_businesses.append({
+                            'username': business_username,
+                            'business_name': business_name,
+                            'service_name': service[1],  # Assuming service[1] is the service name
+                            'service_price': service[2]  # Assuming service[2] is the price
+                        })
+
+            if not matching_businesses:
+                return render_template('templates/search.html', error="No matching services found.")
+
+            return render_template('templates/search.html', businesses=matching_businesses)
+
+        except Exception as e:
+            app.logger.error(f"Error fetching businesses for query '{query}': {str(e)}")
+            return render_template('templates/search.html', error="Error fetching businesses")
+
     return render_template('templates/search.html')
+
 
 @app.route('/profile')
 def profilePage():
@@ -378,7 +438,10 @@ def bookingPage():
     if not username: 
         print("Empty Username!")
         return redirect(url_for('login'))
+    
+    print(CheckRole(username)[0])
 
+    # TODO: Make this faster
     # Get all of the bookings for the business
     if CheckRole(username)[0] == 'Business':
         name = CallBusinessName(username)[0]
@@ -387,13 +450,13 @@ def bookingPage():
 
         # print(allBookings)
         for booking in allBookings:
-            print(dbfunc.CallCustomerInfo(booking[2])) 
+            # print(dbfunc.CallCustomerInfo(booking[2])) 
             customerName = dbfunc.CallCustomerInfo(booking[2])[1] + " " + dbfunc.CallCustomerInfo(booking[2])[2]
-            tempData = [booking[0], customerName , booking[3], booking[4], dbfunc.CallCustomerInfo(booking[2])[8], dbfunc.CallCustomerInfo(booking[2])[8]]
+            tempData = [booking[0], customerName , str(booking[3])[:10], str(booking[3])[11:], str(booking[4])[11:], dbfunc.CallCustomerInfo(booking[2])[8], dbfunc.CallCustomerInfo(booking[2])[7]]
 
             bookingData.append(tempData)
 
-        print (bookingData)
+        # print (bookingData)
         return render_template("templates/bBookings.html", bookings = bookingData)
 
     if CheckRole(username)[0] == 'Customer':
@@ -401,11 +464,15 @@ def bookingPage():
         allBookings = dbfunc.getUserBookings(name)
         print(allBookings)
         bookingData = []
+        bookingIdData = {}
+        
 
         for booking in allBookings: 
             price = "$" + str(dbfunc.GetService(booking[0], booking[1])[4][0]) + "0"
             # print(price)
-            bookingData.append([booking[0], booking[1], booking[3], booking[4], price])
+            bookingData.append([booking[0], booking[1], str(booking[3])[:10],str(booking[3])[11:], str(booking[4])[11:], price, booking[6]])
+            
+            print(booking[6])
 
         # for booking in allBookings:
             # tempData = [book,]
@@ -413,6 +480,14 @@ def bookingPage():
 
     # return render_template('templates/Bbookings.html')
     return
+
+@app.route('/deleteBookingFunction')
+def deleteBooking():
+    data = request.json
+    print(data.get("bookingID"))
+
+
+    return jsonify()
 
 @app.route('/employees')
 def employeePage():
@@ -454,9 +529,6 @@ def businessViewProfilePage(username):
     print("Current username: " , currentUsername)
     print("username: ", username)
     
-    business_username = dbfunc.CallBusinessInfo(username)[6]
-    print("Business Username: ", business_username) 
-
     # If they are not logged in, redirect them to the login page
     if not currentUsername: 
         print("Empty Username!")
@@ -466,28 +538,38 @@ def businessViewProfilePage(username):
 
     # General Business Information
     businessInfo = dbfunc.CallBusinessInfo(username)
-    print(CallBusinessName(username))
-    businessInfo = CallBusinessInfo(username)
-    # businessInfo = CallBusinessInfo(CallBusinessName(username)[0])
+    print("businessInfo")
     print(businessInfo)
+    print(dbfunc.CallBusinessInfo(username))
+    print(dbfunc.CallBusinessName(username))
+    if dbfunc.CallBusinessInfo(username) != None: 
+        businessInfo = dbfunc.CallBusinessInfo(username)
+    else:
+        businessInfo = dbfunc.CallBusinessInfo(username)
+    print(CallBusinessName(username))
+    # print(bus)
+    # businessInfo = CallBusinessInfo(username)
+    # businessInfo = CallBusinessInfo(CallBusinessName(username)[0])
+    # print(businessInfo)
     
     businessName = businessInfo[0]
     businessAddress = businessInfo[3] + ", " + businessInfo[2]
     businessUsername = businessInfo[6]
 
-    stars = "4"
+
+    # stars = "4"
 
     # Get array for services
 
     arrServices = GetBusinessServices(businessName)
     
     # get descriptions
-    
+    #serviceDescription = dbfunc.GetDescription(arrServices, business_username)
 
     # Time Table
 
     # Map
-    bcoords = dbfunc.CheckCoordinates(business_username)
+    bcoords = dbfunc.CheckCoordinates(businessUsername)
     b_lat, b_lng = bcoords
     print(b_lat, b_lng)
     fullAddress = businessInfo[5] + " " + businessInfo[4] + " " + businessInfo[3] + ", " + businessInfo[2]
@@ -498,7 +580,7 @@ def businessViewProfilePage(username):
     
     # Reviews
 
-    return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, stars=stars, title='View Buisness', businessUsername=businessUsername, arrServices=arrServices, api_key=API_KEY, b_lat=b_lat, b_lng=b_lng, fullAddress=fullAddress)
+    return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, title='View Buisness', businessUsername=businessUsername, arrServices=arrServices, api_key=API_KEY, b_lat=b_lat, b_lng=b_lng, fullAddress=fullAddress)
 
 
 @app.route('/business/edit')
@@ -555,7 +637,8 @@ def servicePage():
     print(CallBusinessName(currentUsername))
     # print(CallBusinessInfo(CallBusinessName(currentUsername)))
     print(GetBusinessServices(CallBusinessName(currentUsername)[0]))
-    return render_template('templates/servicePage.html', service=[[row[1], "$" + str(row[2]) + "0", row[3], row[4]]for row in GetBusinessServices(CallBusinessName(currentUsername)[0])], nextLink=[CallBusinessName(currentUsername)])
+    
+    return render_template('templates/servicePage.html', service=[[row[1], "$" + str(row[2]) + "0", row[3], str(row[4]) + "0"]for row in GetBusinessServices(CallBusinessName(currentUsername)[0])], nextLink=[CallBusinessName(currentUsername)])
     # return render_template('templates/servicePage.html', service=GetBusinessServices(CallBusinessName(currentUsername)[0]))
 
 @app.route('/add-service', methods = ['GET','POST'])
@@ -676,7 +759,7 @@ def singleServicePage(businessname, serviceName):
     # print(Get)
     return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours)
 
-@app.route('/<businessname>/service/edit/<serviceName>')
+@app.route('/<businessname>/service/edit/<serviceName>', methods=['GET', 'POST'])
 def singleServiceEditPage(businessname, serviceName):
 # Get user information
     currentUsername = session.get('username')
@@ -685,12 +768,50 @@ def singleServiceEditPage(businessname, serviceName):
     if not currentUsername: 
         print("Empty Username!")
         return redirect('/login')
+    
+    if request.method == 'POST':
+        updateService(businessname, serviceName)
 
     # Get Current Service Information
-    currentService = dbfunc.GetService('thingy11', 'TestB')
-    print(currentService)
+    currentService = dbfunc.GetService(serviceName, businessname)
     currentServiceDescription = dbfunc.GetDescription(serviceName, businessname)
     return render_template("templates/sEdit.html", currentService=currentService, currentServiceDescription=currentServiceDescription)
+
+def updateService(businessname, serviceName): 
+
+    currentService = dbfunc.GetService(serviceName, businessname)
+
+    # TODO: See if this is right
+    information = {'name': currentService[0][0], 'service': currentService[1][0], 'price': currentService[2][0], 'slots': currentService[3][0 ], 'time': currentService[4][0], 'discount': currentService[5][0]}
+    print(information)
+    dbfunc.UpdateService(information['service'], information['name'], information["price"], information['slots'], information['time'], "0")
+
+    for i in request.form:
+        
+        if request.form.get(i) != "":
+            # new data
+            information[i] = request.form.get(i)
+
+    # update the service:
+    print(information)
+    print(information['service'])
+
+    dbfunc.UpdateService(information['service'], information['name'], information["price"], information['slots'], information['time'], "0")
+
+    print('hello thereß')
+
+    return
+
+@app.route('/<businessname>/service/delete/<serviceName>')
+def deleteService(businessname, serviceName):
+    
+    # Delete the service bookings TODO
+
+
+    # Delete the service
+    dbfunc.DeleteService(serviceName, businessname)     
+
+    return redirect(url_for('servicePage'))
 
 @app.route('/employee/add', methods = ['GET','POST'])
 def addEmployee():

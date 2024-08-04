@@ -12,9 +12,13 @@
                 <tr>
                     <th>Service</th>
                     <th>Name</th>
+                    <th>Date</th>
                     <th>Time Start</th>
                     <th>Time End</th>
-                    <th>See More</th>
+                    <th>Phone Number</th>
+                    <th>Email</th>
+                    <th>Edit</th>
+                    <th>Delete Booking</th>
                 </tr>
             </thead>
             <tbody>
@@ -24,7 +28,8 @@
                             <td>{{ data }}</td>
                         {% endfor %}
                         <!-- <td>{{ items[0] }}</td> -->
-                        <td><a href="/{{items[0]}}/service/edit/{{items[1]}}"><button>Edit</button></a></td>
+                        <td><a href="/{{items[0]}}/booking/edit/{{items[1]}}"><button>Edit</button></a></td>
+                        <td><a href="/{{items[0]}}/booking/delete/{{items[1]}}"><button>Edit</button></a></td>
                     </tr>
                 {% endfor %}
                 <!-- Add dynamic data here -->

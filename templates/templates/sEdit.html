@@ -3,7 +3,95 @@
 {% block content %}
 
 <div id="serviceEdit">
-    <h2>Edit Your Service!</h2>
+    
+    <div id="SettingsPage">
+        <div class="tab" style="height: 100%">
+            <h2>Editing {{currentService[1][0]}}</h2>
+            
+
+            <button class="tablinks" onclick="openPage(event, 'general')" id="defaultOpen">General</button>
+            <button class="tablinks" onclick="openPage(event, 'hours')">Service Hours</button>
+            <!-- <button class="tablinks" onclick="openPage(event, 'Profile')" id="defaultOpen">Images</button> -->
+        </div>
+
+        <div id="general" class="tabcontent">
+            <h2>General</h2>
+            <form style="text-align: left" method="post">
+                <!-- TODO: add placehoder text of the current information -->
+                
+                <label>Service Name: </label>
+                <input type="text" id="textInput" name="name" >
+
+                <br>
+                
+                <label>Price: </label>
+                <input type="number" id="textInput" name="price">
+
+                <br>
+
+                <label>Avalible Slots At Once: </label>
+                <input type="number" id="textInput" name="slots">
+
+                <br>
+
+                <label>Total Service Time: (mind)</label>
+                <input type="number" id="textInput" name="time">
+                
+                <br>
+                
+                <input type="submit">
+                
+            </form>
+        </div>
+
+        <div id="hours" class="tabcontent">
+            <h2>Edit Hours</h2>
+            <form style="text-align: left">
+
+                <label for="monday-start">Monday: </label>
+                <input type="time" id="monday-start" name="monday-start">
+                <input type="time" id="monday-end" name="monday-end">
+                <br>
+                <label for="tuesday-start">Tuesday: </label>
+                <input type="time" id="tuesday-start" name="tuesday-start">
+                <input type="time" id="tuesday-end" name="tuesday-end">
+                <br>
+                <label for="wednesday-start">Wednesday: </label>
+                <input type="time" id="wednesday-start" name="wednesday-start">
+                <input type="time" id="wednesday-end" name="wednesday-end">
+                <br>
+                <label for="thursday-start">Thursday: </label>
+                <input type="time" id="thursday-start" name="thursday-start">
+                <input type="time" id="thursday-end" name="thursday-end">
+                <br>
+                <label for="friday-start">Friday: </label>
+                <input type="time" id="friday-start" name="friday-start">
+                <input type="time" id="friday-end" name="friday-end">
+                <br>
+                <label for="saturday-start">Saturday: </label>
+                <input type="time" id="saturday-start" name="saturday-start">
+                <input type="time" id="saturday-end" name="saturday-end">
+                <br>
+                <label for="sunday-start">Sunday: </label>
+                <input type="time" id="sunday-start" name="sunday-start">
+                <input type="time" id="sunday-end" name="sunday-end">
+                <br>
+                
+                <label for="break-start">Break: </label>
+                <input type="time" id="break-start" name="break-start">
+                <input type="time" id="break-end" name="break-end">
+                <br>
+                
+                <input type="submit">
+            </form>
+            </div>
+
+
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+    <!-- <h2>Edit Your Service!</h2>
     <form action="{{url_for('addServiceFunction')}}" method="post">
         <label>Service Name: </label>
         <input type="text" id="textInput" name="name">
@@ -60,12 +148,12 @@
         <br>
 
         <label for="description">description: </label>
-        <!-- <input type="" id="description" name="description"> -->
+        
         <textarea id="description" name="description"></textarea>
         <br>
 
         <input type="submit">
-    </form>
+    </form> -->
 </div>
 
 

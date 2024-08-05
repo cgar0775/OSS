@@ -333,6 +333,7 @@ def homePage():
             for business in nearby_businesses:
                 business_name = business[3]
                 business_services = dbfunc.GetBusinessServicesUnbound(business_name,connection,cursor)
+                business_geo=dbfunc.CheckCoordinatesUnbound(business[2])
                 services = []
                 
                 for service in business_services:
@@ -347,7 +348,9 @@ def homePage():
                     'username': business[3],
                     'name': business_name,
                     'services': services,
-                    'profile_url': url_for('businessViewProfilePage', username=business[3])
+                    'profile_url': url_for('businessViewProfilePage', username=business[3]),
+                    'lat': business_geo[0],
+                    'lng': business_geo[1]
                 })
                 #print("nearby", nearby_businesses)
                 print("business", businesses)
@@ -419,7 +422,9 @@ def searchPage():
                     matching_businesses.append({
                         'business_name': business_name,
                         'service_name': service['name'],  # Assuming service[1] is the service name
-                        'service_price': service['price']  # Assuming service[2] is the price
+                        'service_price': service['price'],  # Assuming service[2] is the price
+                        'lat': business['lat'],
+                        'lng': business['lng']
                     })
         if len(matching_businesses)==0:
             return render_template('templates/search.html', error="No matching services found.")

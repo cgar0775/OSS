@@ -740,11 +740,17 @@ def updateTime():
 
     return redirect(url_for('servicePage'))
 
+def getDBconnection():
+    if not hasattr(g, 'connection'):
+        g.connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+        g.cursor=g.connection.cursor(scrollable=True)
+
+
+
 @app.route('/<businessname>/service/<serviceName>')
 def singleServicePage(businessname, serviceName):
     
-    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
-    cursor=connection.cursor(scrollable=True)
+    #getDBconnection()
 
     # Get user information
     currentUsername = session.get('username')
@@ -764,10 +770,12 @@ def singleServicePage(businessname, serviceName):
     hours = GetHours(serviceName, businessname)
 
     #gets inital reviews
-    reviews = dbfunc.getReviewScrollStart(10,businessname,serviceName,cursor,connection)
+    #reviews = dbfunc.getReviewScrollStart(10,businessname,serviceName,g.cursor,g.connection)
 
-    #reviews = dbfunc.getReviews(businessname, serviceName)
-
+    reviews = dbfunc.getReviews(businessname, serviceName)
+    
+    #only capturing first 10
+    reviews = reviews[:10]
     #print("reviews")
     #print(reviews)
     
@@ -1046,12 +1054,17 @@ def load_more_reviews():
     data = request.get_json()
     businessname = data.get('businessName')
     servicename = data.get('serviceName')
+    start = data.get('start')
     
     print(businessname)
     print(servicename)
-
-    reviews = getReviews(businessname,servicename)
     
+    reviews = dbfunc.getReviews(businessname,servicename)
+        
+    if (len(reviews[start:]) >= 10 ):
+        reviews = reviews[start:start+10]
+    else:
+        reviews = reviews[start:]
 
     print("reviews")
     print(reviews)
@@ -1069,7 +1082,7 @@ def load_more_reviews():
     } for r in reviews]
 
     # return render_template('sView.html', reviews=reviews)
-    return jsonify({'reviews': reviews})
+    return jsonify({'reviews': formatted_reviews})
 
 
 @app.route('/run_python_function', methods=['POST'])

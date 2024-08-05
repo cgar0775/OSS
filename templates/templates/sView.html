@@ -2,6 +2,13 @@
 
 {% block content %}
 
+
+<head>
+    <title> {{businessName}} - {{serviceName}}</title>
+    <!-- Include jQuery for easier AJAX handling -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
 <div>
     <div id="header">
         <!-- header Content -->
@@ -214,12 +221,22 @@
         </script>   
     </div>
 
+    <script>
+         $(window).on('beforeunload', function() {
+            $.ajax({
+                url: '/cleanup',
+                type: 'GET',
+                async: false  // Synchronous request to ensure it completes before unload
+            });
+        });
+    </script>
+
 
     <!--Reviews Section-->
     <div id="reviews">
         <h2>User Reviews</h2>
         <div class="review-list" id="review-list">
-            {% for review in reviews[:10] %}
+            {% for review in reviews %}
                 <div class="review">
                     <h3> {{review.header}}</h3>
                     <p>{{review.body}}</p>
@@ -253,6 +270,7 @@
                     
                     businessName: businessName,
                     serviceName: serviceName,
+                    start: currentReviewIndex
                  })
             })
             
@@ -270,10 +288,10 @@
                         <h3>${review.header}</h3>
                         <p>${review.body}</p>
                         <p>Rating: ${review.rating}</p>
-                        <p>By: ${review.fname} ${review.lname} (${review.username})</p>
-                `;                
+                        <p>By: ${review.fname} ${review.lname} (${review.username})</p>`;                
                
-                reviewList.appendChild(reviewDiv);
+                
+                    reviewList.appendChild(reviewDiv);
                 });
                 currentReviewIndex += data.reviews.length;
                 if (data.reviews.length < 10) {

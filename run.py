@@ -10,6 +10,7 @@ import oracledb
 # import requests
 from database import OracleConfig
 from dotenv import load_dotenv
+from math import radians, cos, sin, asin, sqrt
 import dbfunc
 
 from urllib.parse import urlparse
@@ -370,6 +371,18 @@ def homePage():
     # return render_template('home.html', name = "name")
     return render_template('home.html')
 
+def get_distance(lat1, lng1, lat2, lng2):
+    # Convert decimal degrees to radians
+    lat1, lng1, lat2, lng2 = map(radians, [lat1, lng1, lat2, lng2])
+
+    # Haversine formula
+    dlat = lat2 - lat1 
+    dlng = lng2 - lng1 
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlng/2)**2
+    c = 2 * asin(sqrt(a))
+    r = 3958.8  # Radius of Earth in miles
+    return c * r
+
 @app.route('/search', methods=['GET', 'POST'])
 def searchPage():
     username = session.get('username')
@@ -380,14 +393,14 @@ def searchPage():
 
     user_coords = dbfunc.CheckCoordinates(username)
     if not user_coords:
-        return render_template('search.html', error="Unable to fetch user location")
+        return render_template('templates/search.html', error="Unable to fetch user location")
 
     user_lat, user_lng = user_coords
 
     if request.method == 'POST':
         query = request.form.get('query', '').strip()
         if not query:
-            return render_template('search.html', error="Search query cannot be empty")
+            return render_template('templates/search.html', error="Search query cannot be empty")
 
         #try:
             # Fetch all businesses within a 20-mile radius of the user
@@ -416,7 +429,7 @@ def searchPage():
             #app.logger.error(f"Error fetching businesses for query '{query}': {str(e)}")
             #return render_template('templates/search.html', error="Error fetching businesses")
 
-    return render_template('templates/search.html')
+    return render_template('templates/search.html', api_key = API_KEY)
 
 
 @app.route('/profile')
@@ -540,9 +553,9 @@ def businessViewProfilePage(username):
     # debuig this - there might be an error!!!
 
     # General Business Information
-    businessInfo = dbfunc.CallBusinessInfo(username)
-    print("businessInfo")
-    print(businessInfo)
+    #businessInfo = dbfunc.CallBusinessInfo(username)
+    #print("businessInfo")
+    #print(businessInfo)
     print(dbfunc.CallBusinessInfo(username))
     print(dbfunc.CallBusinessName(username))
     if dbfunc.CallBusinessInfo(username) != None: 
@@ -552,7 +565,7 @@ def businessViewProfilePage(username):
     print(CallBusinessName(username))
     # print(bus)
     #businessInfo = CallBusinessInfo(username)
-    # businessInfo = CallBusinessInfo(CallBusinessName(username)[0])
+    businessInfo = CallBusinessInfo(CallBusinessName(username)[0])
     # print(businessInfo)
     
     businessName = businessInfo[0]
@@ -884,8 +897,19 @@ def addEmployee():
 @app.route('/maps')
 def viewMap():
     username = session.get('username')
-    CustomerInfo = dbfunc.CallCustomerInfo(username)
-    return render_template('maps.html', api_key = API_KEY)
+    if not username:
+        return redirect(url_for('login'))
+
+    lat = request.args.get('lat')
+    lng = request.args.get('lng')
+    name = request.args.get('name')
+    address = request.args.get('address')
+
+    if not lat or not lng or not name or not address:
+        return "Invalid parameters", 400
+
+    return render_template('maps.html', api_key=API_KEY, lat=lat, lng=lng, name=name, address=address)
+
 
 #Geocoding Location for maps
 @app.route('/get-user-location')

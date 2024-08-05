@@ -1061,8 +1061,8 @@ def load_more_reviews():
     
     reviews = dbfunc.getReviews(businessname,servicename)
         
-    if (len(reviews[start:]) >= 10 ):
-        reviews = reviews[start:start+10]
+    if (len(reviews[start:]) >= 2 ):
+        reviews = reviews[start:start+2]
     else:
         reviews = reviews[start:]
 

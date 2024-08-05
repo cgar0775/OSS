@@ -14,6 +14,8 @@ from math import radians, cos, sin, asin, sqrt
 import dbfunc
 
 from urllib.parse import urlparse
+from werkzeug.utils import secure_filename
+
 
 from datetime import datetime, timedelta, date
 
@@ -56,6 +58,11 @@ app.config['SESSION_KEY_PREFIX'] = 'session:'
 #--Configures Redis as the storage backend--#
 app.config['SESSION_REDIS'] = redis.StrictRedis(host='localhost', port=6379, db=0)
 
+
+app.config['UPLOAD_FOLDER'] = 'static/images/uploads/'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit
+# app.config['username'] = ""
+
 #initializes the session management in flask application
 Session(app)
 
@@ -75,7 +82,7 @@ def before_request():
 
     username = session.get('username')
     if username:
-        
+        g.username = username
         g.role = CheckRole(username)[0]
         if g.role == "Business":
             bname = CallBusinessName(username)[0]
@@ -586,7 +593,8 @@ def businessViewProfilePage(username):
         businessInfo = dbfunc.CallBusinessInfo(username)
     else:
         businessInfo = dbfunc.CallBusinessInfo(username)
-    #print(CallBusinessName(username))
+    print(CallBusinessName(username))
+    print(CallBusinessInfo(username))
     businessInfo = CallBusinessInfo(CallBusinessName(username)[0])
     businessName = businessInfo[0]
     businessAddress = businessInfo[3] + ", " + businessInfo[2]
@@ -606,17 +614,29 @@ def businessViewProfilePage(username):
 
     # Map
     bcoords = dbfunc.CheckCoordinates(businessUsername)
-    b_lat, b_lng = bcoords
-    print(b_lat, b_lng)
+    if bcoords is not None: 
+        b_lat, b_lng = bcoords
+        print(b_lat, b_lng)
+    else: 
+        b_lat, b_lng = 0, 0
     fullAddress = businessInfo[5] + " " + businessInfo[4] + " " + businessInfo[3] + ", " + businessInfo[2]
     print(fullAddress)
     #If we want to do direction maps??
     user_coords = dbfunc.CheckCoordinates(currentUsername)
-    #user_lat, user_lng = user_coords
+    #user   _lat, user_lng = user_coords
     
     # Reviews
+    
+    profilePath = "static/images/uploads/" + businessUsername + "/profile_picture.png"
+    file_exists = os.path.isfile(profilePath)
 
-    return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, title='View Buisness', businessUsername=businessUsername, arrServices=arrServices, api_key=API_KEY, b_lat=b_lat, b_lng=b_lng, fullAddress=fullAddress)
+
+    profilePath1 = "static/images/uploads/" + businessUsername + "/cover_photo.png"
+    background_exists = os.path.isfile(profilePath1)
+    print(background_exists) 
+    print(businessUsername) 
+ 
+    return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, title='View Buisness', businessUsername=businessUsername, arrServices=arrServices, api_key=API_KEY, b_lat=b_lat, b_lng=b_lng, fullAddress=fullAddress, file_exists=file_exists, background_exists=background_exists)
 
 
 @app.route('/business/edit')
@@ -628,8 +648,75 @@ def businessEditProfilePage():
     if not currentUsername: 
         print("Empty Username!")
         return redirect(url_for('login'))
+    
+    
+    businessUsername = currentUsername
+    profilePath = "static/images/uploads/" + businessUsername + "/profile_picture.png"
+    file_exists = os.path.isfile(profilePath)
 
-    return render_template('templates/bEdit.html', title="Edit Profile")
+
+    profilePath1 = "static/images/uploads/" + businessUsername + "/cover_photo.png"
+    background_exists = os.path.isfile(profilePath1)
+    print(profilePath1) 
+    print(background_exists) 
+    print(businessUsername) 
+
+    return render_template('templates/bEdit.html', title="Edit Profile", username=currentUsername, businessName=CallBusinessName(currentUsername)[0], file_exists=file_exists, background_exists=background_exists)
+
+
+def save_file(file, field_name):
+    if file and file.filename != '':
+        filename = secure_filename(file.filename)
+        # Create a unique filename based on the field name
+        filename = f"{field_name}_{filename}"
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+        return filename
+    return None
+
+
+@app.route('/upload', methods=['get', 'POST'])
+def upload_file():
+    # Get user information
+    currentUsername = session.get('username')
+
+
+    uploadFolder = "static/images/uploads/" + currentUsername
+    
+    # Create the directory if it doesn't exist
+    if not os.path.exists(uploadFolder):
+        os.makedirs(uploadFolder)
+
+
+    profile_picture = request.files.get('profilePicture')
+    cover_photo = request.files.get('bannerFile')
+
+    if profile_picture:
+        print("here")
+        extension = ".png" # os.path.splitext(profile_picture.filename)[1]
+        # Generate the custom filename
+        filename = f"profile_picture{extension}"
+        profile_picture_filename = "profile_picture" + extension
+        profile_picture.save(os.path.join(uploadFolder,profile_picture_filename))
+        print("here")
+    if cover_photo:
+        extension = ".png" # os.path.splitext(cover_photo.filename)[1]
+        # Generate the custom filename
+        filename = f"cover_photo{extension}"
+        cover_photo_filename = "cover_photo" + extension
+        cover_photo.save(os.path.join(uploadFolder,cover_photo_filename))
+        print("here")
+
+     
+    print(request.form.get("bname"))
+    if request.form.get("bname") != "":
+        dbfunc.UpdateService()
+
+
+    return redirect('/business/edit')
+
+    
+    
 
 @app.route('/profile/view')
 def customerViewProfilePage():
@@ -796,7 +883,9 @@ def singleServicePage(businessname, serviceName):
 
     # Get user information
     currentUsername = session.get('username')
-
+    
+    businessUsername = dbfunc.CallBusinessInfo(businessname)[6]
+    # print(bUsername)
     # If they are not logged in, redirect them to the login page
     if not currentUsername: 
         print("Empty Username!")
@@ -830,8 +919,18 @@ def singleServicePage(businessname, serviceName):
     #if leave page do the following
     #cursor.close()
     #connection.close()
+    
 
-    return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours, reviews = formatted_reviews)
+    profilePath = "static/images/uploads/" + businessUsername + "/profile_picture.png"
+    file_exists = os.path.isfile(profilePath)
+
+
+    profilePath1 = "static/images/uploads/" + businessUsername + "/cover_photo.png"
+    background_exists = os.path.isfile(profilePath1)
+    print(background_exists) 
+    print(businessUsername) 
+
+    return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours, reviews = formatted_reviews, username=businessUsername, background_exists=background_exists, file_exists=file_exists)
 
 @app.route('/exitingServicePage', methods = ['post'])
 def exitingServicePage():

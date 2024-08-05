@@ -1,0 +1,51 @@
+{% extends 'frame.html' %}
+
+{% block content %}
+
+<div>
+    <h2>Analytics</h2>
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <div id="myPlot" style="width: 80vw; height: 70vh; margin: 0 auto;"></div>
+
+    <script>
+        // Get data passed from Flask and parse item
+        function getData(){
+            fetch('/dataNeeded', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                })
+                .then(response => response.json())
+                .then(responce => {
+                    
+                    const data = responce.data;
+                    const layout = responce.layout;
+
+                    updatePlot(data, layout)
+                    
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            getData();    
+        })
+
+        function updatePlot(data, layout) {
+            Plotly.newPlot('myPlot', [{
+                x: data.x,
+                y: data.y,
+                type: 'bar'
+            }], layout);
+        }
+
+
+    </script>
+
+</div>
+
+{% endblock %}

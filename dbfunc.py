@@ -387,7 +387,8 @@ def getBusinessBookings(name):
 def getBusinessBookingsOnDate(name, date):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
-    query=f"SELECT * FROM bookings WHERE bname='{name}' AND timeslot_start = TO_DATE('{date}',  'DD-MON-YY HH24:MI:SS')"
+    query=f"SELECT COUNT(*) FROM bookings WHERE bname='{name}' AND TRUNC(timeslot_start) = TO_DATE('{date}', 'YYYY-MM-DD')"
+    print(query)
     cursor.execute(query)
     connection.commit()
     bookings=cursor.fetchall()
@@ -691,6 +692,12 @@ def GetResponse(bname,sname):
     connection.close()
     return res
 
+<<<<<<< HEAD
+def closeConnections(): 
+    cursor.close()
+    connection.close()
+    return
+=======
 
 #When first running reviews use this initially
 def getReviewScrollStart(amount,bname,sname,cursor,connection):
@@ -704,3 +711,4 @@ def getReviewScrollStart(amount,bname,sname,cursor,connection):
 def getReviewScrollContinue(amount,cursor,connection):
     
     return cursor.fetchmany(amount)
+>>>>>>> main

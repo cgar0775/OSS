@@ -72,150 +72,171 @@
         <script>
             // Done with ChatGPT
             document.addEventListener('DOMContentLoaded', () => {
-    const calendarDates = document.querySelector('.calendar-dates');
-    const monthYearDisplay = document.querySelector('.month-year');
-    const prevMonthButton = document.querySelector('.prev-month');
-    const nextMonthButton = document.querySelector('.next-month');
+                const calendarDates = document.querySelector('.calendar-dates');
+                const monthYearDisplay = document.querySelector('.month-year');
+                const prevMonthButton = document.querySelector('.prev-month');
+                const nextMonthButton = document.querySelector('.next-month');
 
-    let currentDate = new Date();
-    currentDate.setDate(1);
+                let currentDate = new Date();
+                currentDate.setDate(1);
 
-    function renderCalendar() {
-        const month = currentDate.getMonth();
-        const year = currentDate.getFullYear();
-        const firstDayIndex = currentDate.getDay();
-        const lastDay = new Date(year, month + 1, 0).getDate();
-        const prevLastDay = new Date(year, month, 0).getDate();
-        const lastDayIndex = new Date(year, month + 1, 0).getDay();
-        const nextDays = 7 - lastDayIndex - 1;
+                function renderCalendar() {
+                    const month = currentDate.getMonth();
+                    const year = currentDate.getFullYear();
+                    const firstDayIndex = currentDate.getDay();
+                    const lastDay = new Date(year, month + 1, 0).getDate();
+                    const prevLastDay = new Date(year, month, 0).getDate();
+                    const lastDayIndex = new Date(year, month + 1, 0).getDay();
+                    const nextDays = 7 - lastDayIndex - 1;
 
-        monthYearDisplay.innerText = `${currentDate.toLocaleString('default', { month: 'long' })} ${year}`;
+                    monthYearDisplay.innerText = `${currentDate.toLocaleString('default', { month: 'long' })} ${year}`;
 
-        let days = '';
+                    let days = '';
 
-        for (let x = firstDayIndex; x > 0; x--) {
-            days += `<div class="prev-date" data-date="${year}-${month}-${prevLastDay - x + 1}">${prevLastDay - x + 1}</div>`;
-        }
+                    for (let x = firstDayIndex; x > 0; x--) {
+                        days += `<div class="prev-date" data-date="${year}-${month}-${prevLastDay - x + 1}">${prevLastDay - x + 1}</div>`;
+                    }
 
-        for (let i = 1; i <= lastDay; i++) {
-            const day = new Date(year, month, i);
-            const isBooked = checkIfBooked(day);
-            days += `<div class="${isBooked ? 'booked' : 'available'}" data-date="${year}-${month + 1}-${i}">${i}</div>`;
-        }
+                    for (let i = 1; i <= lastDay; i++) {
+                        const day = new Date(year, month, i);
+                        const isBooked = checkIfBooked(day);
+                        days += `<div class="${isBooked ? 'booked' : 'available'}" data-date="${year}-${month + 1}-${i}">${i}</div>`;
+                    }
 
-        for (let j = 1; j <= nextDays; j++) {
-            days += `<div class="next-date" data-date="${year}-${month + 2}-${j}">${j}</div>`;
-        }
+                    for (let j = 1; j <= nextDays; j++) {
+                        days += `<div class="next-date" data-date="${year}-${month + 2}-${j}">${j}</div>`;
+                    }
 
-        calendarDates.innerHTML = days;
-        addDateClickListeners();
-    }
+                    calendarDates.innerHTML = days;
+                    addDateClickListeners();
+                }
 
-    function checkIfBooked(date) {
-        // Example: all dates after today are booked for demonstration purposes
-        return date <= new Date();
-    }
+                function checkIfBooked(date) {
+                    // Example: all dates after today are booked for demonstration purposes
+                    return date <= new Date();
+                }
 
-    function addDateClickListeners() {
-        const dateElements = document.querySelectorAll('.calendar-dates div');
-        dateElements.forEach(dateElement => {
-            dateElement.addEventListener('click', handleDateClick);
-        });
-    }
+                function addDateClickListeners() {
+                    const dateElements = document.querySelectorAll('.calendar-dates div');
+                    dateElements.forEach(dateElement => {
+                        dateElement.addEventListener('click', handleDateClick);
+                    });
+                }
 
-    function handleDateClick(event) {
-        const clickedDate = event.target.getAttribute('data-date');
-        const dateInfo = new Date(clickedDate);
+                function handleDateClick(event) {
+                    const clickedDate = event.target.getAttribute('data-date');
+                    const dateInfo = new Date(clickedDate);
 
-        // Display the current date and the avalible times
-        document.querySelector("#heading").innerText = dateInfo;
+                    // Display the current date and the avalible times
+                    document.querySelector("#heading").innerText = dateInfo;
 
-        fetch('/run_python', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ dateInfo: dateInfo })
-        })
-        .then(response => response.json())
-        .then(data => {
-            
-            // document.querySelector(".times").innerText = data.result[2];
-            // document.querySelector(".times").innerText = data.result.length;
-            document.querySelector("#data").innerText = "";   
-
-            for(const item of data.result){
-                const dateObject = new Date(item);
-                console.log(dateObject); // Output: Date object representing the date and time
-                console.log(dateObject.getHours()); // Output: Date object representing the date and time
-
-                // add to the block
-
-                // TODO: Update the styles
-                document.querySelector("#data").innerHTML += "<form>";
-                // document.querySelector(".times").innerHTML += dateObject.getHours() + ":" + dateObject.getMinutes() + "<button class='button'>Book Now!</button><br>"
-                
-                // Get hours and minutes
-                const hours = dateObject.getHours();
-                const minutes = dateObject.getMinutes();
-                
-                
-                const timeSmallLabel = `${hours > 12 ? hours - 12 : hours}:${minutes < 10 ? '0' + minutes : minutes}`;
-                const timeLabel = `<label>${hours > 12 ? hours - 12 : hours}:${minutes < 10 ? '0' + minutes : minutes}</label>`;
-    
-                document.querySelector("#data").innerHTML += "<label>" + timeLabel + "</label>"
-                document.querySelector("#data").innerHTML += "<button class='button' id='" + timeSmallLabel + "'>Book</button> <br>"
-                
-                document.querySelector("#data").innerHTML += "</form>"
-
-        
-            }
-            const buttons = document.querySelectorAll('.button');
-
-            // Iterate over the NodeList and add an event listener to each button
-            buttons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const buttonId = button.id;
-
-                    // Send an HTTP request to the Flask endpoint
-                    fetch('/run_python_function', {
+                    fetch('/run_python', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ buttonId: buttonId, location: window.location.href, date: document.querySelector("#heading").innerText })
+                        body: JSON.stringify({ dateInfo: dateInfo })
                     })
                     .then(response => response.json())
                     .then(data => {
-                        console.log('Success:', data);
-                        console.log(window.location.href)
-                        // Handle the response data if needed
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
-                    });
+                        
+                        // document.querySelector(".times").innerText = data.result[2];
+                        // document.querySelector(".times").innerText = data.result.length;
+                        document.querySelector("#data").innerText = "";   
+
+                        for(const item of data.result){
+                            const dateObject = new Date(item);
+                            console.log(dateObject); // Output: Date object representing the date and time
+                            console.log(dateObject.getHours()); // Output: Date object representing the date and time
+
+                            // add to the block
+
+                            // TODO: Update the styles
+                            document.querySelector("#data").innerHTML += "<form>";
+                            // document.querySelector(".times").innerHTML += dateObject.getHours() + ":" + dateObject.getMinutes() + "<button class='button'>Book Now!</button><br>"
+                            
+                            // Get hours and minutes
+                            const hours = dateObject.getHours();
+                            const minutes = dateObject.getMinutes();
+                            
+                            
+                            const timeSmallLabel = `${hours > 12 ? hours - 12 : hours}:${minutes < 10 ? '0' + minutes : minutes}`;
+                            const timeLabel = `<label>${hours > 12 ? hours - 12 : hours}:${minutes < 10 ? '0' + minutes : minutes}</label>`;
+                
+                            document.querySelector("#data").innerHTML += "<label>" + timeLabel + "</label>"
+                            document.querySelector("#data").innerHTML += "<button class='button' id='" + timeSmallLabel + "'>Book</button> <br>"
+                            
+                            document.querySelector("#data").innerHTML += "</form>"
+
                     
+                        }
+                        const buttons = document.querySelectorAll('.button');
+
+                        // Iterate over the NodeList and add an event listener to each button
+                        buttons.forEach(button => {
+                            button.addEventListener('click', () => {
+                                const buttonId = button.id;
+
+                                // Send an HTTP request to the Flask endpoint
+                                fetch('/run_python_function', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ buttonId: buttonId, location: window.location.href, date: document.querySelector("#heading").innerText })
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    console.log('Success:', data);
+                                    console.log(window.location.href)
+                                    // Handle the response data if needed
+                                })
+                                .catch((error) => {
+                                    console.error('Error:', error);
+                                });
+                                
+                            });
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
+
+                }
+
+                
+
+                prevMonthButton.addEventListener('click', () => {
+                    currentDate.setMonth(currentDate.getMonth() - 1);
+                    renderCalendar();
                 });
+
+                nextMonthButton.addEventListener('click', () => {
+                    currentDate.setMonth(currentDate.getMonth() + 1);
+                    renderCalendar();
+                });
+
+                renderCalendar();
             });
-        })
-        .catch(error => console.error('Error:', error));
 
-    }
+            window.addEventListener('beforeunload', function (event) {
+                // Custom function to execute on page exit
+                myFunction();
 
-    
+                // Standard message for confirmation dialog (note that most modern browsers ignore this)
+                
+            });
 
-    prevMonthButton.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() - 1);
-        renderCalendar();
-    });
-
-    nextMonthButton.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() + 1);
-        renderCalendar();
-    });
-
-    renderCalendar();
-});
+            function myFunction() { 
+                // Your custom code here
+                console.log('Page is being exited');
+                // Example: Send data to the server or perform some action
+                fetch('/exitingServicePage', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: 'User is leaving the page' })
+                });
+            }
 
 
         </script>   

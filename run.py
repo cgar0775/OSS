@@ -318,6 +318,7 @@ def homePage():
         return redirect(url_for('login'))
     
     # if they are logged in, what type of account???
+    
 
     if CheckRole(username)[0] == 'Customer':
         CustomerInfo = CallCustomerInfo(username)
@@ -364,11 +365,12 @@ def homePage():
             return render_template('home.html', name=name, nearby_businesses=businesses)
         
     elif CheckRole(username)=='Business':
+
     # if CallBusinessInfo(CallBusinessName(username)[0]):
         
         BusinessInfo = CallBusinessInfo(CallBusinessName(username)[0])
         return render_template('bHome.html', name = BusinessInfo[0]) #Change this to the buisness home page!!!
-    
+
     # Check to see if it is an employee
     elif CheckRole(username)=='Employee':
     # if CallBusinessInfo(CallBusinessName(username)[0]):
@@ -379,13 +381,31 @@ def homePage():
     # return render_template('home.html', name = "name")
     return render_template('home.html')
 
+@app.route('/search')
+
+def get_distance(lat1, lng1, lat2, lng2):
+    # Convert decimal degrees to radians
+    lat1, lng1, lat2, lng2 = map(radians, [lat1, lng1, lat2, lng2])
+
+    # Haversine formula
+    dlat = lat2 - lat1 
+    dlng = lng2 - lng1 
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlng/2)**2
+    c = 2 * asin(sqrt(a))
+    r = 3958.8  # Radius of Earth in miles
+    return c * r
+
 @app.route('/search', methods=['GET', 'POST'])
+
 def searchPage():
+    # Get user information
     username = session.get('username')
 
     # If they are not logged in, redirect them to the login page
-    if not username:
+    if not username: 
+        print("Empty Username!")
         return redirect(url_for('login'))
+
 
     user_coords = dbfunc.CheckCoordinates(username)
     if not user_coords:
@@ -439,8 +459,8 @@ def profilePage():
     if not username: 
         print("Empty Username!")
         return redirect(url_for('login'))
-
-    return render_template('templates/cEdit.html')
+    name = dbfunc.CallCustomerInfo(username)[1] + " " + dbfunc.CallCustomerInfo(username)[2]
+    return render_template('templates/cEdit.html', name=name)
 
 @app.route('/bookings')
 def bookingPage():
@@ -554,6 +574,9 @@ def businessViewProfilePage(username):
     print("Current username: " , currentUsername)
     print("business username: ", username)
     
+    # business_username = dbfunc.CallBusinessInfo(username)
+    # print("Business Username: ", business_username) 
+
     # If they are not logged in, redirect them to the login page
     if not currentUsername: 
         print("Empty Username!")
@@ -572,11 +595,7 @@ def businessViewProfilePage(username):
     else:
         businessInfo = dbfunc.CallBusinessInfo(username)
     #print(CallBusinessName(username))
-    # print(bus)
-    #businessInfo = CallBusinessInfo(username)
     businessInfo = CallBusinessInfo(CallBusinessName(username)[0])
-    print("business info: ", businessInfo)
-    
     businessName = businessInfo[0]
     businessAddress = businessInfo[3] + ", " + businessInfo[2]
     businessUsername = businessInfo[6]
@@ -589,7 +608,7 @@ def businessViewProfilePage(username):
     arrServices = GetBusinessServices(businessName)
     
     # get descriptions
-    #serviceDescription = dbfunc.GetDescription(arrServices, business_username)
+    
 
     # Time Table
 
@@ -792,12 +811,6 @@ def singleServicePage(businessname, serviceName):
         return redirect('/login')
 
     # Get avalible service times 
-    #print("hi there")
-    #print(serviceName)
-    #print(businessname)
-
-    #print(GetHours(serviceName, businessname))
-
     hours = GetHours(serviceName, businessname)
 
     #gets inital reviews
@@ -827,6 +840,14 @@ def singleServicePage(businessname, serviceName):
     #connection.close()
 
     return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours, reviews = formatted_reviews)
+
+@app.route('/exitingServicePage', methods = ['post'])
+def exitingServicePage():
+    print("hi there")
+    
+    dbfunc.closeConnections()
+
+    return
 
 @app.route('/<businessname>/service/edit/<serviceName>', methods=['GET', 'POST'])
 def singleServiceEditPage(businessname, serviceName):
@@ -1090,6 +1111,61 @@ def run_python():
     return jsonify(result=timeSlots)
 
 
+@app.route('/dataNeeded', methods=['post'])
+def data():
+    dailyBookingsInfo = {}
+    
+    chart_data = {
+        'x': [],
+        'y': []
+    }
+
+    current_date = datetime.now().date()
+    startDate = current_date - timedelta(days = 7)
+
+    while(startDate != current_date): #TODO: turn this into a do while loop
+        print(startDate)
+        dailyBookingsInfo[startDate.strftime("%A")] = dbfunc.getBusinessBookingsOnDate('TestB', startDate)[0][0]
+        startDate += timedelta(days = 1) 
+
+    for i in dailyBookingsInfo:
+        chart_data['x'].append(i)
+        chart_data['y'].append(dailyBookingsInfo[i])
+
+    layout = {
+        # 'title': 'Sample Bar Chart',
+        'xaxis': {'title': 'Weekdays'},
+        'yaxis': {'title': 'Amount of Bookings'}
+    }
+
+    return jsonify({"data": chart_data, "layout": layout})
+
+@app.route('/analytics')
+def analyticsPage():
+
+    username = session.get('username')
+    
+    # Get the data that goes on the chart    
+    
+    chart_data = {
+        'x': ['a', 'b', 'c', 'd'],
+        'y': [10, 15, 13, 117]
+    }
+    
+    # current_date = datetime.now().date()
+    # for i in range (7):
+    #     print(current_date - timedelta(days=i))
+    #     print(current_date.strftime("%A"))
+    #     thing = current_date - timedelta(days=i)
+    #     print(dbfunc.getBusinessBookingsOnDate('TestB', thing))
+    #     print(len(dbfunc.getBusinessBookingsOnDate('TestB', thing)))
+    #     dailyBookingsInfo[current_date - timedelta(days=i)] = (current_date - timedelta(days=i)).strftime("%A")
+
+    #     # get the count for the days and then put them into the graph
+
+    return render_template('templates/analytics.html')
+
+
 @app.route('/load_more_reviews',methods=['POST'])
 def load_more_reviews():
     
@@ -1125,6 +1201,7 @@ def load_more_reviews():
 
     # return render_template('sView.html', reviews=reviews)
     return jsonify({'reviews': formatted_reviews})
+
 
 
 @app.route('/run_python_function', methods=['POST'])

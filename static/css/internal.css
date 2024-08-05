@@ -379,7 +379,7 @@ h2{
 
 /* Style the tab */
 .tab {
-    width: 25%;
+    /* width: 25%; */
     overflow: hidden;
     /* border-bottom: 1px solid #ccc; */
     display: grid;

@@ -1196,12 +1196,21 @@ def load_more_reviews():
 
 @app.route('/submit_review', methods=['POST'])
 def submit_review():
-    header = request.form['header']
+    
+    bname = request.form['businessname']
+    sname = request.form['servicename']
+    username = session.get('username')
+    header = request.form['header1']
     body = request.form['body']
     rating = request.form['rating']
-    fname = request.form['fname']
-    lname = request.form['lname']
-    username = request.form['username']
+    fname = dbfunc.CallCustomerInfo(username)[1] 
+    lname =dbfunc.CallCustomerInfo(username)[2]
+    
+    dbfunc.CreateReview(username,fname,lname,header,body,rating,bname,sname)
+
+
+
+
 
 
 @app.route('/run_python_function', methods=['POST'])

@@ -957,24 +957,57 @@ def run_python():
     #         # print(len(timeSlots))
     return jsonify(result=timeSlots)
 
+@app.route('/dataNeeded', methods=['post'])
+def data():
+    dailyBookingsInfo = {}
+    
+    chart_data = {
+        'x': [],
+        'y': []
+    }
+
+    current_date = datetime.now().date()
+    startDate = current_date - timedelta(days = 7)
+
+    while(startDate != current_date): #TODO: turn this into a do while loop
+        print(startDate)
+        dailyBookingsInfo[startDate.strftime("%A")] = dbfunc.getBusinessBookingsOnDate('TestB', startDate)[0][0]
+        startDate += timedelta(days = 1) 
+
+    for i in dailyBookingsInfo:
+        chart_data['x'].append(i)
+        chart_data['y'].append(dailyBookingsInfo[i])
+
+    layout = {
+        # 'title': 'Sample Bar Chart',
+        'xaxis': {'title': 'Weekdays'},
+        'yaxis': {'title': 'Amount of Bookings'}
+    }
+
+    return jsonify({"data": chart_data, "layout": layout})
+
 @app.route('/analytics')
 def analyticsPage():
 
     username = session.get('username')
     
     # Get the data that goes on the chart    
-    dailyBookingsInfo = {}
     
-    current_date = datetime.now().date()
-    for i in range (7):
-        print(current_date - timedelta(days=i))
-        print(current_date.strftime("%A"))
-        thing = current_date - timedelta(days=i)
-        print(dbfunc.getBusinessBookingsOnDate('TestB', thing))
-        dailyBookingsInfo[current_date - timedelta(days=i)] = (current_date - timedelta(days=i)).strftime("%A")
+    chart_data = {
+        'x': ['a', 'b', 'c', 'd'],
+        'y': [10, 15, 13, 117]
+    }
+    
+    # current_date = datetime.now().date()
+    # for i in range (7):
+    #     print(current_date - timedelta(days=i))
+    #     print(current_date.strftime("%A"))
+    #     thing = current_date - timedelta(days=i)
+    #     print(dbfunc.getBusinessBookingsOnDate('TestB', thing))
+    #     print(len(dbfunc.getBusinessBookingsOnDate('TestB', thing)))
+    #     dailyBookingsInfo[current_date - timedelta(days=i)] = (current_date - timedelta(days=i)).strftime("%A")
 
-    print("Current date:", current_date)
-    print(dailyBookingsInfo)
+    #     # get the count for the days and then put them into the graph
 
     return render_template('templates/analytics.html')
 

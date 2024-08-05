@@ -377,7 +377,7 @@ def getBusinessBookings(name):
 def getBusinessBookingsOnDate(name, date):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
-    query=f"SELECT * FROM bookings WHERE bname='{name}' AND timeslot_start = TO_DATE('{date}',  'YYYY-MM-DD')"
+    query=f"SELECT COUNT(*) FROM bookings WHERE bname='{name}' AND TRUNC(timeslot_start) = TO_DATE('{date}', 'YYYY-MM-DD')"
     print(query)
     cursor.execute(query)
     connection.commit()

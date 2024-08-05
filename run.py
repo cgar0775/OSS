@@ -17,7 +17,7 @@ from urllib.parse import urlparse
 
 from datetime import datetime, timedelta, date
 
-from dbfunc import CallEmployeeInfo, CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability, CallBusinessName, CheckRole, UpdateDescription, GetHours, getBusinessBookings
+from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability, CallBusinessName, CheckRole, UpdateDescription, GetHours, getBusinessBookings,getReviews
 
 
 import inputvalidation
@@ -25,7 +25,7 @@ from flask_session import Session
 import redis
 import re
 
-import pytz
+#import pytz
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -60,7 +60,7 @@ app.config['SESSION_REDIS'] = redis.StrictRedis(host='localhost', port=6379, db=
 Session(app)
 
 # Timezone Configuration
-est = pytz.timezone('America/New_York')  # EST is part of the America/New_York timezone
+#est = pytz.timezone('America/New_York')  # EST is part of the America/New_York timezone
 
 
 #With this configuration, user sessions are stored in Redis, 
@@ -761,8 +761,18 @@ def updateTime():
 
     return redirect(url_for('servicePage'))
 
+def getDBconnection():
+    if not hasattr(g, 'connection'):
+        g.connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+        g.cursor=g.connection.cursor(scrollable=True)
+
+
+
 @app.route('/<businessname>/service/<serviceName>')
 def singleServicePage(businessname, serviceName):
+    
+    #getDBconnection()
+
     # Get user information
     currentUsername = session.get('username')
 
@@ -772,13 +782,41 @@ def singleServicePage(businessname, serviceName):
         return redirect('/login')
 
     # Get avalible service times 
-    print("hi there")
-    print(GetHours(serviceName, businessname))
+    #print("hi there")
+    #print(serviceName)
+    #print(businessname)
+
+    #print(GetHours(serviceName, businessname))
 
     hours = GetHours(serviceName, businessname)
 
-    # print(Get)
-    return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours)
+    #gets inital reviews
+    #reviews = dbfunc.getReviewScrollStart(10,businessname,serviceName,g.cursor,g.connection)
+
+    reviews = dbfunc.getReviews(businessname, serviceName)
+    
+    #only capturing first 10
+    reviews = reviews[:10]
+    #print("reviews")
+    #print(reviews)
+    
+    formatted_reviews = [{
+        'id': r[0],
+        'username': r[1],
+        'fname': r[2],
+        'lname': r[3],
+        'header': r[4],
+        'body': r[5],
+        'rating': r[6],
+        'businessname': r[7],
+        'servicename': r[8]
+    } for r in reviews]
+
+    #if leave page do the following
+    #cursor.close()
+    #connection.close()
+
+    return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours, reviews = formatted_reviews)
 
 @app.route('/<businessname>/service/edit/<serviceName>', methods=['GET', 'POST'])
 def singleServiceEditPage(businessname, serviceName):
@@ -1040,6 +1078,44 @@ def run_python():
 
     #         # print(len(timeSlots))
     return jsonify(result=timeSlots)
+
+
+@app.route('/load_more_reviews',methods=['POST'])
+def load_more_reviews():
+    
+    data = request.get_json()
+    businessname = data.get('businessName')
+    servicename = data.get('serviceName')
+    start = data.get('start')
+    
+    print(businessname)
+    print(servicename)
+    
+    reviews = dbfunc.getReviews(businessname,servicename)
+        
+    if (len(reviews[start:]) >= 2 ):
+        reviews = reviews[start:start+2]
+    else:
+        reviews = reviews[start:]
+
+    print("reviews")
+    print(reviews)
+
+    formatted_reviews = [{
+        'id': r[0],
+        'username': r[1],
+        'fname': r[2],
+        'lname': r[3],
+        'header': r[4],
+        'body': r[5],
+        'rating': r[6],
+        'businessname': r[7],
+        'servicename': r[8]
+    } for r in reviews]
+
+    # return render_template('sView.html', reviews=reviews)
+    return jsonify({'reviews': formatted_reviews})
+
 
 @app.route('/run_python_function', methods=['POST'])
 def run_python_function():

@@ -692,12 +692,10 @@ def GetResponse(bname,sname):
     connection.close()
     return res
 
-<<<<<<< HEAD
 def closeConnections(): 
     cursor.close()
     connection.close()
     return
-=======
 
 #When first running reviews use this initially
 def getReviewScrollStart(amount,bname,sname,cursor,connection):
@@ -711,4 +709,3 @@ def getReviewScrollStart(amount,bname,sname,cursor,connection):
 def getReviewScrollContinue(amount,cursor,connection):
     
     return cursor.fetchmany(amount)
->>>>>>> main

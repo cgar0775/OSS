@@ -114,7 +114,7 @@ def login():
         # Set session variable for logged-in user
         #--indicates that the user is logged in--#
         session['logged_in'] = True
-
+        session['s_nearby_businesses_t']=False
         #--stores the logged-in username--#
         session['username'] = username
         
@@ -325,42 +325,56 @@ def homePage():
 
         # nearby_business = dbfunc.CallBusinessGeo(username)
         # return render_template('home.html', name = name)
-        
-        nearby_businesses = dbfunc.CallBusinessGeo(username)
-        businesses = []
-        connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
-        cursor=connection.cursor()
-        for business in nearby_businesses:
-            business_name = business[3]
-            business_services = dbfunc.GetBusinessServicesUnbound(business_name,connection,cursor)
-            services = []
-            
-            for service in business_services:
-                service_name = service[1]  # Extract 'Haircut' from ('Test123', 'Haircut', 300.0, 3, '300:0', 0)
-                service_price = service[2]  # Extract the price (300.0)
-                services.append({
-                    'name': service_name,
-                    'price': service_price
+        if not session.get('s_nearby_businesses_t'):
+            nearby_businesses = dbfunc.CallBusinessGeo(username)
+            businesses = []
+            connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+            cursor=connection.cursor()
+            for business in nearby_businesses:
+                business_name = business[3]
+                business_services = dbfunc.GetBusinessServicesUnbound(business_name,connection,cursor)
+                business_geo=dbfunc.CheckCoordinatesUnbound(business[2],connection, cursor)
+                services = []
+                
+                for service in business_services:
+                    service_name = service[1]  # Extract 'Haircut' from ('Test123', 'Haircut', 300.0, 3, '300:0', 0)
+                    service_price = service[2]  # Extract the price (300.0)
+                    services.append({
+                        'name': service_name,
+                        'price': service_price
+                    })
+                #print("service", service)
+                businesses.append({
+                    'username': business[3],
+                    'name': business_name,
+                    'services': services,
+                    'profile_url': url_for('businessViewProfilePage', username=business[3]),
+                    'lat': business_geo[0],
+                    'lng': business_geo[1]
                 })
-            #print("service", service)
-            businesses.append({
-                'username': business[3],
-                'name': business_name,
-                'services': services,
-                'profile_url': url_for('businessViewProfilePage', username=business[3])
-            })
-            #print("nearby", nearby_businesses)
-            print("business", businesses)
-        cursor.close()
-        connection.close()
-        return render_template('home.html', name=name, nearby_businesses=businesses)
+                #print("nearby", nearby_businesses)
+                print("business", businesses)
+            session['s_nearby_businesses']=businesses
+            session['s_nearby_businesses_t']=True
+            cursor.close()
+            connection.close()
+            return render_template('home.html', name=name, nearby_businesses=businesses)
+        else:
+            businesses=session.get('s_nearby_businesses')
+            return render_template('home.html', name=name, nearby_businesses=businesses)
+        
     elif CheckRole(username)=='Business':
     # if CallBusinessInfo(CallBusinessName(username)[0]):
         
         BusinessInfo = CallBusinessInfo(CallBusinessName(username)[0])
         return render_template('bHome.html', name = BusinessInfo[0]) #Change this to the buisness home page!!!
-    # Check to see if it is an employee
     
+    # Check to see if it is an employee
+    elif CheckRole(username)=='Employee':
+    # if CallBusinessInfo(CallBusinessName(username)[0]):
+        
+        BusinessInfo = CallBusinessInfo(CallBusinessName(username)[0])
+        return render_template('bHome.html', name = BusinessInfo[0])
     
     # return render_template('home.html', name = "name")
     return render_template('home.html')
@@ -379,58 +393,39 @@ def searchPage():
 
     user_lat, user_lng = user_coords
 
-    query = ""
     if request.method == 'POST':
         query = request.form.get('query', '').strip()
         if not query:
             return render_template('templates/search.html', error="Search query cannot be empty")
 
-        try:
+        #try:
             # Fetch all businesses within a 20-mile radius of the user
-            nearby_businesses = dbfunc.CallBusinessGeo(username)
-            matching_businesses = []
-            connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
-            cursor=connection.cursor()
-            for business in nearby_businesses:
-                business_username = business[2]
-                business_name = business[3]
-                businessInfo = dbfunc.CallBusinessInfoUnbound(business_name,connection,cursor)
-                business_services = dbfunc.GetBusinessServicesUnbound(business_name,connection,cursor)
-                address = f"{businessInfo[5]} {businessInfo[4]} {businessInfo[3]}, {businessInfo[2]}"
-                business_lat, business_lng = dbfunc.CheckCoordinates(business_username)             
-             
-                if query.lower() in business_name.lower():  # Case-insensitive search for business name
+        nearby_businesses = session.get('s_nearby_businesses')
+        #print(nearby_businesses)
+        matching_businesses = []
+        #print(nearby_businesses)
+        for business in nearby_businesses:
+            business_name = business['username']
+            services = business['services']
+            #if query.lower() in business_name.lower():
+                #print("found")
+            for service in services:
+                if query.lower() in service['name'].lower() or query.lower() in business['username'].lower():  # Case-insensitive search
+                    print("found")
                     matching_businesses.append({
-                        'username': business_username,
                         'business_name': business_name,
-                        'services': business_services,
-                        'address': address,
-                        'lat': business_lat,
-                        'lng': business_lng
+                        'service_name': service['name'],  # Assuming service[1] is the service name
+                        'service_price': service['price'],  # Assuming service[2] is the price
+                        'lat': business['lat'],
+                        'lng': business['lng']
                     })
-                else:
-                    for service in business_services:
-                        if query.lower() in service[1].lower():  # Case-insensitive search for service name
-                            matching_businesses.append({
-                                'username': business_username,
-                                'business_name': business_name,
-                                'service_name': service[1],
-                                'service_price': service[2],
-                                'address': address, 
-                                'lat': business_lat,
-                                'lng': business_lng
-                            })
-                            break  # Only add the business once if any service matches
-            cursor.close()
-            connection.close()                 
-            if not matching_businesses:
-                return render_template('templates/search.html', error="No matching businesses or services found.", query = query)
+        if len(matching_businesses)==0:
+            return render_template('templates/search.html', error="No matching services found.")
+        return render_template('templates/search.html', businesses=matching_businesses)
 
-            return render_template('templates/search.html', businesses=matching_businesses, address = address, query = query)
-
-        except Exception as e:
-            app.logger.error(f"Error fetching businesses for query '{query}': {str(e)}")
-            return render_template('templates/search.html', error="Error fetching businesses")
+        #except Exception as e:
+            #app.logger.error(f"Error fetching businesses for query '{query}': {str(e)}")
+            #return render_template('templates/search.html', error="Error fetching businesses")
 
     return render_template('templates/search.html', api_key = API_KEY)
 
@@ -462,7 +457,7 @@ def bookingPage():
 
     # TODO: Make this faster
     # Get all of the bookings for the business
-    if CheckRole(username)[0] == 'Business':
+    if CheckRole(username)[0] == 'Business' and 'Employee' and 'Administrator':
         name = CallBusinessName(username)[0]
         allBookings = dbfunc.getBusinessBookings(name)
         bookingData = []
@@ -498,7 +493,7 @@ def bookingPage():
         return render_template('templates/bookings.html', bookings = bookingData)
 
     # return render_template('templates/Bbookings.html')
-    return
+    return render_template("templates/bBookings.html")
 
 @app.route('/deleteBookingFunction')
 def deleteBooking():
@@ -537,7 +532,18 @@ def employeePage():
 # Redirect to the current logged in buisness view page
 @app.route('/business/view')
 def redirectToHome():
-    redir = '/business/view/' + CallBusinessName(session.get('username'))[0]
+    username = session.get('username')
+    print(username)
+    print("role:", g.role)
+    if g.role == "Business":
+        redir = '/business/view/' + username
+    else:
+        employeeInfo = dbfunc.CallEmployeeInfo(username)
+        #print(employeeInfo)
+        #print(employeeInfo[3])
+        businessUsername = CallBusinessInfo(employeeInfo[3])[6]
+        redir = '/business/view/' + businessUsername
+
     return redirect(redir)
 
 @app.route('/business/view/<username>',  methods = ['GET','POST'])
@@ -546,7 +552,7 @@ def businessViewProfilePage(username):
     # Get user information
     currentUsername = session.get('username')
     print("Current username: " , currentUsername)
-    print("username: ", username)
+    print("business username: ", username)
     
     # If they are not logged in, redirect them to the login page
     if not currentUsername: 
@@ -559,17 +565,17 @@ def businessViewProfilePage(username):
     #businessInfo = dbfunc.CallBusinessInfo(username)
     #print("businessInfo")
     #print(businessInfo)
-    print(dbfunc.CallBusinessInfo(username))
-    print(dbfunc.CallBusinessName(username))
+    #print(dbfunc.CallBusinessInfo(username))
+    #print(dbfunc.CallBusinessName(username))
     if dbfunc.CallBusinessInfo(username) != None: 
         businessInfo = dbfunc.CallBusinessInfo(username)
     else:
         businessInfo = dbfunc.CallBusinessInfo(username)
-    print(CallBusinessName(username))
+    #print(CallBusinessName(username))
     # print(bus)
     #businessInfo = CallBusinessInfo(username)
     businessInfo = CallBusinessInfo(CallBusinessName(username)[0])
-    # print(businessInfo)
+    print("business info: ", businessInfo)
     
     businessName = businessInfo[0]
     businessAddress = businessInfo[3] + ", " + businessInfo[2]
@@ -595,7 +601,7 @@ def businessViewProfilePage(username):
     print(fullAddress)
     #If we want to do direction maps??
     user_coords = dbfunc.CheckCoordinates(currentUsername)
-    user_lat, user_lng = user_coords
+    #user_lat, user_lng = user_coords
     
     # Reviews
 
@@ -652,12 +658,18 @@ def servicePage():
     if not currentUsername: 
         print("Empty Username!")
         return redirect(url_for('login'))
-
-    print(CallBusinessName(currentUsername))
+    #print("currentUsername:", currentUsername)
+    employeeInfo = dbfunc.CallEmployeeInfo(currentUsername)
+    # print("employee info:", employeeInfo)
+    # print("business_name: ", employeeInfo[3])
+    # print(CallBusinessName(currentUsername))
     # print(CallBusinessInfo(CallBusinessName(currentUsername)))
-    print(GetBusinessServices(CallBusinessName(currentUsername)[0]))
-    
-    return render_template('templates/servicePage.html', service=[[row[1], "$" + str(row[2]) + "0", row[3], str(row[4]) + "0"]for row in GetBusinessServices(CallBusinessName(currentUsername)[0])], nextLink=[CallBusinessName(currentUsername)])
+    # print(GetBusinessServices(CallBusinessName(currentUsername)[0]))
+    # if business
+    if g.role == "Business":
+        return render_template('templates/servicePage.html', service=[[row[1], "$" + str(row[2]) + "0", row[3], str(row[4]) + "0"]for row in GetBusinessServices(CallBusinessName(currentUsername)[0])], nextLink=[CallBusinessName(currentUsername)])
+    else:
+        return render_template('templates/servicePage.html', service=[[row[1], "$" + str(row[2]) + "0", row[3], str(row[4]) + "0"]for row in GetBusinessServices(employeeInfo[3])], nextLink=[employeeInfo[3]])
     # return render_template('templates/servicePage.html', service=GetBusinessServices(CallBusinessName(currentUsername)[0]))
 
 @app.route('/add-service', methods = ['GET','POST'])

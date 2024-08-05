@@ -521,6 +521,13 @@ def CheckCoordinates(username):
     connection.close()
     return coords
 
+def CheckCoordinatesUnbound(username,connection,cursor):
+    query=f"SELECT lat,lng FROM geocoordinates WHERE username='{username}'"
+    cursor.execute(query)
+    connection.commit()
+    coords=cursor.fetchone()
+    return coords
+
 #faster implementation of haversine calculating it locally rather than serverside
 def CallBusinessGeo(Customerusername):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)

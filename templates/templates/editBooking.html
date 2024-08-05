@@ -1,0 +1,22 @@
+{% extends 'frame.html' %}
+
+{% block content %}
+
+<div>
+    <h2>{{ bookingInformation[0][0]}}</h2>
+    <h2>{{ bookingInformation }}</h2>
+
+    <form method="POST" action="{{url_for('editBookingFunction', id=value)}}">
+
+        <label>Apply Discount</label>
+        <input type="number" name="discount" id="discount">
+
+        <input type="submit">
+    </form>
+
+    <script>
+
+    </script>
+</div>
+
+{% endblock %}

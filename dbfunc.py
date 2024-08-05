@@ -690,3 +690,17 @@ def GetResponse(bname,sname):
     cursor.close()
     connection.close()
     return res
+
+
+#When first running reviews use this initially
+def getReviewScrollStart(amount,bname,sname,cursor,connection):
+    query=f"SELECT * FROM creviews WHERE bname='{bname}' and sname='{sname}'"
+    cursor.execute(query)
+    connection.commit()
+    rev=cursor.fetchmany(amount)
+    return rev
+
+#get more reviews 
+def getReviewScrollContinue(amount,cursor,connection):
+    
+    return cursor.fetchmany(amount)

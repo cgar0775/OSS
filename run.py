@@ -1191,9 +1191,17 @@ def load_more_reviews():
         'servicename': r[8]
     } for r in reviews]
 
-    # return render_template('sView.html', reviews=reviews)
+
     return jsonify({'reviews': formatted_reviews})
 
+@app.route('/submit_review', methods=['POST'])
+def submit_review():
+    header = request.form['header']
+    body = request.form['body']
+    rating = request.form['rating']
+    fname = request.form['fname']
+    lname = request.form['lname']
+    username = request.form['username']
 
 
 @app.route('/run_python_function', methods=['POST'])

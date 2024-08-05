@@ -320,9 +320,6 @@ def homePage():
     # if they are logged in, what type of account???
     
 
-<<<<<<< HEAD
-    if CallBusinessName(username):
-=======
     if CheckRole(username)[0] == 'Customer':
         CustomerInfo = CallCustomerInfo(username)
         name = CustomerInfo[1]
@@ -337,7 +334,7 @@ def homePage():
             for business in nearby_businesses:
                 business_name = business[3]
                 business_services = dbfunc.GetBusinessServicesUnbound(business_name,connection,cursor)
-                business_geo=dbfunc.CheckCoordinatesUnbound(business[2])
+                business_geo=dbfunc.CheckCoordinatesUnbound(business[2],connection, cursor)
                 services = []
                 
                 for service in business_services:
@@ -368,34 +365,24 @@ def homePage():
             return render_template('home.html', name=name, nearby_businesses=businesses)
         
     elif CheckRole(username)=='Business':
->>>>>>> main
+
     # if CallBusinessInfo(CallBusinessName(username)[0]):
         
-        BuisnessInfo = CallBusinessInfo(CallBusinessName(username)[0])
-
-        
-        
-        
-        return render_template('bHome.html', name = "name") #Change this to the buisness home page!!!
-        
-
-    if CheckRole(username)[0] == 'Customer':
-        # print("Username: " + str(username))
-        CustomerInfo = CallCustomerInfo(username)
-        # print(CustomerInfo)
-        name = CustomerInfo[1]
-        # nearby_business = dbfunc.CallBusinessGeo(username)
-        return render_template('home.html', name = name)
+        BusinessInfo = CallBusinessInfo(CallBusinessName(username)[0])
+        return render_template('bHome.html', name = BusinessInfo[0]) #Change this to the buisness home page!!!
 
     # Check to see if it is an employee
-    
+    elif CheckRole(username)=='Employee':
+    # if CallBusinessInfo(CallBusinessName(username)[0]):
+        
+        BusinessInfo = CallBusinessInfo(CallBusinessName(username)[0])
+        return render_template('bHome.html', name = BusinessInfo[0])
     
     # return render_template('home.html', name = "name")
     return render_template('home.html')
 
-<<<<<<< HEAD
 @app.route('/search')
-=======
+
 def get_distance(lat1, lng1, lat2, lng2):
     # Convert decimal degrees to radians
     lat1, lng1, lat2, lng2 = map(radians, [lat1, lng1, lat2, lng2])
@@ -409,7 +396,7 @@ def get_distance(lat1, lng1, lat2, lng2):
     return c * r
 
 @app.route('/search', methods=['GET', 'POST'])
->>>>>>> main
+
 def searchPage():
     # Get user information
     username = session.get('username')
@@ -419,9 +406,7 @@ def searchPage():
         print("Empty Username!")
         return redirect(url_for('login'))
 
-<<<<<<< HEAD
-    return render_template('templates/search.html')
-=======
+
     user_coords = dbfunc.CheckCoordinates(username)
     if not user_coords:
         return render_template('templates/search.html', error="Unable to fetch user location")
@@ -463,7 +448,7 @@ def searchPage():
             #return render_template('templates/search.html', error="Error fetching businesses")
 
     return render_template('templates/search.html', api_key = API_KEY)
->>>>>>> main
+
 
 @app.route('/profile')
 def profilePage():
@@ -492,7 +477,7 @@ def bookingPage():
 
     # TODO: Make this faster
     # Get all of the bookings for the business
-    if CheckRole(username)[0] == 'Business':
+    if CheckRole(username)[0] == 'Business' and 'Employee' and 'Administrator':
         name = CallBusinessName(username)[0]
         allBookings = dbfunc.getBusinessBookings(name)
         bookingData = []
@@ -528,7 +513,7 @@ def bookingPage():
         return render_template('templates/bookings.html', bookings = bookingData)
 
     # return render_template('templates/Bbookings.html')
-    return
+    return render_template("templates/bBookings.html")
 
 @app.route('/deleteBookingFunction')
 def deleteBooking():
@@ -567,7 +552,18 @@ def employeePage():
 # Redirect to the current logged in buisness view page
 @app.route('/business/view')
 def redirectToHome():
-    redir = '/business/view/' + CallBusinessName(session.get('username'))[0]
+    username = session.get('username')
+    print(username)
+    print("role:", g.role)
+    if g.role == "Business":
+        redir = '/business/view/' + username
+    else:
+        employeeInfo = dbfunc.CallEmployeeInfo(username)
+        #print(employeeInfo)
+        #print(employeeInfo[3])
+        businessUsername = CallBusinessInfo(employeeInfo[3])[6]
+        redir = '/business/view/' + businessUsername
+
     return redirect(redir)
 
 @app.route('/business/view/<username>',  methods = ['GET','POST'])
@@ -576,7 +572,7 @@ def businessViewProfilePage(username):
     # Get user information
     currentUsername = session.get('username')
     print("Current username: " , currentUsername)
-    print("username: ", username)
+    print("business username: ", username)
     
     # business_username = dbfunc.CallBusinessInfo(username)
     # print("Business Username: ", business_username) 
@@ -592,23 +588,14 @@ def businessViewProfilePage(username):
     #businessInfo = dbfunc.CallBusinessInfo(username)
     #print("businessInfo")
     #print(businessInfo)
-    print(dbfunc.CallBusinessInfo(username))
-    print(dbfunc.CallBusinessName(username))
+    #print(dbfunc.CallBusinessInfo(username))
+    #print(dbfunc.CallBusinessName(username))
     if dbfunc.CallBusinessInfo(username) != None: 
         businessInfo = dbfunc.CallBusinessInfo(username)
     else:
         businessInfo = dbfunc.CallBusinessInfo(username)
-    print(CallBusinessName(username))
-    # print(bus)
-<<<<<<< HEAD
-    # businessInfo = CallBusinessInfo(username)
-    # businessInfo = CallBusinessInfo(CallBusinessName(username)[0])
-=======
-    #businessInfo = CallBusinessInfo(username)
+    #print(CallBusinessName(username))
     businessInfo = CallBusinessInfo(CallBusinessName(username)[0])
->>>>>>> main
-    # print(businessInfo)
-    
     businessName = businessInfo[0]
     businessAddress = businessInfo[3] + ", " + businessInfo[2]
     businessUsername = businessInfo[6]
@@ -633,7 +620,7 @@ def businessViewProfilePage(username):
     print(fullAddress)
     #If we want to do direction maps??
     user_coords = dbfunc.CheckCoordinates(currentUsername)
-    user_lat, user_lng = user_coords
+    #user_lat, user_lng = user_coords
     
     # Reviews
 
@@ -690,12 +677,18 @@ def servicePage():
     if not currentUsername: 
         print("Empty Username!")
         return redirect(url_for('login'))
-
-    print(CallBusinessName(currentUsername))
+    #print("currentUsername:", currentUsername)
+    employeeInfo = dbfunc.CallEmployeeInfo(currentUsername)
+    # print("employee info:", employeeInfo)
+    # print("business_name: ", employeeInfo[3])
+    # print(CallBusinessName(currentUsername))
     # print(CallBusinessInfo(CallBusinessName(currentUsername)))
-    print(GetBusinessServices(CallBusinessName(currentUsername)[0]))
-    
-    return render_template('templates/servicePage.html', service=[[row[1], "$" + str(row[2]) + "0", row[3], str(row[4]) + "0"]for row in GetBusinessServices(CallBusinessName(currentUsername)[0])], nextLink=[CallBusinessName(currentUsername)])
+    # print(GetBusinessServices(CallBusinessName(currentUsername)[0]))
+    # if business
+    if g.role == "Business":
+        return render_template('templates/servicePage.html', service=[[row[1], "$" + str(row[2]) + "0", row[3], str(row[4]) + "0"]for row in GetBusinessServices(CallBusinessName(currentUsername)[0])], nextLink=[CallBusinessName(currentUsername)])
+    else:
+        return render_template('templates/servicePage.html', service=[[row[1], "$" + str(row[2]) + "0", row[3], str(row[4]) + "0"]for row in GetBusinessServices(employeeInfo[3])], nextLink=[employeeInfo[3]])
     # return render_template('templates/servicePage.html', service=GetBusinessServices(CallBusinessName(currentUsername)[0]))
 
 @app.route('/add-service', methods = ['GET','POST'])
@@ -818,15 +811,6 @@ def singleServicePage(businessname, serviceName):
         return redirect('/login')
 
     # Get avalible service times 
-<<<<<<< HEAD
-=======
-    #print("hi there")
-    #print(serviceName)
-    #print(businessname)
-
-    #print(GetHours(serviceName, businessname))
-
->>>>>>> main
     hours = GetHours(serviceName, businessname)
 
     #gets inital reviews
@@ -1126,7 +1110,7 @@ def run_python():
     #         # print(len(timeSlots))
     return jsonify(result=timeSlots)
 
-<<<<<<< HEAD
+
 @app.route('/dataNeeded', methods=['post'])
 def data():
     dailyBookingsInfo = {}
@@ -1180,7 +1164,7 @@ def analyticsPage():
     #     # get the count for the days and then put them into the graph
 
     return render_template('templates/analytics.html')
-=======
+
 
 @app.route('/load_more_reviews',methods=['POST'])
 def load_more_reviews():
@@ -1217,7 +1201,7 @@ def load_more_reviews():
 
     # return render_template('sView.html', reviews=reviews)
     return jsonify({'reviews': formatted_reviews})
->>>>>>> main
+
 
 
 @app.route('/run_python_function', methods=['POST'])

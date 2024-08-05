@@ -13,7 +13,7 @@
         <ul>
             {% for business in businesses %}
             
-                    <strong><a href="{{ url_for('businessViewProfilePage', username=business.username) }}">{{ business.business_name }}</strong></a><br>
+                    <strong><a href="{{ url_for('businessViewProfilePage', username=business.business_name) }}">{{ business.business_name }}</strong></a><br>
                     <strong>Service: </strong>
                         {{ business.service_name }} - ${{ business.service_price }}<br>
                     Address: {{ business.address }}<br>

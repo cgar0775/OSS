@@ -365,18 +365,6 @@ def homePage():
     # return render_template('home.html', name = "name")
     return render_template('home.html')
 
-def get_distance(lat1, lng1, lat2, lng2):
-    # Convert decimal degrees to radians
-    lat1, lng1, lat2, lng2 = map(radians, [lat1, lng1, lat2, lng2])
-
-    # Haversine formula
-    dlat = lat2 - lat1 
-    dlng = lng2 - lng1 
-    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlng/2)**2
-    c = 2 * asin(sqrt(a))
-    r = 3958.8  # Radius of Earth in miles
-    return c * r
-
 @app.route('/search', methods=['GET', 'POST'])
 def searchPage():
     username = session.get('username')
@@ -391,6 +379,7 @@ def searchPage():
 
     user_lat, user_lng = user_coords
 
+    query = ""
     if request.method == 'POST':
         query = request.form.get('query', '').strip()
         if not query:
@@ -405,12 +394,10 @@ def searchPage():
             for business in nearby_businesses:
                 business_username = business[2]
                 business_name = business[3]
-                businessInfo = dbfunc.CallBusinessInfo(business_name,connection,cursor)
-                business_services = dbfunc.GetBusinessServices(business_name)
+                businessInfo = dbfunc.CallBusinessInfoUnbound(business_name,connection,cursor)
+                business_services = dbfunc.GetBusinessServicesUnbound(business_name,connection,cursor)
                 address = f"{businessInfo[5]} {businessInfo[4]} {businessInfo[3]}, {businessInfo[2]}"
-                business_lat, business_lng = dbfunc.CheckCoordinates(business_username)
-                distance = get_distance(user_lat, user_lng, business_lat, business_lng)
-                
+                business_lat, business_lng = dbfunc.CheckCoordinates(business_username)             
              
                 if query.lower() in business_name.lower():  # Case-insensitive search for business name
                     matching_businesses.append({
@@ -437,9 +424,9 @@ def searchPage():
             cursor.close()
             connection.close()                 
             if not matching_businesses:
-                return render_template('templates/search.html', error="No matching businesses or services found.")
+                return render_template('templates/search.html', error="No matching businesses or services found.", query = query)
 
-            return render_template('templates/search.html', businesses=matching_businesses, address = address)
+            return render_template('templates/search.html', businesses=matching_businesses, address = address, query = query)
 
         except Exception as e:
             app.logger.error(f"Error fetching businesses for query '{query}': {str(e)}")

@@ -324,6 +324,7 @@
     </script>
 
     <!--Review Submission Form-->
+    {% if g.role == 'Customer' %}
 
     <div>
         <h2>Leave a Review!</h2>
@@ -350,10 +351,7 @@
         </form>
     </div>
 
-
-
-
-
+    {% endif %}
 
 </div>
 

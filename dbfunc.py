@@ -99,6 +99,16 @@ def CallBusinessInfo(name):
     #returns the first (and expectedly only) row
     return val
 
+def CallBusinessInfoUnbound(name,connection,cursor):
+    #calls a specific business' info from the database
+    query=f"SELECT * FROM BUSINESSINFO WHERE name='{name}'"
+    cursor.execute(query)
+    connection.commit()
+    #store result so we can close db connection
+    val=cursor.fetchone()
+    #returns the first (and expectedly only) row
+    return val
+
 def CallBusinessName(username):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
@@ -512,6 +522,13 @@ def CheckCoordinates(username):
     connection.close()
     return coords
 
+def CheckCoordinatesUnbound(username,connection,cursor):
+    query=f"SELECT lat,lng FROM geocoordinates WHERE username='{username}'"
+    cursor.execute(query)
+    connection.commit()
+    coords=cursor.fetchone()
+    return coords
+
 #faster implementation of haversine calculating it locally rather than serverside
 def CallBusinessGeo(Customerusername):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
@@ -675,7 +692,23 @@ def GetResponse(bname,sname):
     connection.close()
     return res
 
+<<<<<<< HEAD
 def closeConnections(): 
     cursor.close()
     connection.close()
     return
+=======
+
+#When first running reviews use this initially
+def getReviewScrollStart(amount,bname,sname,cursor,connection):
+    query=f"SELECT * FROM creviews WHERE bname='{bname}' and sname='{sname}'"
+    cursor.execute(query)
+    connection.commit()
+    rev=cursor.fetchmany(amount)
+    return rev
+
+#get more reviews 
+def getReviewScrollContinue(amount,cursor,connection):
+    
+    return cursor.fetchmany(amount)
+>>>>>>> main

@@ -10,13 +10,14 @@ import oracledb
 # import requests
 from database import OracleConfig
 from dotenv import load_dotenv
+from math import radians, cos, sin, asin, sqrt
 import dbfunc
 
 from urllib.parse import urlparse
 
 from datetime import datetime, timedelta, date
 
-from dbfunc import CallEmployeeInfo, CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability, CallBusinessName, CheckRole, UpdateDescription, GetHours, getBusinessBookings
+from dbfunc import CreateCustomerAcc,CreateBusinessAcc, loginCheck, CallBusinessInfo, CheckBusinessName, CheckUsername, CallCustomerInfo, CreateService, GetBusinessServices, UpdateAvailability, CallBusinessName, CheckRole, UpdateDescription, GetHours, getBusinessBookings,getReviews
 
 
 import inputvalidation
@@ -24,7 +25,7 @@ from flask_session import Session
 import redis
 import re
 
-import pytz
+#import pytz
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -59,7 +60,7 @@ app.config['SESSION_REDIS'] = redis.StrictRedis(host='localhost', port=6379, db=
 Session(app)
 
 # Timezone Configuration
-est = pytz.timezone('America/New_York')  # EST is part of the America/New_York timezone
+#est = pytz.timezone('America/New_York')  # EST is part of the America/New_York timezone
 
 
 #With this configuration, user sessions are stored in Redis, 
@@ -113,7 +114,7 @@ def login():
         # Set session variable for logged-in user
         #--indicates that the user is logged in--#
         session['logged_in'] = True
-
+        session['s_nearby_businesses_t']=False
         #--stores the logged-in username--#
         session['username'] = username
         
@@ -319,7 +320,55 @@ def homePage():
     # if they are logged in, what type of account???
     
 
+<<<<<<< HEAD
     if CallBusinessName(username):
+=======
+    if CheckRole(username)[0] == 'Customer':
+        CustomerInfo = CallCustomerInfo(username)
+        name = CustomerInfo[1]
+
+        # nearby_business = dbfunc.CallBusinessGeo(username)
+        # return render_template('home.html', name = name)
+        if not session.get('s_nearby_businesses_t'):
+            nearby_businesses = dbfunc.CallBusinessGeo(username)
+            businesses = []
+            connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+            cursor=connection.cursor()
+            for business in nearby_businesses:
+                business_name = business[3]
+                business_services = dbfunc.GetBusinessServicesUnbound(business_name,connection,cursor)
+                business_geo=dbfunc.CheckCoordinatesUnbound(business[2])
+                services = []
+                
+                for service in business_services:
+                    service_name = service[1]  # Extract 'Haircut' from ('Test123', 'Haircut', 300.0, 3, '300:0', 0)
+                    service_price = service[2]  # Extract the price (300.0)
+                    services.append({
+                        'name': service_name,
+                        'price': service_price
+                    })
+                #print("service", service)
+                businesses.append({
+                    'username': business[3],
+                    'name': business_name,
+                    'services': services,
+                    'profile_url': url_for('businessViewProfilePage', username=business[3]),
+                    'lat': business_geo[0],
+                    'lng': business_geo[1]
+                })
+                #print("nearby", nearby_businesses)
+                print("business", businesses)
+            session['s_nearby_businesses']=businesses
+            session['s_nearby_businesses_t']=True
+            cursor.close()
+            connection.close()
+            return render_template('home.html', name=name, nearby_businesses=businesses)
+        else:
+            businesses=session.get('s_nearby_businesses')
+            return render_template('home.html', name=name, nearby_businesses=businesses)
+        
+    elif CheckRole(username)=='Business':
+>>>>>>> main
     # if CallBusinessInfo(CallBusinessName(username)[0]):
         
         BuisnessInfo = CallBusinessInfo(CallBusinessName(username)[0])
@@ -344,7 +393,23 @@ def homePage():
     # return render_template('home.html', name = "name")
     return render_template('home.html')
 
+<<<<<<< HEAD
 @app.route('/search')
+=======
+def get_distance(lat1, lng1, lat2, lng2):
+    # Convert decimal degrees to radians
+    lat1, lng1, lat2, lng2 = map(radians, [lat1, lng1, lat2, lng2])
+
+    # Haversine formula
+    dlat = lat2 - lat1 
+    dlng = lng2 - lng1 
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlng/2)**2
+    c = 2 * asin(sqrt(a))
+    r = 3958.8  # Radius of Earth in miles
+    return c * r
+
+@app.route('/search', methods=['GET', 'POST'])
+>>>>>>> main
 def searchPage():
     # Get user information
     username = session.get('username')
@@ -354,7 +419,51 @@ def searchPage():
         print("Empty Username!")
         return redirect(url_for('login'))
 
+<<<<<<< HEAD
     return render_template('templates/search.html')
+=======
+    user_coords = dbfunc.CheckCoordinates(username)
+    if not user_coords:
+        return render_template('templates/search.html', error="Unable to fetch user location")
+
+    user_lat, user_lng = user_coords
+
+    if request.method == 'POST':
+        query = request.form.get('query', '').strip()
+        if not query:
+            return render_template('templates/search.html', error="Search query cannot be empty")
+
+        #try:
+            # Fetch all businesses within a 20-mile radius of the user
+        nearby_businesses = session.get('s_nearby_businesses')
+        #print(nearby_businesses)
+        matching_businesses = []
+        #print(nearby_businesses)
+        for business in nearby_businesses:
+            business_name = business['username']
+            services = business['services']
+            #if query.lower() in business_name.lower():
+                #print("found")
+            for service in services:
+                if query.lower() in service['name'].lower() or query.lower() in business['username'].lower():  # Case-insensitive search
+                    print("found")
+                    matching_businesses.append({
+                        'business_name': business_name,
+                        'service_name': service['name'],  # Assuming service[1] is the service name
+                        'service_price': service['price'],  # Assuming service[2] is the price
+                        'lat': business['lat'],
+                        'lng': business['lng']
+                    })
+        if len(matching_businesses)==0:
+            return render_template('templates/search.html', error="No matching services found.")
+        return render_template('templates/search.html', businesses=matching_businesses)
+
+        #except Exception as e:
+            #app.logger.error(f"Error fetching businesses for query '{query}': {str(e)}")
+            #return render_template('templates/search.html', error="Error fetching businesses")
+
+    return render_template('templates/search.html', api_key = API_KEY)
+>>>>>>> main
 
 @app.route('/profile')
 def profilePage():
@@ -480,9 +589,9 @@ def businessViewProfilePage(username):
     # debuig this - there might be an error!!!
 
     # General Business Information
-    businessInfo = dbfunc.CallBusinessInfo(username)
-    print("businessInfo")
-    print(businessInfo)
+    #businessInfo = dbfunc.CallBusinessInfo(username)
+    #print("businessInfo")
+    #print(businessInfo)
     print(dbfunc.CallBusinessInfo(username))
     print(dbfunc.CallBusinessName(username))
     if dbfunc.CallBusinessInfo(username) != None: 
@@ -491,8 +600,13 @@ def businessViewProfilePage(username):
         businessInfo = dbfunc.CallBusinessInfo(username)
     print(CallBusinessName(username))
     # print(bus)
+<<<<<<< HEAD
     # businessInfo = CallBusinessInfo(username)
     # businessInfo = CallBusinessInfo(CallBusinessName(username)[0])
+=======
+    #businessInfo = CallBusinessInfo(username)
+    businessInfo = CallBusinessInfo(CallBusinessName(username)[0])
+>>>>>>> main
     # print(businessInfo)
     
     businessName = businessInfo[0]
@@ -683,8 +797,18 @@ def updateTime():
 
     return redirect(url_for('servicePage'))
 
+def getDBconnection():
+    if not hasattr(g, 'connection'):
+        g.connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+        g.cursor=g.connection.cursor(scrollable=True)
+
+
+
 @app.route('/<businessname>/service/<serviceName>')
 def singleServicePage(businessname, serviceName):
+    
+    #getDBconnection()
+
     # Get user information
     currentUsername = session.get('username')
 
@@ -694,10 +818,44 @@ def singleServicePage(businessname, serviceName):
         return redirect('/login')
 
     # Get avalible service times 
+<<<<<<< HEAD
+=======
+    #print("hi there")
+    #print(serviceName)
+    #print(businessname)
+
+    #print(GetHours(serviceName, businessname))
+
+>>>>>>> main
     hours = GetHours(serviceName, businessname)
 
-    # print(Get)
-    return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours)
+    #gets inital reviews
+    #reviews = dbfunc.getReviewScrollStart(10,businessname,serviceName,g.cursor,g.connection)
+
+    reviews = dbfunc.getReviews(businessname, serviceName)
+    
+    #only capturing first 10
+    reviews = reviews[:10]
+    #print("reviews")
+    #print(reviews)
+    
+    formatted_reviews = [{
+        'id': r[0],
+        'username': r[1],
+        'fname': r[2],
+        'lname': r[3],
+        'header': r[4],
+        'body': r[5],
+        'rating': r[6],
+        'businessname': r[7],
+        'servicename': r[8]
+    } for r in reviews]
+
+    #if leave page do the following
+    #cursor.close()
+    #connection.close()
+
+    return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours, reviews = formatted_reviews)
 
 @app.route('/exitingServicePage', methods = ['post'])
 def exitingServicePage():
@@ -829,8 +987,19 @@ def addEmployee():
 @app.route('/maps')
 def viewMap():
     username = session.get('username')
-    CustomerInfo = dbfunc.CallCustomerInfo(username)
-    return render_template('maps.html', api_key = API_KEY)
+    if not username:
+        return redirect(url_for('login'))
+
+    lat = request.args.get('lat')
+    lng = request.args.get('lng')
+    name = request.args.get('name')
+    address = request.args.get('address')
+
+    if not lat or not lng or not name or not address:
+        return "Invalid parameters", 400
+
+    return render_template('maps.html', api_key=API_KEY, lat=lat, lng=lng, name=name, address=address)
+
 
 #Geocoding Location for maps
 @app.route('/get-user-location')
@@ -957,6 +1126,7 @@ def run_python():
     #         # print(len(timeSlots))
     return jsonify(result=timeSlots)
 
+<<<<<<< HEAD
 @app.route('/dataNeeded', methods=['post'])
 def data():
     dailyBookingsInfo = {}
@@ -1010,6 +1180,44 @@ def analyticsPage():
     #     # get the count for the days and then put them into the graph
 
     return render_template('templates/analytics.html')
+=======
+
+@app.route('/load_more_reviews',methods=['POST'])
+def load_more_reviews():
+    
+    data = request.get_json()
+    businessname = data.get('businessName')
+    servicename = data.get('serviceName')
+    start = data.get('start')
+    
+    print(businessname)
+    print(servicename)
+    
+    reviews = dbfunc.getReviews(businessname,servicename)
+        
+    if (len(reviews[start:]) >= 2 ):
+        reviews = reviews[start:start+2]
+    else:
+        reviews = reviews[start:]
+
+    print("reviews")
+    print(reviews)
+
+    formatted_reviews = [{
+        'id': r[0],
+        'username': r[1],
+        'fname': r[2],
+        'lname': r[3],
+        'header': r[4],
+        'body': r[5],
+        'rating': r[6],
+        'businessname': r[7],
+        'servicename': r[8]
+    } for r in reviews]
+
+    # return render_template('sView.html', reviews=reviews)
+    return jsonify({'reviews': formatted_reviews})
+>>>>>>> main
 
 
 @app.route('/run_python_function', methods=['POST'])

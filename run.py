@@ -83,10 +83,10 @@ def before_request():
             # print("g.data: ")
             # print(g.data)
         elif g.role == "Employee":
-            g.data = CallEmployeeInfo(username)
+            g.data = dbfunc.CallEmployeeInfo(username)
         
         elif g.role == "Administrator":
-            g.data = CallEmployeeInfo(username)
+            g.data = dbfunc.CallEmployeeInfo(username)
         
         elif g.role == "Customer":
             g.data = CallCustomerInfo(username)
@@ -332,6 +332,8 @@ def homePage():
             cursor=connection.cursor()
             for business in nearby_businesses:
                 business_name = business[3]
+                businessInfo = dbfunc.CallBusinessInfoUnbound(business_name,connection,cursor)
+                address = f"{businessInfo[5]} {businessInfo[4]} {businessInfo[3]}, {businessInfo[2]}"
                 business_services = dbfunc.GetBusinessServicesUnbound(business_name,connection,cursor)
                 business_geo=dbfunc.CheckCoordinatesUnbound(business[2],connection, cursor)
                 services = []
@@ -345,15 +347,17 @@ def homePage():
                     })
                 #print("service", service)
                 businesses.append({
-                    'username': business[3],
+                    'username': business[2],
                     'name': business_name,
+                    'address': address,
                     'services': services,
-                    'profile_url': url_for('businessViewProfilePage', username=business[3]),
+                    'profile_url': url_for('businessViewProfilePage', username=business[2]),
                     'lat': business_geo[0],
                     'lng': business_geo[1]
                 })
                 #print("nearby", nearby_businesses)
                 print("business", businesses)
+            
             session['s_nearby_businesses']=businesses
             session['s_nearby_businesses_t']=True
             cursor.close()
@@ -405,15 +409,17 @@ def searchPage():
         matching_businesses = []
         #print(nearby_businesses)
         for business in nearby_businesses:
-            business_name = business['username']
+            business_name = business['name']
             services = business['services']
             #if query.lower() in business_name.lower():
                 #print("found")
             for service in services:
-                if query.lower() in service['name'].lower() or query.lower() in business['username'].lower():  # Case-insensitive search
+                if query.lower() in service['name'].lower() or query.lower() in business['name'].lower():  # Case-insensitive search
                     print("found")
                     matching_businesses.append({
                         'business_name': business_name,
+                        'business_username': business['username'],
+                        'address': business['address'],
                         'service_name': service['name'],  # Assuming service[1] is the service name
                         'service_price': service['price'],  # Assuming service[2] is the price
                         'lat': business['lat'],

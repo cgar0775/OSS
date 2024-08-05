@@ -13,12 +13,12 @@
         <ul>
             {% for business in businesses %}
             
-                    <strong><a href="{{ url_for('businessViewProfilePage', username=business.business_name) }}">{{ business.business_name }}</strong></a><br>
+                    <strong><a href="{{ url_for('businessViewProfilePage', username=business.business_username) }}">{{ business.business_name }}</strong></a><br>
                     <strong>Service: </strong>
                         {{ business.service_name }} - ${{ business.service_price }}<br>
                     Address: {{ business.address }}<br>
                     <a href="{{ url_for('viewMap', lat=business.lat, lng=business.lng, name=business.business_name, address=business.address) }}">View on Map</a><br>
-                
+                    <br>
             {% endfor %}
         </ul>
     {% elif error %}

@@ -385,20 +385,6 @@ def homePage():
     # return render_template('home.html', name = "name")
     return render_template('home.html')
 
-@app.route('/search')
-
-def get_distance(lat1, lng1, lat2, lng2):
-    # Convert decimal degrees to radians
-    lat1, lng1, lat2, lng2 = map(radians, [lat1, lng1, lat2, lng2])
-
-    # Haversine formula
-    dlat = lat2 - lat1 
-    dlng = lng2 - lng1 
-    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlng/2)**2
-    c = 2 * asin(sqrt(a))
-    r = 3958.8  # Radius of Earth in miles
-    return c * r
-
 @app.route('/search', methods=['GET', 'POST'])
 
 def searchPage():
@@ -416,7 +402,7 @@ def searchPage():
         return render_template('templates/search.html', error="Unable to fetch user location")
 
     user_lat, user_lng = user_coords
-
+    query = ""
     if request.method == 'POST':
         query = request.form.get('query', '').strip()
         if not query:
@@ -446,8 +432,8 @@ def searchPage():
                         'lng': business['lng']
                     })
         if len(matching_businesses)==0:
-            return render_template('templates/search.html', error="No matching services found.")
-        return render_template('templates/search.html', businesses=matching_businesses)
+            return render_template('templates/search.html', error="No matching services found.", query=query)
+        return render_template('templates/search.html', businesses=matching_businesses, query=query)
 
         #except Exception as e:
             #app.logger.error(f"Error fetching businesses for query '{query}': {str(e)}")

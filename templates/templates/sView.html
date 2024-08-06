@@ -260,7 +260,7 @@
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({ message: 'User is leaving the page' })
-                    });
+                    }); 
                 }
 
 
@@ -321,7 +321,25 @@
                 </form>
             </div>
 
+
+            
+
         {% endif %}
+
+        <h2>Images</h2>
+        <div class="gallery">
+            
+            {% for image in image_files %}
+                <!-- <div class="image-container">
+                    <img src="{{ '/' + image_folder + '/' + image}}" alt="Image" class="displayImages">
+                </div> -->
+
+                <a href="{{ '/' + image_folder + '/' + image}}" data-lightbox="gallery" data-title="{{ image }}" class="gallery-item">
+                    <img src="{{ '/' + image_folder + '/' + image}}" alt="Image">
+                </a>
+
+            {% endfor %}
+        </div>
 
 
         <!--Reviews Section-->

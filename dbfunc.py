@@ -187,6 +187,7 @@ def CreateService(bname,sname,price,slots,time,discount):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
     query=f"INSERT INTO services VALUES('{bname}','{sname}',{price},{slots},{time},{discount})"  
+    print(query)
     cursor.execute(query)
     connection.commit()
     cursor.close()

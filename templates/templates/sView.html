@@ -355,8 +355,20 @@
 
                         {% if g.role == 'Business' %}
                         
-                            <button onclick="showReplyForm('{{review.id}}')">Reply</button>
+                            <button onclick="showReplyForm()">Reply</button>
+                            <div id="textBoxContainer">
+                                <textarea id="Reply" name="Reply" style="display:none;" required></textarea>
+                                <button type="button" id="button" onclick="submitReply()" style="display:none;">Submit</button>
+                            </div>
                         
+                            <script>
+                                function showReplyForm() {
+                                    // Use the unique review ID to show the corresponding textarea
+                                    document.getElementById('Reply').style.display = 'block';
+                                    document.getElementById('button').style.display = 'block';
+                                }
+                            </script>
+
                         {% endif %}
                         
                         
@@ -369,6 +381,8 @@
                         </div>
                         
                     {% endif %}
+
+                    
                     
                     <!-- <button onclick="openReplyPopup('{{ review.id }}')">Reply</button> -->
 
@@ -385,6 +399,28 @@
         </div>
         <button id = "loadMoreBtn" onclick="loadMoreReviews()">Load More</button>
     </div>
+
+        <script>
+
+            function submitReply(){
+
+                fetch('/load_more_reviews', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    
+                    businessName: businessName,
+                    serviceName: serviceName,
+                    start: currentReviewIndex
+                 })
+            })
+
+
+            }
+
+        </script>
 
         <script>
 

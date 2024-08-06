@@ -27,7 +27,7 @@ from flask_session import Session
 import redis
 import re
 
-import pytz
+#import pytz
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -67,7 +67,7 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit
 Session(app)
 
 # Timezone Configuration
-est = pytz.timezone('America/New_York')  # EST is part of the America/New_York timezone
+#est = pytz.timezone('America/New_York')  # EST is part of the America/New_York timezone
 
 
 #With this configuration, user sessions are stored in Redis, 
@@ -1473,7 +1473,9 @@ def submit_review():
     return jsonify({'message': 'Review submitted successfully'}), 200
 
 
-
+@app.route('/submit_reply', methods=['POST'])
+def submit_reply():
+    
 
 
 

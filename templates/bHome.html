@@ -1,9 +1,30 @@
 {% extends 'frame.html' %}
 
 {% block content %}
-
-    <h1 style="text-align: center;">Greetings, {{name}}!</h1>
-
-
-
+    <div class="homepage">
+        <!-- Greeting based on user role -->
+        {% if g.role == 'Business' %}
+            <h1 style="text-align: center;">Welcome {{ name }}!</h1>
+        {% endif %}
+        {% if g.role == 'Administrator' %}
+            <h1 style="text-align: center;">Welcome {{ employee_name }}!</h1>
+        {% endif %}
+        {% if g.role == 'Employee' %}
+            <h1 style="text-align: center;">Welcome {{ employee_name }}!</h1>
+        {% endif %}
+    </div>
+    <div id="contentArea">
+        <div id="services">
+            <h4>Available Services for {{name}}</h4>
+            
+            <!-- Add Services Here -->
+            <div id="servicesContainer">
+                {% for service in arrServices %}
+                    {% include 'components/services.html' %}
+                    <!-- {{arrServices[0][0]}}
+                    {{arrServices}} -->
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 {% endblock %}

@@ -93,7 +93,13 @@
         <!-- <h2>See Our Business</h2> -->
 
         <div>
-
+        <!-- reviews here (maybe) -->
+        
+        <h2>Reviews</h2>
+        <div id="servicesContainer" class="contentArea">
+            {% for review in reviews %}
+                {% include 'components/reviews.html' %}
+            {% endfor %}
         </div>
     </div>
 

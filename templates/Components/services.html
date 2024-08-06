@@ -1,11 +1,12 @@
 <div id="serviceContanier">
     <h6>Service</h6>
     <h3>{{service[1]}}</h3>
-    <h4>${{service[2]}}</h4>
-    <h5>Description</h5>
+    <h4>${{service[2]}}0</h4>
     <!-- <p>something else here hehehe</p> -->
 
+    {% if g.role == 'Customer' %}
     <button>
         <a href="/{{businessName}}/service/{{service[1]}}">Book Now!</a>
     </button>
+    {% endif %}
 </div>

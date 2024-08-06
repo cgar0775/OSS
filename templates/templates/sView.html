@@ -270,6 +270,9 @@
                         
                             <button onclick="showReplyForm('{{review.id}}')">Reply</button>
                         
+                        {% endif %}
+                        
+                        
                     {% else %}
                             
                         <div class="reply">
@@ -278,13 +281,9 @@
 
                         </div>
                         
-                    {% end if %}
-
-
+                    {% endif %}
                     
                     <!-- <button onclick="openReplyPopup('{{ review.id }}')">Reply</button> -->
-
-                    {% endif %}
 
                     <!-- Display replies -->
                     {% for reply in review.replies %}

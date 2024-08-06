@@ -1205,6 +1205,9 @@ def submit_review():
     rating = request.form['rating']
     fname = dbfunc.CallCustomerInfo(username)[1] 
     lname =dbfunc.CallCustomerInfo(username)[2]
+
+    print(bname)
+    print(sname)
     
     dbfunc.CreateReview(username,fname,lname,header,body,rating,bname,sname)
 

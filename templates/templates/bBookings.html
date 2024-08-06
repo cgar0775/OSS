@@ -17,6 +17,7 @@
                     <th>Time End</th>
                     <th>Phone Number</th>
                     <th>Email</th>
+                    <th>Discount</th>
                     <th>Edit</th>
                     <th>Delete Booking</th>
                 </tr>
@@ -27,10 +28,10 @@
                         {%for data in items %}
                             <td>{{ data }}</td>
                         {% endfor %}
-                        <!-- <td>{{ items[0] }}</td> -->
+                        <!-- <td>{{ items }}</td> -->
                         <!-- <td>{{idList[loop.index - 1]}}</td> -->
-                        <td><a href="/{{items[0]}}/booking/edit/{{items[1]}}"><button>Edit</button></a></td>
-                        <td><a href="/booking/delete/{{idList[loop.index - 1]}}"><button>Delete</button></a></td>
+                        <td><a href="/booking/edit/{{idList[loop.index - 1]}} "><button>Edit</button></a></td>
+                        <td><a href="/booking/delete/{{idList[loop.index - 1]}} "><button>Delete</button></a></td>
                     </tr>
                 {% endfor %}
                 <!-- Add dynamic data here -->

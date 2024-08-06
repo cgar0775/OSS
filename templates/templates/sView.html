@@ -39,6 +39,10 @@
             <h2>{{ businessName }}</h2>
             <h3>{{ businessAddress }}</h3>
 
+            <h2 id="customerName">{{ customerName }}</h2>
+            <h2 id="customerUser" style="display: none">{{ customerUser }}</h2>
+            <h2 id="bookingId" style="display: none">{{ bookingId }}</h2>
+
             <!-- TODO: Turn this into a resopnsive image -->
             <h4>⭐️⭐️⭐️⭐️⭐️</h4>
         </div>
@@ -83,7 +87,7 @@
 
             
             <script>
-                // Done with ChatGPT
+                // Outline done with ChatGPT
                 document.addEventListener('DOMContentLoaded', () => {
                     const calendarDates = document.querySelector('.calendar-dates');
                     const monthYearDisplay = document.querySelector('.month-year');
@@ -200,12 +204,16 @@
                                         headers: {
                                             'Content-Type': 'application/json'
                                         },
-                                        body: JSON.stringify({ buttonId: buttonId, location: window.location.href, date: document.querySelector("#heading").innerText })
+                                        body: JSON.stringify({ buttonId: buttonId, location: window.location.href, date: document.querySelector("#heading").innerText, customer: document.querySelector("#customerName").innerText, customerUser: document.querySelector("#customerUser").innerText, bookingId: window.location.pathname})
                                     })
                                     .then(response => response.json())
                                     .then(data => {
                                         console.log('Success:', data);
-                                        console.log(window.location.href)
+                                        // console.log(window.location.href)
+                                        // console.log(window.location.host)
+                                        window.location.href = "/bookings"
+
+
                                         // Handle the response data if needed
                                     })
                                     .catch((error) => {
@@ -252,7 +260,7 @@
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({ message: 'User is leaving the page' })
-                    });
+                    }); 
                 }
 
 
@@ -267,9 +275,71 @@
                     async: false  // Synchronous request to ensure it completes before unload
                 });
             });
+
+            function applyDiscount() {
+                fetch('/apply_discount', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({discountAmount: document.getElementById('discountInput').value, bookingId: window.location.pathname})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    // console.log(window.location.href)
+                    // console.log(window.location.host)
+                    window.location.reload();
+
+
+                    // Handle the response data if needed
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+            }
         </script>
 
 
+        {% if userType != "customer" %}
+            <div id="discountSection">
+
+                <div>
+                    {% if currentDiscount %}
+                        <h2>Current Discount: {{ currentDiscount }}%</h2>
+                    {% else %}
+                        <h2>No discount offered.</h2>
+                    {% endif %}
+                </div>
+
+                <form onsubmit="applyDiscount()">
+
+                    <label>Enter Discount:</label>
+                    <input type="number" name="discountInput" id="discountInput">
+                    <br>
+                    <input type="submit" id="submitDiscount">
+                </form>
+            </div>
+
+
+            
+
+        {% endif %}
+
+        <h2>Images</h2>
+        <div class="gallery">
+            
+            {% for image in image_files %}
+                <!-- <div class="image-container">
+                    <img src="{{ '/' + image_folder + '/' + image}}" alt="Image" class="displayImages">
+                </div> -->
+
+                <a href="{{ '/' + image_folder + '/' + image}}" data-lightbox="gallery" data-title="{{ image }}" class="gallery-item">
+                    <img src="{{ '/' + image_folder + '/' + image}}" alt="Image">
+                </a>
+
+            {% endfor %}
+        </div>
     <!--Reviews Section-->
     <div id="reviews">
         <h2>User Reviews</h2>

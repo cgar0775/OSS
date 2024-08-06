@@ -9,14 +9,15 @@
             <h2>Editing {{currentService[1][0]}}</h2>
             
 
-            <button class="tablinks" onclick="openPage(event, 'general')" id="defaultOpen">General</button>
-            <button class="tablinks" onclick="openPage(event, 'hours')">Service Hours</button>
+            <!-- <button class="tablinks" onclick="openPage(event, 'general')" id="defaultOpen">General</button> -->
+            <!-- <button class="tablinks" onclick="openPage(event, 'hours')">Service Hours</button> -->
+            <button class="tablinks" onclick="openPage(event, 'images')"  id="defaultOpen">Images</button>
             <!-- <button class="tablinks" onclick="openPage(event, 'Profile')" id="defaultOpen">Images</button> -->
         </div>
 
         <div id="general" class="tabcontent">
             <h2>General</h2>
-            <form style="text-align: left" method="post">
+            <form action="/updateService/{{ businessName }}/{{ currentService[1][0] }}" style="text-align: left" method="post">
                 <!-- TODO: add placehoder text of the current information -->
                 
                 <label>Service Name: </label>
@@ -84,8 +85,45 @@
                 
                 <input type="submit">
             </form>
-            </div>
+        </div>
 
+        <script>
+
+        </script>
+
+        <div id="images" class="tabcontent">
+        
+            <h2>Add Images!</h2>
+            <form action="/uploadImages/{{ businessName }}/{{ currentService[1][0] }}" method="POST" enctype="multipart/form-data">
+                <!-- The name attribute is required to access the file in the Flask request -->
+                <input type="file" name="image" required>
+                <input type="submit" value="Upload">
+            </form>
+
+            <div id="addedImages">
+                <h2>Images Already Added: </h2>
+                <div class="gallery">
+                    {% for image in image_files %}
+                        <!-- <div class="image-container">
+                            <img src="{{ '/' + image_folder + '/' + image}}" alt="Image" class="displayImages">
+                        </div> -->
+
+                        <a href="{{ '/' + image_folder + '/' + image}}" data-lightbox="gallery" data-title="{{ image }}" class="gallery-item">
+                            <img src="{{ '/' + image_folder + '/' + image}}" alt="Image">
+                        </a>
+
+                    {% endfor %}
+                </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>  
+
+                <div>
+                                        
+                </div>
+            </div>
+        
+        </div>
 
     </div>
 

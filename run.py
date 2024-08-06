@@ -515,8 +515,8 @@ def bookingPage():
         for booking in allBookings:
             # #print(dbfunc.CallCustomerInfo(booking[2])) 
             customerName = dbfunc.CallCustomerInfo(booking[2])[1] + " " + dbfunc.CallCustomerInfo(booking[2])[2]
-            tempData = [booking[0], customerName , str(booking[3])[:10], str(booking[3])[11:], str(booking[4])[11:], dbfunc.CallCustomerInfo(booking[2])[8], dbfunc.CallCustomerInfo(booking[2])[7]]
-
+            tempData = [booking[0], customerName , str(booking[3])[:10], str(booking[3])[11:], str(booking[4])[11:], dbfunc.CallCustomerInfo(booking[2])[8], dbfunc.CallCustomerInfo(booking[2])[7], booking[5]]
+            # print()
             bookingData.append(tempData)
 
             print(booking)
@@ -560,18 +560,17 @@ def bookingPage():
     # return render_template('templates/Bbookings.html')
     return render_template("templates/bBookings.html")
 
-@app.route('/deleteBookingFunction')
+@app.route('/deleteBookingFunction', methods=['POST'])
 def deleteBooking():
     data = request.json
-    #print(data.get("bookingID"))
+    dbfunc.DeleteBookingFromID(data.get("bookingID"))
 
-
-    return jsonify()
+    return jsonify(data)
 
 @app.route('/booking/delete/<id>')
 def deleteBookingID(id):
 
-    dbfunc.DeleBookingFromID(id)
+    dbfunc.DeleteBookingFromID(id)
 
     return redirect('/bookings')
 
@@ -707,6 +706,9 @@ def businessViewProfilePage(username):
     background_exists = os.path.isfile(profilePath1)
     #print(background_exists) 
     #print(businessUsername) 
+
+    #Service hours
+
  
     return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, title=businessName, businessUsername=businessUsername, arrServices=arrServices, api_key=API_KEY, b_lat=b_lat, b_lng=b_lng, fullAddress=fullAddress, file_exists=file_exists, background_exists=background_exists, reviews=formatted_reviews)
 
@@ -746,6 +748,36 @@ def save_file(file, field_name):
         return filename
     return None
 
+
+@app.route('/uploadImages/<businessName>/<serviceName>', methods=['get', 'POST'])
+def upload_service_file(businessName, serviceName):
+    uploadFolder = "static/images/uploads/" + dbfunc.CallBusinessInfo(businessName)[6] + '/' + serviceName
+    uploadFolder = uploadFolder.replace("%20", " ")
+
+    print(uploadFolder.replace("%20", " "))
+    
+    # Create the directory if it doesn't exist
+    if not os.path.exists(uploadFolder):
+        os.makedirs(uploadFolder)
+    
+    
+    # Handle file upload
+    if 'image' not in request.files:
+        return 'No file part'
+
+    file = request.files['image']
+
+    if file.filename == '':
+        return 'No selected file'
+
+    if file:
+        # Save the file to the directory
+        file_path = os.path.join(uploadFolder, file.filename)
+        file.save(file_path)
+        # return 'File uploaded successfully'
+
+
+    return redirect('/services')
 
 @app.route('/upload', methods=['get', 'POST'])
 def upload_file():
@@ -887,8 +919,6 @@ def addServiceFunction():
         ##print(employeeInfo)
         ##print(employeeInfo[3])
         bName = employeeInfo[3]
-        print(bName)
-    # #print(name + " " + price + " " + bName + " " + slots)
 
     # Create the swervice with both the given and known information
     CreateService(bName, name, price, slots, time, "0")
@@ -952,6 +982,28 @@ def getDBconnection():
         g.cursor=g.connection.cursor(scrollable=True)
 
 
+@app.route('/booking/edit/<bookingId>',  methods = ['GET','POST'])
+def reBook(bookingId=None):
+    currentUsername = session.get('username')
+    
+    bookingInfo = dbfunc.getBookingFromId(bookingId)
+    
+    customerName = "Editing: " + dbfunc.CallCustomerInfo(dbfunc.getBookingFromId(bookingId)[0][2])[1] + " " + dbfunc.CallCustomerInfo(dbfunc.getBookingFromId(bookingId)[0][2])[2]
+    customerUser = dbfunc.getBookingFromId(bookingId)[0][2]
+    print(customerUser)
+
+    print(bookingInfo)
+    currentDiscount = bookingInfo[0][5] 
+
+    imageFolder = "static/images/uploads/" + currentUsername + "/" + serviceName
+    print("imageFolder")
+    print(imageFolder)
+    # imageFolder = "static/images/uploads/ikeasunrise/Furniture Repair"
+
+    image_files = [f for f in os.listdir(imageFolder) if os.path.isfile(os.path.join(imageFolder, f))]   
+
+    return render_template("templates/sView.html", bookingId=bookingId, businessName=bookingInfo[0][1], serviceName=bookingInfo[0][0], customerName=customerName, customerUser=customerUser, currentDiscount=currentDiscount, image_files=image_files, image_folder=imageFolder)
+    # `return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours, reviews = formatted_reviews, username=businessUsername, background_exists=background_exists, file_exists=file_exists)
 
 @app.route('/<businessname>/service/<serviceName>')
 def singleServicePage(businessname, serviceName):
@@ -1007,7 +1059,15 @@ def singleServicePage(businessname, serviceName):
     #print(background_exists) 
     #print(businessUsername) 
 
-    return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours, reviews = formatted_reviews, username=businessUsername, background_exists=background_exists, file_exists=file_exists)
+    imageFolder = "static/images/uploads/" + businessUsername + "/" + serviceName
+    print("imageFolder")
+    print(imageFolder)
+    # imageFolder = "static/images/uploads/ikeasunrise/Furniture Repair"
+
+    image_files = [f for f in os.listdir(imageFolder) if os.path.isfile(os.path.join(imageFolder, f))]   
+
+
+    return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours, reviews = formatted_reviews, username=businessUsername, background_exists=background_exists, file_exists=file_exists, userType="customer",  image_files=image_files, image_folder=imageFolder)
 
 @app.route('/exitingServicePage', methods = ['post'])
 def exitingServicePage():
@@ -1033,8 +1093,20 @@ def singleServiceEditPage(businessname, serviceName):
     # Get Current Service Information
     currentService = dbfunc.GetService(serviceName, businessname)
     currentServiceDescription = dbfunc.GetDescription(serviceName, businessname)
-    return render_template("templates/sEdit.html", currentService=currentService, currentServiceDescription=currentServiceDescription)
 
+    imageFolder = "static/images/uploads/" + currentUsername + "/" + serviceName
+    print("imageFolder")
+    print(imageFolder)
+    # imageFolder = "static/images/uploads/ikeasunrise/Furniture Repair"
+
+    if not os.path.exists(imageFolder):
+        os.makedirs(imageFolder)
+
+    image_files = [f for f in os.listdir(imageFolder) if os.path.isfile(os.path.join(imageFolder, f))]
+
+    return render_template("templates/sEdit.html", currentService=currentService, currentServiceDescription=currentServiceDescription, businessName=businessname, image_files=image_files, image_folder=imageFolder)
+
+@app.route('/updateService/<businessname>/<serviceName>', methods = ['post'])
 def updateService(businessname, serviceName): 
 
     currentService = dbfunc.GetService(serviceName, businessname)
@@ -1056,7 +1128,8 @@ def updateService(businessname, serviceName):
 
     dbfunc.UpdateService(information['service'], information['name'], information["price"], information['slots'], information['time'], "0")
 
-    #print('hello thereß')
+    
+    print('hello thereß')
 
     return
 
@@ -1412,6 +1485,10 @@ def run_python_function():
 
     username = session.get('username')
     
+    print(data.get('bookingID'))
+    print(data.get('customer'))
+    print("data.get('customerUser')")
+    print(data.get('customerUser'))
 
     parsed_url = urlparse(data.get("location"))
 
@@ -1479,13 +1556,49 @@ def run_python_function():
     #print("========")
 
     
+    #THISSSS
+    if g.role == "Business":
+        # Customerusername = data.get('customer')[9:]
+        # print(Customerusername)
+        # cuser = dbfunc.CallCustomerInfoByName(Customerusername)
+        # print(cuser)
+        print(data.get('bookingId')[14:])
+        print()
+        print(dbfunc.getBookingFromId(data.get('bookingId')[14:]))
+        service = dbfunc.getBookingFromId(data.get('bookingId')[14:])[0][0]
+        businessName = dbfunc.getBookingFromId(data.get('bookingId')[14:])[0][1]
+        print(test_detail)
+        print("service")
+        print(service)
+        print( data.get('customerUser'))
 
-    dbfunc.CreateBooking(test_detail, service, username, date_time_str, date_time_str2, "null")
+        discount = 0
+
+        # Delete old booking 
+        dbfunc.DeleteBookingFromID(data.get('bookingId')[14:])
+
+        dbfunc.CreateBooking(service, businessName, data.get('customerUser'), date_time_str, date_time_str2, discount)
+
+        # return redirect('/home')
+    elif g.role == "Customer":
+        dbfunc.CreateBooking(test_detail, service, username, date_time_str, date_time_str2, "null")
+
     # result = my_python_function(button_id)
 
     #print(dbfunc.getUserBookings("ctest"))
     result="hi there"
     return jsonify(result=result)
+
+
+@app.route('/apply_discount', methods=['POST'])
+def applyDiscount():
+    data = request.json
+    print(data['discountAmount'])
+    print(data.get('bookingId')[14:])
+
+    dbfunc.ApplyDiscount(data['discountAmount'], data.get('bookingId')[14:])
+
+    return jsonify()
 
 if __name__ == '__main__':
     app.run(debug=True)

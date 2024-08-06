@@ -270,21 +270,51 @@
         </script>
 
 
-        <!--Reviews Section-->
-        <div id="reviews">
-            <h2>User Reviews</h2>
-            <div class="review-list" id="review-list">
-                {% for review in reviews %}
-                    <div class="review">
-                        <h3> {{review.header}}</h3>
-                        <p>{{review.body}}</p>
-                        <p>Rating: {{review.rating}}</p>
-                        <p>By: {{review.fname}} {{review.lname}} ({{review.username}})</p>
+    <!--Reviews Section-->
+    <div id="reviews">
+        <h2>User Reviews</h2>
+        <div class="review-list" id="review-list">
+            {% for review in reviews %}
+                <div class="review">
+                    <h3> {{review.header}}</h3>
+                    <p>{{review.body}}</p>
+                    <p>Rating: {{review.rating}}</p>
+                    <p>By: {{review.fname}} {{review.lname}} ({{review.username}})</p>
+
+                    {% if not review.reply %}
+
+                        {% if g.role == 'Business' %}
+                        
+                            <button onclick="showReplyForm('{{review.id}}')">Reply</button>
+                        
+                        {% endif %}
+                        
+                        
+                    {% else %}
+                            
+                        <div class="reply">
+
+                            <p><strong>Reply:</strong> {{review.reply}}</p>
+
+                        </div>
+                        
+                    {% endif %}
+                    
+                    <!-- <button onclick="openReplyPopup('{{ review.id }}')">Reply</button> -->
+
+                    <!-- Display replies -->
+                    {% for reply in review.replies %}
+                    <div class="reply">
+                        <p>{{ reply.body }}</p>
+                        <p>By: {{ reply.business_name }}</p>
                     </div>
-                {% endfor %}
-            </div>
-            <button id = "loadMoreBtn" onclick="loadMoreReviews()">Load More</button>
+                    {% endfor %}
+
+                </div>
+            {% endfor %}
         </div>
+        <button id = "loadMoreBtn" onclick="loadMoreReviews()">Load More</button>
+    </div>
 
         <script>
 
@@ -299,47 +329,111 @@
 
             function loadMoreReviews(){
 
-                fetch('/load_more_reviews', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ 
-                        
-                        businessName: businessName,
-                        serviceName: serviceName,
-                        start: currentReviewIndex
-                    })
-                })
-                
-                .then(response => response.json())
-                .then(data => {
-                    console.log("here!!!")
-                    console.log(data.reviews)
-                    console.log(data.reviews)
-                    const reviewList = document.getElementById('review-list');
-                    data.reviews.forEach(review => {
-                        const reviewDiv = document.createElement('div');
-                        reviewDiv.classList.add('review');
-                        
-                        reviewDiv.innerHTML = `
-                            <h3>${review.header}</h3>
-                            <p>${review.body}</p>
-                            <p>Rating: ${review.rating}</p>
-                            <p>By: ${review.fname} ${review.lname} (${review.username})</p>`;                
-                
+            fetch('/load_more_reviews', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
                     
-                        reviewList.appendChild(reviewDiv);
-                    });
-                    currentReviewIndex += data.reviews.length;
-                    //if (data.reviews.length < 10) {
-                    //  document.getElementById('loadMoreBtn').style.display = 'none';
-                    //}
+                    businessName: businessName,
+                    serviceName: serviceName,
+                    start: currentReviewIndex
+                 })
+            })
+            
+            .then(response => response.json())
+            .then(data => {
+                console.log("here!!!")
+                console.log(data.reviews)
+                console.log(data.reviews)
+                const reviewList = document.getElementById('review-list');
+                data.reviews.forEach(review => {
+                    const reviewDiv = document.createElement('div');
+                    reviewDiv.classList.add('review');
+                    
+                    reviewDiv.innerHTML = `
+                        <h3>${review.header}</h3>
+                        <p>${review.body}</p>
+                        <p>Rating: ${review.rating}</p>
+                        <p>By: ${review.fname} ${review.lname} (${review.username})</p>`;                
+               
+                
+                    reviewList.appendChild(reviewDiv);
+                });
+                currentReviewIndex += data.reviews.length;
+                //if (data.reviews.length < 10) {
+                  //  document.getElementById('loadMoreBtn').style.display = 'none';
+                //}
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function submitReview() {
+            const body = document.getElementById('body').value;
+            const reviewHeader = document.getElementById('reviewTitle').value;
+            const reviewRating = document.getElementById('rating').value;
+
+            // const additionalData = { key: 'value' }; // Replace with your data
+
+            fetch('/submit_review', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    
+                },
+                body: JSON.stringify({
+                    body: body,
+                    header: reviewHeader,
+                    rating: reviewRating,
+                    businessName: businessName,
+                    serviceName: serviceName
                 })
-                .catch(error => console.error('Error:', error));
-            }
-        </script>
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                window.location.reload();  // Redirect after success
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+
+    
+    <!--Review Submission Form-->
+    {% if g.role == 'Customer' %}
+
+    <div>
+        <h2>Leave a Review!</h2>
+
+        <form method="post" >
+<!--            
+            <input type="hidden" name="business_name" value="{{ businessName }}">
+            <input type="hidden" name="service_name" value="{{ serviceName }}"> -->
+
+            <label for="reviewTitle">Review Title:</label>
+            <input type="text" id="reviewTitle" name="reviewTitle" required>
+            <br>
+            <br>
+
+            <label for="body">Review:</label>
+            <textarea id="body" name="body" required></textarea>
+            <br>
+
+            <label for="rating">Rating:</label>
+            <input type="number" id="rating" name="rating" min="1" max="5" step="0.5" required>
+            <br>
+
+            <button type="button" onclick="submitReview()">Submit Review</button>
+        </form>
     </div>
+
+    {% endif %}
+
+</div>
+
 
 
     {% endblock %}

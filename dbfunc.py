@@ -5,7 +5,7 @@ import hashlib
 from database import OracleConfig
 from dotenv import load_dotenv
 import math
-from haversine import haversine,Unit
+#from haversine import haversine,Unit
 load_dotenv()
 #setup the database connection
 database= OracleConfig()

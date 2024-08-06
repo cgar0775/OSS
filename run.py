@@ -1310,8 +1310,38 @@ def load_more_reviews():
         'servicename': r[8]
     } for r in reviews]
 
-    # return render_template('sView.html', reviews=reviews)
+
     return jsonify({'reviews': formatted_reviews})
+
+@app.route('/submit_review', methods=['POST'])
+def submit_review():
+    
+    # print(data.re) data = request.json  # Get JSON data sent from JavaScript
+
+    #data = request.json
+    #print(data)
+
+    data = request.get_json()
+    username = session.get('username')
+    fname = dbfunc.CallCustomerInfo(username)[1] 
+    lname =dbfunc.CallCustomerInfo(username)[2]
+    
+    header = data.get('header')
+    body = data.get('body')
+    rating = data.get('rating')
+    
+    businessname = data.get('businessName')
+    servicename = data.get('serviceName')
+
+    
+    
+    dbfunc.CreateReview(username,fname,lname,header,body,rating,businessname,servicename)
+    
+    return jsonify({'message': 'Review submitted successfully'}), 200
+
+
+
+
 
 
 

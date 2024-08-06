@@ -94,13 +94,10 @@
         <!-- reviews here (maybe) -->
         
         <h2>Reviews</h2>
-        
         <div id="servicesContainer" class="contentArea">
-            {% include 'components/reviews.html' %}
-            {% include 'components/reviews.html' %}
-            {% include 'components/reviews.html' %}
-            {% include 'components/reviews.html' %}
-            
+            {% for review in reviews %}
+                {% include 'components/reviews.html' %}
+            {% endfor %}
         </div>
     </div>
 </div>

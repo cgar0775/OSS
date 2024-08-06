@@ -1429,7 +1429,7 @@ def load_more_reviews():
         reviews = reviews[start:]
 
     #print("reviews")
-    #print(reviews)
+    print(reviews)
 
     formatted_reviews = [{
         'id': r[0],
@@ -1473,9 +1473,24 @@ def submit_review():
     return jsonify({'message': 'Review submitted successfully'}), 200
 
 
+
 @app.route('/submit_reply', methods=['POST'])
 def submit_reply():
-    
+
+    data = request.get_json()
+    #username = session.get('username')
+    businessname = data.get('businessName')
+    servicename = data.get('serviceName')
+    reply = data.get('reply')
+
+    print(data.get('reviewID'))
+
+   #  = dbfunc.CreateResponse(businessname,id,reply)
+
+
+
+
+
 
 
 

@@ -355,10 +355,10 @@
 
                         {% if g.role == 'Business' %}
                         
-                            <button onclick="showReplyForm()">Reply</button>
-                            <div id="textBoxContainer">
-                                <textarea id="Reply" name="Reply" style="display:none;" required></textarea>
-                                <button type="button" id="button" onclick="submitReply()" style="display:none;">Submit</button>
+                            <button onclick="showReplyForm('{{ review.id }}')">Reply</button>
+                            <div id="textBoxContainer_{{review.id}}">
+                                <textarea id="Reply_{{review.id}}" name="Reply" style="display:none;" required></textarea>
+                                <button type="button" id="button_{{review.id}}" onclick="submitReply('{{review.id}}')" style="display:none;">Submit</button>
                             </div>
                         
                             <script>
@@ -402,30 +402,31 @@
 
         <script>
 
-            function submitReply(){
+            const businessName = "{{ businessName }}";
+            const serviceName = "{{ serviceName }}";
 
-                fetch('/load_more_reviews', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
+            function submitReply(reviewId){
+
+                const Reply = document.getElementById('Reply' + reviewId).value;
+
+                fetch('/submit_reply', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ 
+                    body: JSON.stringify({ 
                     
-                    businessName: businessName,
-                    serviceName: serviceName,
-                    start: currentReviewIndex
+                        businessName: businessName,
+                        serviceName: serviceName,
+                        reply: Reply,
+                        reviewId:reviewId
+                    })
                  })
-            })
-
-
             }
 
         </script>
 
         <script>
-
-            const businessName = "{{ businessName }}";
-            const serviceName = "{{ serviceName }}";
 
             let currentReviewIndex = 10;
 

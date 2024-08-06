@@ -1042,8 +1042,25 @@ def singleServicePage(businessname, serviceName):
         'body': r[5],
         'rating': r[6],
         'businessname': r[7],
-        'servicename': r[8]
+        'servicename': r[8],
+        'reply': ""
     } for r in reviews]
+
+    response = {}
+
+    for review in formatted_reviews:
+        print("review")
+        data = dbfunc.GetResponse(review ['businessname'], review['servicename'], review['id'])
+        namePair = (data[0][1], data[0][2])
+        rid = data[0][0]
+
+        print(str(namePair) + " " + str(rid))
+
+        response[rid] = namePair
+        review['reply'] = data[0][2]
+
+        print(review['reply'])
+    
 
     #if leave page do the following
     #cursor.close()
@@ -1477,13 +1494,26 @@ def submit_review():
 @app.route('/submit_reply', methods=['POST'])
 def submit_reply():
 
-    data = request.get_json()
+    data = request.json
     #username = session.get('username')
     businessname = data.get('businessName')
     servicename = data.get('serviceName')
     reply = data.get('reply')
+    reviewId = data.get('reviewId')
 
-    print(data.get('reviewID'))
+    print(reply)
+    print("data.get('reviewId')")
+    print(data.get('reviewId'))
+    print(data.get('businessName'))
+
+    print(id)
+    dbfunc.CreateResponse(businessname,data.get('reviewId'),reply)
+
+    print("made it here!")
+    
+    
+    return redirect(request.referrer or url_for('current_page'))        
+
 
    #  = dbfunc.CreateResponse(businessname,id,reply)
 

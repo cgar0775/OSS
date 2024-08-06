@@ -356,16 +356,18 @@
                         {% if g.role == 'Business' %}
                         
                             <button onclick="showReplyForm('{{ review.id }}')">Reply</button>
-                            <div id="textBoxContainer_{{review.id}}">
-                                <textarea id="Reply_{{review.id}}" name="Reply" style="display:none;" required></textarea>
-                                <button type="button" id="button_{{review.id}}" onclick="submitReply('{{review.id}}')" style="display:none;">Submit</button>
+                            <div id="textBoxContainer_{{review.id}}"  style="display:none;" class="replyBox">
+                                <textarea id="Reply_{{review.id}}" name="Reply" required></textarea>
+                                <button type="button" id="button_{{review.id}}" onclick="submitReply('{{review.id}}')">Submit</button>
                             </div>
                         
                             <script>
                                 function showReplyForm() {
                                     // Use the unique review ID to show the corresponding textarea
-                                    document.getElementById('Reply').style.display = 'block';
-                                    document.getElementById('button').style.display = 'block';
+                                    console.log("hi there")
+                                    // document.getElementById('Reply').style.display = 'block';    
+                                    document.getElementsByClassName('replyBox')[0].style.display = 'block';    
+                                    // document.getElementById('button').style.display = 'block';
                                 }
                             </script>
 
@@ -391,6 +393,7 @@
                     <div class="reply">
                         <p>{{ reply.body }}</p>
                         <p>By: {{ reply.business_name }}</p>
+                        
                     </div>
                     {% endfor %}
 
@@ -407,8 +410,11 @@
 
             function submitReply(reviewId){
 
-                const Reply = document.getElementById('Reply' + reviewId).value;
-
+                console.log("hi there")
+                console.log(reviewId)
+                console.log(businessName)
+                const Reply = document.getElementById('Reply_' + reviewId).value;
+                console.log("hi there")
                 fetch('/submit_reply', {
                     method: 'POST',
                     headers: {
@@ -419,7 +425,7 @@
                         businessName: businessName,
                         serviceName: serviceName,
                         reply: Reply,
-                        reviewId:reviewId
+                        reviewId: reviewId
                     })
                  })
             }

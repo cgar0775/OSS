@@ -2,38 +2,26 @@
 
 {% block content %}
 
-<h1 style="text-align: center;">Greetings, {{ name }}!</h1>
+<h1 style="text-align: center;">Welcome {{ name }}!</h1>
 
 <div>
-
-    <!-- For You Section -->
-    <div id="nearContainer">
-        <h2>For You:</h2>
-        <div id="nearCol">
-            {% include 'components/serviceBox.html' %}
-            {% include 'components/serviceBox.html' %}
-            {% include 'components/serviceBox.html' %}
-            {% include 'components/serviceBox.html' %}
-            {% include 'components/serviceBox.html' %}
-            {% include 'components/serviceBox.html' %}
-        </div>
-    </div>  
-    
+  
     <!-- Near You Section -->
     <div id="nearContainer">
-        <h2>Near You:</h2>
+        <h2>Businesses Near You:</h2>
         <div id="nearCol">
             {% for business in nearby_businesses %}
                 <div id="bookingBox">
-                    <img>
+                    
                     <h2><a href="{{ url_for('businessViewProfilePage', username=business.username) }}">{{ business.name }}</a></h2>
+                    <p>{{ business.address }}</p>
                     <h3>
                         {% for service in business.services %}
                         <li>{{ service.name }} - ${{ service.price }}</li>
+                        <a href="/{{business.name}}/service/{{service.name}}"><button>Book Now!</button></a>
+                        <br>
                         {% endfor %}
                     </h3>
-                    <p>{{ business.address }}</p>
-                    <button>Book Now!</button>
                 </div>
             {% endfor %}
         </div>
@@ -41,100 +29,19 @@
     
     <!-- Your Bookings Section -->
     <div id="nearContainer">
-        <h2>Your Bookings:</h2>
+        <h2>Your Bookings Reminder:</h2>
         <div id="nearCol">
-            {% include 'components/bookingBox.html' %}
-            {% include 'components/bookingBox.html' %}
-            {% include 'components/bookingBox.html' %}
+            {% for booking in bookings %}
+                <div id="bookingBox">
+                    <h3>Booking for {{ booking.business_name }}</h3>
+                    <h4> Service: <u>{{booking.service_name}}</u> </h4>
+                    <p>Start Time: {{ booking.time }} | Price: {{ booking.price }}</p>
+                    
+                </div>
+            {% endfor %}
         </div>
     </div>
 
 </div>
-<!-- <h1 style="text-align: center;">Greetings, {{name}}!</h1>
-
-    <div id="">
-        <h2>Your Bookings:</h2>
-        
-        <div id="nearCol">
-
-            <img>
-            <h3>Publix</h3>
-            <h5>address</h5>
-            <h6>.3 miles away</h6>
-            <button></button>
-            <img>
-
-            <h3>Publix</h3>
-            <h5>address</h5>
-            <h6>.3 miles away</h6>
-            <button></button>
-            
-            <img>
-            <h3>Publix</h3>
-            <h5>address</h5>
-            <h6>.3 miles away</h6>
-            <button></button>
-        </div>
-        
-
-    </div>
-
-    <div id="nearContainer">
-        <h2>Near You:</h2>
-        <div id="nearCol">
-
-            <img>
-            <h3>Publix</h3>
-            <h5>address</h5>
-            <h6>.3 miles away</h6>
-            <img>
-            <h3>Publix</h3>
-            <h5>address</h5>
-            <h6>.3 miles away</h6>
-            <img>
-            <h3>Publix</h3>
-            <h5>address</h5>
-            <h6>.3 miles away</h6>
-        </div>
-    </div>  
-
-    <div id="nearContainer">
-        <h2>For You:</h2>
-        <div id="nearCol">
-
-            <img>
-            <h3>Publix</h3>
-            <h5>address</h5>
-            <h6>.3 miles away</h6>
-            <img>
-            <h3>Publix</h3>
-            <h5>address</h5>
-            <h6>.3 miles away</h6>
-            <img>
-            <h3>Publix</h3>
-            <h5>address</h5>
-            <h6>.3 miles away</h6>
-        </div>
-    </div>  
-
-    <!-- <div id="nearContainer">
-        <h2>??? You:</h2>
-        <div id="nearCol">
-
-            <img>
-            <h3>Publix</h3>
-            <h5>address</h5>
-            <h6>.3 miles away</h6>
-            <img>
-            <h3>Publix</h3>
-            <h5>address</h5>
-            <h6>.3 miles away</h6>
-            <img>
-            <h3>Publix</h3>
-            <h5>address</h5>
-            <h6>.3 miles away</h6>
-        </div>
-    </div>   -->
-
 
 {% endblock %}

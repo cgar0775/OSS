@@ -1,6 +1,6 @@
 <div id="navheader">
     <nav class="navbar">
-        <a href="/home"><img src="{{ url_for('static', filename='/images/logo/logo1.png')}}" id="headerlogo"></a>
+        <img src="{{ url_for('static', filename='/images/logo/logo1.png')}}" id="headerlogo">
 
 
 
@@ -22,9 +22,9 @@
             <li><a href="/employees">Employees</a></li>
             <li><a href="/analytics">Analytics</a></li>
             <!-- <li><a href="profile/edit">Profile</a></li>  -->
+            <li><a href="/business/view">Our Profile</a></li>
             <li><a href="/logout">Logout</a></li>
             <!-- <img src="../../static/images/uploads/{{username}}/profile_picture.png"> -->
-            <li><a href="/business/view">Our Profile</a></li>
             <!-- <li><a href="/profile"><img src="/static/images/icons/profile.png" style="width:50px;"></a></li> -->
             
         </ul>
@@ -32,7 +32,7 @@
 
         {% if g.role == 'Administrator' %}
         <ul>
-            <!-- <li><a href="/home">Home</a></li> -->
+            <li><a href="/home">Home</a></li>
             <li><a href="/services">Services</a></li>
             <li><a href="/bookings">Bookings</a></li>
             <li><a href="/employees">Employees</a></li>
@@ -45,7 +45,7 @@
 
         {% if g.role == 'Employee' %}
         <ul>
-            <!-- <li><a href="/home">Home</a></li> -->
+            <li><a href="/home">Home</a></li>
             <li><a href="/bookings">Bookings</a></li>
             <!-- <li><a href="profile/edit">Profile</a></li>  -->
             <li><a href="/business/view">Business Profile</a></li>

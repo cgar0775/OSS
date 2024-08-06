@@ -5,7 +5,9 @@
     <h5>Description</h5>
     <!-- <p>something else here hehehe</p> -->
 
+    {% if g.role == 'Customer' %}
     <button>
         <a href="/{{businessName}}/service/{{service[1]}}">Book Now!</a>
     </button>
+    {% endif %}
 </div>

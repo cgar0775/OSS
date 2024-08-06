@@ -376,13 +376,16 @@ def homePage():
         
     elif CheckRole(username)[0]=='Business':
         BusinessInfo = CallBusinessInfo(CallBusinessName(username)[0])
-        return render_template('bHome.html', name = BusinessInfo[0]) #Change this to the buisness home page!!!
+        arrServices = GetBusinessServices(BusinessInfo[0])
+        return render_template('bHome.html', name = BusinessInfo[0], arrServices=arrServices) #Change this to the buisness home page!!!
     
     elif CheckRole(username)[0]=='Employee' or 'Administrator':
         employeeInfo = dbfunc.CallEmployeeInfo(username)
         employee_name = employeeInfo[1]
         business_name = employeeInfo[3]
-        return render_template('bHome.html', name = employee_name, business_name=business_name)
+        arrServices = GetBusinessServices(business_name)
+        return render_template('bHome.html', employee_name = employee_name, name=business_name, arrServices = arrServices)
+    
     
     # return render_template('home.html', name = "name")
     return render_template('home.html')
@@ -470,8 +473,15 @@ def bookingPage():
 
     # TODO: Make this faster
     # Get all of the bookings for the business
-    if CheckRole(username)[0] == 'Business' and 'Employee' and 'Administrator':
-        name = CallBusinessName(username)[0]
+    if CheckRole(username)[0] == 'Business' or 'Employee' or 'Administrator':
+        if CheckRole(username)[0] == 'Employee' or 'Administrator':
+            employeeInfo = dbfunc.CallEmployeeInfo(username)
+            #employee_name = employeeInfo[1]
+            business_name = employeeInfo[3]
+            name = business_name
+        else:
+            name = CallBusinessName(username)[0]
+        
         allBookings = dbfunc.getBusinessBookings(name)
         bookingData = []
         idList = []
@@ -643,7 +653,7 @@ def businessViewProfilePage(username):
     #print(background_exists) 
     #print(businessUsername) 
  
-    return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, title='View Buisness', businessUsername=businessUsername, arrServices=arrServices, api_key=API_KEY, b_lat=b_lat, b_lng=b_lng, fullAddress=fullAddress, file_exists=file_exists, background_exists=background_exists)
+    return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, title=businessName, businessUsername=businessUsername, arrServices=arrServices, api_key=API_KEY, b_lat=b_lat, b_lng=b_lng, fullAddress=fullAddress, file_exists=file_exists, background_exists=background_exists)
 
 
 @app.route('/business/edit')
@@ -943,7 +953,7 @@ def singleServicePage(businessname, serviceName):
 def exitingServicePage():
     #print("hi there")
     
-    dbfunc.closeConnections()
+    #dbfunc.closeConnections()
 
     return
 

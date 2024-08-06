@@ -264,22 +264,21 @@
                     <p>Rating: {{review.rating}}</p>
                     <p>By: {{review.fname}} {{review.lname}} ({{review.username}})</p>
 
+                    {% if not review.reply %}
 
-                    {% if g.role == 'Business' %}
-
-                        {% if not review.reply %}
-
+                        {% if g.role == 'Business' %}
+                        
                             <button onclick="showReplyForm('{{review.id}}')">Reply</button>
                         
-                        {% else %}
+                    {% else %}
                             
-                            <div class="reply">
+                        <div class="reply">
 
-                                <p><strong>Reply:</strong> {{review.reply}}</p>
+                            <p><strong>Reply:</strong> {{review.reply}}</p>
 
-                            </div>
+                        </div>
                         
-                        {% end if %}
+                    {% end if %}
 
 
                     

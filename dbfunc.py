@@ -137,6 +137,21 @@ def CheckBusinessName(name):
     #returns the first (and expectedly only) row
     return val
 
+def CallCustomerInfoByName(fname, lname):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    #calls a specific business' info from the database
+    query=f"SELECT * FROM CUSTOMERINFO WHERE firstname='{fname}' AND lastname='{lname}'"
+    cursor.execute(query)
+    connection.commit()
+    #store result so we can close db connection
+    val=cursor.fetchone()
+    cursor.close()
+    connection.close()
+    #returns the first (and expectedly only) row
+    return val
+
+
 def CallCustomerInfo(name):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
@@ -353,6 +368,7 @@ def CreateBooking(sname,bname,username,timeslot_start,timeslot_end,discount):
     cursor=connection.cursor()
     naxtID = maxBookingId()[0] + 1
     query=f"INSERT INTO bookings VALUES('{sname}','{bname}','{username}',TO_DATE('{timeslot_start}', 'MON-DD-YYYY HH24:MI'),TO_DATE('{timeslot_end}', 'MON-DD-YYYY HH24:MI'), NULL, {naxtID})"
+    print(query)
     cursor.execute(query)
     connection.commit()
     cursor.close()
@@ -408,7 +424,18 @@ def getBusinessBookingsOnDateAndTime(name, date):
     bookings=cursor.fetchall()
     cursor.close()
     connection.close()
-    print("BOOKINGS: " + str(bookings))
+    return bookings
+
+# Returns a booking from an id
+def getBookingFromId(id):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"SELECT * FROM bookings WHERE id='{id}'"
+    cursor.execute(query)
+    connection.commit()
+    bookings=cursor.fetchall()
+    cursor.close()
+    connection.close()
     return bookings
 
 #update an existing booking
@@ -429,6 +456,17 @@ def UpdateBooking(sname,bname,username,timeslot_start,timeslot_end, new_timeslot
     connection.close()
     return
 
+def ApplyDiscount(discount, bookingId):
+    # UPDATE bookings SET discount='25' WHERE id = '3' 
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"""UPDATE bookings SET discount='{discount}' WHERE id = '{bookingId}' """
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return
+
 def DeleteBooking(sname,bname,username,timeslot_start,timeslot_end, new_timeslot_start, new_timeslot_end):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
@@ -442,7 +480,7 @@ def DeleteBooking(sname,bname,username,timeslot_start,timeslot_end, new_timeslot
     connection.close()
     return
 
-def DeleBookingFromID(id):
+def DeleteBookingFromID(id):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
     query=f"""DELETE FROM bookings WHERE id = {id}"""

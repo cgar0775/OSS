@@ -486,8 +486,8 @@ def bookingPage():
         for booking in allBookings:
             # #print(dbfunc.CallCustomerInfo(booking[2])) 
             customerName = dbfunc.CallCustomerInfo(booking[2])[1] + " " + dbfunc.CallCustomerInfo(booking[2])[2]
-            tempData = [booking[0], customerName , str(booking[3])[:10], str(booking[3])[11:], str(booking[4])[11:], dbfunc.CallCustomerInfo(booking[2])[8], dbfunc.CallCustomerInfo(booking[2])[7]]
-
+            tempData = [booking[0], customerName , str(booking[3])[:10], str(booking[3])[11:], str(booking[4])[11:], dbfunc.CallCustomerInfo(booking[2])[8], dbfunc.CallCustomerInfo(booking[2])[7], booking[5]]
+            # print()
             bookingData.append(tempData)
 
             print(booking)
@@ -520,18 +520,17 @@ def bookingPage():
     # return render_template('templates/Bbookings.html')
     return render_template("templates/bBookings.html")
 
-@app.route('/deleteBookingFunction')
+@app.route('/deleteBookingFunction', methods=['POST'])
 def deleteBooking():
     data = request.json
-    #print(data.get("bookingID"))
+    dbfunc.DeleteBookingFromID(data.get("bookingID"))
 
-
-    return jsonify()
+    return jsonify(data)
 
 @app.route('/booking/delete/<id>')
 def deleteBookingID(id):
 
-    dbfunc.DeleBookingFromID(id)
+    dbfunc.DeleteBookingFromID(id)
 
     return redirect('/bookings')
 
@@ -648,6 +647,9 @@ def businessViewProfilePage(username):
     background_exists = os.path.isfile(profilePath1)
     #print(background_exists) 
     #print(businessUsername) 
+
+    #Service hours
+
  
     return render_template('templates/bProfile.html', businessName = businessName, businessAddress=businessAddress, title='View Buisness', businessUsername=businessUsername, arrServices=arrServices, api_key=API_KEY, b_lat=b_lat, b_lng=b_lng, fullAddress=fullAddress, file_exists=file_exists, background_exists=background_exists)
 
@@ -888,6 +890,21 @@ def getDBconnection():
         g.cursor=g.connection.cursor(scrollable=True)
 
 
+@app.route('/booking/edit/<bookingId>',  methods = ['GET','POST'])
+def reBook(bookingId=None):
+    currentUsername = session.get('username')
+    
+    bookingInfo = dbfunc.getBookingFromId(bookingId)
+    
+    customerName = "Editing: " + dbfunc.CallCustomerInfo(dbfunc.getBookingFromId(bookingId)[0][2])[1] + " " + dbfunc.CallCustomerInfo(dbfunc.getBookingFromId(bookingId)[0][2])[2]
+    customerUser = dbfunc.getBookingFromId(bookingId)[0][2]
+    print(customerUser)
+
+    print(bookingInfo)
+    currentDiscount = bookingInfo[0][5]    
+
+    return render_template("templates/sView.html", bookingId=bookingId, businessName=bookingInfo[0][1], serviceName=bookingInfo[0][0], customerName=customerName, customerUser=customerUser, currentDiscount=currentDiscount)
+    # `return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours, reviews = formatted_reviews, username=businessUsername, background_exists=background_exists, file_exists=file_exists)
 
 @app.route('/<businessname>/service/<serviceName>')
 def singleServicePage(businessname, serviceName):
@@ -943,7 +960,7 @@ def singleServicePage(businessname, serviceName):
     #print(background_exists) 
     #print(businessUsername) 
 
-    return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours, reviews = formatted_reviews, username=businessUsername, background_exists=background_exists, file_exists=file_exists)
+    return render_template("templates/sView.html", businessName=businessname, serviceName=serviceName, hours=hours, reviews = formatted_reviews, username=businessUsername, background_exists=background_exists, file_exists=file_exists, userType="customer")
 
 @app.route('/exitingServicePage', methods = ['post'])
 def exitingServicePage():
@@ -1318,6 +1335,10 @@ def run_python_function():
 
     username = session.get('username')
     
+    print(data.get('bookingID'))
+    print(data.get('customer'))
+    print("data.get('customerUser')")
+    print(data.get('customerUser'))
 
     parsed_url = urlparse(data.get("location"))
 
@@ -1385,13 +1406,49 @@ def run_python_function():
     #print("========")
 
     
+    #THISSSS
+    if g.role == "Business":
+        # Customerusername = data.get('customer')[9:]
+        # print(Customerusername)
+        # cuser = dbfunc.CallCustomerInfoByName(Customerusername)
+        # print(cuser)
+        print(data.get('bookingId')[14:])
+        print()
+        print(dbfunc.getBookingFromId(data.get('bookingId')[14:]))
+        service = dbfunc.getBookingFromId(data.get('bookingId')[14:])[0][0]
+        businessName = dbfunc.getBookingFromId(data.get('bookingId')[14:])[0][1]
+        print(test_detail)
+        print("service")
+        print(service)
+        print( data.get('customerUser'))
 
-    dbfunc.CreateBooking(test_detail, service, username, date_time_str, date_time_str2, "null")
+        discount = 0
+
+        # Delete old booking 
+        dbfunc.DeleteBookingFromID(data.get('bookingId')[14:])
+
+        dbfunc.CreateBooking(service, businessName, data.get('customerUser'), date_time_str, date_time_str2, discount)
+
+        # return redirect('/home')
+    elif g.role == "Customer":
+        dbfunc.CreateBooking(test_detail, service, username, date_time_str, date_time_str2, "null")
+
     # result = my_python_function(button_id)
 
     #print(dbfunc.getUserBookings("ctest"))
     result="hi there"
     return jsonify(result=result)
+
+
+@app.route('/apply_discount', methods=['POST'])
+def applyDiscount():
+    data = request.json
+    print(data['discountAmount'])
+    print(data.get('bookingId')[14:])
+
+    dbfunc.ApplyDiscount(data['discountAmount'], data.get('bookingId')[14:])
+
+    return jsonify()
 
 if __name__ == '__main__':
     app.run(debug=True)

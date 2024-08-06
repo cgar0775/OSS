@@ -142,13 +142,14 @@
 
                         // Display the current date and the avalible times
                         document.querySelector("#heading").innerText = dateInfo;
+                        document.querySelector("#data").innerHTML = "<div class='loader'></div>";
 
                         fetch('/run_python', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
-                            body: JSON.stringify({ dateInfo: dateInfo })
+                            body: JSON.stringify({ dateInfo: dateInfo, bInfo: businessName, sname: serviceName })
                         })
                         .then(response => response.json())
                         .then(data => {
@@ -156,6 +157,8 @@
                             // document.querySelector(".times").innerText = data.result[2];
                             // document.querySelector(".times").innerText = data.result.length;
                             document.querySelector("#data").innerText = "";   
+
+                            counter = 0;
 
                             for(const item of data.result){
                                 const dateObject = new Date(item);
@@ -178,10 +181,11 @@
                     
                                 document.querySelector("#data").innerHTML += "<label>" + timeLabel + "</label>"
                                 document.querySelector("#data").innerHTML += "<button class='button' id='" + timeSmallLabel + "'>Book</button> <br>"
-                                
+                                document.querySelector("#data").innerHTML += data.bookingsNum[counter]
                                 document.querySelector("#data").innerHTML += "</form>"
 
                         
+                                counter++;
                             }
                             const buttons = document.querySelectorAll('.button');
 

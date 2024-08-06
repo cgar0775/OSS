@@ -263,6 +263,38 @@
                     <p>{{review.body}}</p>
                     <p>Rating: {{review.rating}}</p>
                     <p>By: {{review.fname}} {{review.lname}} ({{review.username}})</p>
+
+
+                    {% if g.role == 'Business' %}
+
+                        {% if not review.reply %}
+
+                            <button onclick="showReplyForm('{{review.id}}')">Reply</button>
+                        
+                        {% else %}
+                            
+                            <div class="reply">
+
+                                <p><strong>Reply:</strong> {{review.reply}}</p>
+
+                            </div>
+                        
+                        {% end if %}
+
+
+                    
+                    <!-- <button onclick="openReplyPopup('{{ review.id }}')">Reply</button> -->
+
+                    {% endif %}
+
+                    <!-- Display replies -->
+                    {% for reply in review.replies %}
+                    <div class="reply">
+                        <p>{{ reply.body }}</p>
+                        <p>By: {{ reply.business_name }}</p>
+                    </div>
+                    {% endfor %}
+
                 </div>
             {% endfor %}
         </div>
@@ -323,6 +355,7 @@
         }
     </script>
 
+    
     <!--Review Submission Form-->
     {% if g.role == 'Customer' %}
 

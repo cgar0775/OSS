@@ -396,6 +396,21 @@ def getBusinessBookingsOnDate(name, date):
     connection.close()
     return bookings
 
+#return bookings on date and time
+def getBusinessBookingsOnDateAndTime(name, date):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    print(date)
+    query=f"SELECT COUNT(*) FROM bookings WHERE bname='{name}' AND timeslot_start = TO_DATE('{date}', 'YYYY-MM-DD HH24:MI:SS')"
+    print(query)
+    cursor.execute(query)
+    connection.commit()
+    bookings=cursor.fetchall()
+    cursor.close()
+    connection.close()
+    print("BOOKINGS: " + str(bookings))
+    return bookings
+
 #update an existing booking
 #same inputs as creating a booking with additional new timeslots to be updated to
 def UpdateBooking(sname,bname,username,timeslot_start,timeslot_end, new_timeslot_start, new_timeslot_end, discount):
@@ -421,6 +436,16 @@ def DeleteBooking(sname,bname,username,timeslot_start,timeslot_end, new_timeslot
     WHERE sname='{sname}', bname='{bname}', username='{username}',
     timeslot_start=TO_DATE('{timeslot_start}', 'MON-DD-YYYY HH24:MI'), 
     timeslot_end=TO_DATE('{timeslot_end}', 'MON-DD-YYYY HH24:MI'))"""
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return
+
+def DeleBookingFromID(id):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"""DELETE FROM bookings WHERE id = {id}"""
     cursor.execute(query)
     connection.commit()
     cursor.close()

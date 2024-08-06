@@ -28,8 +28,9 @@
                             <td>{{ data }}</td>
                         {% endfor %}
                         <!-- <td>{{ items[0] }}</td> -->
+                        <!-- <td>{{idList[loop.index - 1]}}</td> -->
                         <td><a href="/{{items[0]}}/booking/edit/{{items[1]}}"><button>Edit</button></a></td>
-                        <td><a href="/{{items[0]}}/booking/delete/{{items[1]}}"><button>Edit</button></a></td>
+                        <td><a href="/booking/delete/{{idList[loop.index - 1]}}"><button>Delete</button></a></td>
                     </tr>
                 {% endfor %}
                 <!-- Add dynamic data here -->

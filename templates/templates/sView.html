@@ -353,7 +353,7 @@
         }
 
         function submitReview() {
-            const reviewText = document.getElementById('body').value;
+            const body = document.getElementById('body').value;
             const reviewHeader = document.getElementById('reviewTitle').value;
             const reviewRating = document.getElementById('rating').value;
 
@@ -366,15 +366,17 @@
                     
                 },
                 body: JSON.stringify({
-                    review: reviewText,
+                    body: body,
                     header: reviewHeader,
-                    rating: reviewRating
+                    rating: reviewRating,
+                    businessName: businessName,
+                    serviceName: serviceName
                 })
             })
             .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
-                window.location.href = '/thank_you';  // Redirect after success
+                window.location.reload();  // Redirect after success
             })
             .catch((error) => {
                 console.error('Error:', error);

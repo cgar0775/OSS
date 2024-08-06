@@ -1199,19 +1199,27 @@ def submit_review():
     
     # print(data.re) data = request.json  # Get JSON data sent from JavaScript
 
-    data = request.json
-    print(data)
+    #data = request.json
+    #print(data)
 
-    # bname = request.form['businessname']
-    # sname = request.form['servicename']
+    data = request.get_json()
     username = session.get('username')
-    header = request.form.get('reviewTitle')
-    body = request.form.get('body')
-    rating = request.form.get('rating')
     fname = dbfunc.CallCustomerInfo(username)[1] 
     lname =dbfunc.CallCustomerInfo(username)[2]
+    
+    header = data.get('header')
+    body = data.get('body')
+    rating = data.get('rating')
+    
+    businessname = data.get('businessName')
+    servicename = data.get('serviceName')
 
-    dbfunc.CreateReview(username,fname,lname,header,body,rating)
+    
+    
+    dbfunc.CreateReview(username,fname,lname,header,body,rating,businessname,servicename)
+    
+    return jsonify({'message': 'Review submitted successfully'}), 200
+
 
 
 

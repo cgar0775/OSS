@@ -364,7 +364,7 @@ def homePage():
                     'lng': business_geo[1]
                 })
                 #print("nearby", nearby_businesses)
-                print("business", businesses)
+                #print("business", businesses)
             
             session['s_nearby_businesses']=businesses
             session['s_nearby_businesses_t']=True
@@ -375,25 +375,20 @@ def homePage():
             businesses=session.get('s_nearby_businesses')
             return render_template('home.html', name=name, nearby_businesses=businesses)
         
-    elif CheckRole(username)=='Business':
-
-    # if CallBusinessInfo(CallBusinessName(username)[0]):
-        
+    elif CheckRole(username)[0]=='Business':
         BusinessInfo = CallBusinessInfo(CallBusinessName(username)[0])
         return render_template('bHome.html', name = BusinessInfo[0]) #Change this to the buisness home page!!!
-
-    # Check to see if it is an employee
-    elif CheckRole(username)=='Employee':
-    # if CallBusinessInfo(CallBusinessName(username)[0]):
-        
-        BusinessInfo = CallBusinessInfo(CallBusinessName(username)[0])
-        return render_template('bHome.html', name = BusinessInfo[0])
+    
+    elif CheckRole(username)[0]=='Employee' or 'Administrator':
+        employeeInfo = dbfunc.CallEmployeeInfo(username)
+        employee_name = employeeInfo[1]
+        business_name = employeeInfo[3]
+        return render_template('bHome.html', name = employee_name, business_name=business_name)
     
     # return render_template('home.html', name = "name")
     return render_template('home.html')
 
 @app.route('/search', methods=['GET', 'POST'])
-
 def searchPage():
     # Get user information
     username = session.get('username')
@@ -538,13 +533,13 @@ def employeePage():
         bname = BusinessInfo[0]
         employees = dbfunc.CallBusinessEmployees(bname)
 
-    elif g.role == "Administrator":
+    elif g.role == "Administrator": 
         
         bname = dbfunc.CallEmployeeInfo(username)[3]
         employees = dbfunc.CallBusinessEmployees(bname)
-
-
         
+        
+
     return render_template('templates/bEmployees.html', employees = employees)
 
 

@@ -1197,19 +1197,21 @@ def load_more_reviews():
 @app.route('/submit_review', methods=['POST'])
 def submit_review():
     
-    bname = request.form['businessname']
-    sname = request.form['servicename']
+    # print(data.re) data = request.json  # Get JSON data sent from JavaScript
+
+    data = request.json
+    print(data)
+
+    # bname = request.form['businessname']
+    # sname = request.form['servicename']
     username = session.get('username')
-    header = request.form['header1']
-    body = request.form['body']
-    rating = request.form['rating']
+    header = request.form.get('reviewTitle')
+    body = request.form.get('body')
+    rating = request.form.get('rating')
     fname = dbfunc.CallCustomerInfo(username)[1] 
     lname =dbfunc.CallCustomerInfo(username)[2]
 
-    print(bname)
-    print(sname)
-    
-    dbfunc.CreateReview(username,fname,lname,header,body,rating,bname,sname)
+    dbfunc.CreateReview(username,fname,lname,header,body,rating)
 
 
 

@@ -27,7 +27,7 @@ from flask_session import Session
 import redis
 import re
 
-import pytz
+#import pytz
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -67,7 +67,7 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit
 Session(app)
 
 # Timezone Configuration
-est = pytz.timezone('America/New_York')  # EST is part of the America/New_York timezone
+#est = pytz.timezone('America/New_York')  # EST is part of the America/New_York timezone
 
 
 #With this configuration, user sessions are stored in Redis, 
@@ -1042,8 +1042,29 @@ def singleServicePage(businessname, serviceName):
         'body': r[5],
         'rating': r[6],
         'businessname': r[7],
-        'servicename': r[8]
+        'servicename': r[8],
+        'reply': ""
     } for r in reviews]
+
+    response = {}
+
+    for review in formatted_reviews:
+        print("review")
+        data = dbfunc.GetResponse(review ['businessname'], review['servicename'], review['id'])
+        
+        #namePair = (data[0][1], data[0][2])
+        #rid = data[0][0]
+
+        #print(str(namePair) + " " + str(rid))
+
+        #response[rid] = namePair
+        
+        print(data)
+        if(data):
+            review['reply'] = data[0][2]
+
+        print(review['reply'])
+    
 
     #if leave page do the following
     #cursor.close()
@@ -1429,7 +1450,7 @@ def load_more_reviews():
         reviews = reviews[start:]
 
     #print("reviews")
-    #print(reviews)
+    print(reviews)
 
     formatted_reviews = [{
         'id': r[0],
@@ -1471,6 +1492,36 @@ def submit_review():
     dbfunc.CreateReview(username,fname,lname,header,body,rating,businessname,servicename)
     
     return jsonify({'message': 'Review submitted successfully'}), 200
+
+
+
+@app.route('/submit_reply', methods=['POST'])
+def submit_reply():
+
+    data = request.json
+    #username = session.get('username')
+    businessname = data.get('businessName')
+    servicename = data.get('serviceName')
+    reply = data.get('reply')
+    reviewId = data.get('reviewId')
+
+    print(reply)
+    print("data.get('reviewId')")
+    print(data.get('reviewId'))
+    print(data.get('businessName'))
+
+    print(id)
+    dbfunc.CreateResponse(businessname,data.get('reviewId'),reply)
+
+    print("made it here!")
+    
+    
+    return redirect(request.referrer or url_for('current_page'))        
+
+
+   #  = dbfunc.CreateResponse(businessname,id,reply)
+
+
 
 
 

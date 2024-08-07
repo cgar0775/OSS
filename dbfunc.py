@@ -5,7 +5,7 @@ import hashlib
 from database import OracleConfig
 from dotenv import load_dotenv
 import math
-from haversine import haversine,Unit
+#from haversine import haversine,Unit
 load_dotenv()
 #setup the database connection
 database= OracleConfig()
@@ -726,7 +726,8 @@ def getReviewIds(bname,sname):
 def CreateResponse(bname,id,body):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
-    query=f"INSERT INTO bresponse VALUES({id},{bname},'{body}')"
+    query=f"INSERT INTO bresponse VALUES({id},'{bname}','{body}')"
+    print(query)
     cursor.execute(query)
     connection.commit()
     cursor.close()
@@ -745,10 +746,11 @@ def EditResponse(id,body):
     return
 
 #gets the responses to reviews
-def GetResponse(bname,sname):
+def GetResponse(bname,sname,revid):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
-    query=f"SELECT bresponse.name, bresponse.body FROM bresponse INNER JOIN creviews c ON refid=id WHERE c.bname='{bname}' AND c.sname='{sname}'"
+    query=f"SELECT bresponse.refid, bresponse.name, bresponse.body FROM bresponse INNER JOIN creviews c ON refid=id WHERE c.bname='{bname}' AND c.sname='{sname}' AND refid={revid}"
+    print
     cursor.execute(query)
     connection.commit()
     res=cursor.fetchall()

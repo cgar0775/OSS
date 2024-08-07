@@ -64,7 +64,8 @@ Easy Find, presented by CCOM, is designed for both local service-seeking custome
    ```
 5. Verify redis
   ```sh
-redis-cli ping```
+redis-cli ping
+```
 It should respond with PONG
 
 6. Install Oracle

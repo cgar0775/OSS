@@ -488,7 +488,7 @@ def profilePage():
         #print("Empty Username!")
         return redirect(url_for('login'))
     name = dbfunc.CallCustomerInfo(username)[1] + " " + dbfunc.CallCustomerInfo(username)[2]
-    return render_template('templates/cEdit.html', name=name)
+    return render_template('templates/cProfile.html', name=name)
 
 @app.route('/bookings')
 def bookingPage():

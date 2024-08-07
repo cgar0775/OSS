@@ -1018,6 +1018,9 @@ def reBook(bookingId=None):
     print(imageFolder)
     # imageFolder = "static/images/uploads/ikeasunrise/Furniture Repair"
 
+    if not os.path.exists(imageFolder):
+        os.makedirs(imageFolder)
+
     image_files = [f for f in os.listdir(imageFolder) if os.path.isfile(os.path.join(imageFolder, f))]   
 
     return render_template("templates/sView.html", bookingId=bookingId, businessName=bookingInfo[0][1], serviceName=bookingInfo[0][0], customerName=customerName, customerUser=customerUser, currentDiscount=currentDiscount, image_files=image_files, image_folder=imageFolder)
@@ -1102,6 +1105,9 @@ def singleServicePage(businessname, serviceName):
     print("imageFolder")
     print(imageFolder)
     # imageFolder = "static/images/uploads/ikeasunrise/Furniture Repair"
+
+    if not os.path.exists(imageFolder):
+        os.makedirs(imageFolder)
 
     image_files = [f for f in os.listdir(imageFolder) if os.path.isfile(os.path.join(imageFolder, f))]   
 

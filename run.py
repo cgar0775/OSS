@@ -1051,13 +1051,17 @@ def singleServicePage(businessname, serviceName):
     for review in formatted_reviews:
         print("review")
         data = dbfunc.GetResponse(review ['businessname'], review['servicename'], review['id'])
-        namePair = (data[0][1], data[0][2])
-        rid = data[0][0]
+        
+        #namePair = (data[0][1], data[0][2])
+        #rid = data[0][0]
 
-        print(str(namePair) + " " + str(rid))
+        #print(str(namePair) + " " + str(rid))
 
-        response[rid] = namePair
-        review['reply'] = data[0][2]
+        #response[rid] = namePair
+        
+        print(data)
+        if(data):
+            review['reply'] = data[0][2]
 
         print(review['reply'])
     

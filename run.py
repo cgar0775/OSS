@@ -1419,7 +1419,7 @@ def data():
 
     while(startDate != current_date): #TODO: turn this into a do while loop
         #print(startDate)
-        dailyBookingsInfo[startDate.strftime("%A")] = dbfunc.getBusinessBookingsOnDate('TestB', startDate)[0][0]
+        dailyBookingsInfo[startDate.strftime("%A")] = dbfunc.getBusinessBookingsOnDate(dbfunc.CallBusinessName(session.get('username'))[0], startDate)[0][0]
         startDate += timedelta(days = 1) 
 
     for i in dailyBookingsInfo:

@@ -77,6 +77,24 @@ Session(app)
 
 # run.py General Functions 
 
+@app.errorhandler(TypeError)
+def handle_type_error(e):
+    # Log the error (if needed) and redirect to a custom error page or home page
+    print(f"TypeError occurred: {e}")
+    return redirect("/")
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return redirect("/")
+    # return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return redirect("/")
+    # return render_template('500.html'), 500
+
+
 @app.before_request
 def before_request():
 
@@ -1106,6 +1124,9 @@ def singleServiceEditPage(businessname, serviceName):
     # If they are not logged in, redirect them to the login page
     if not currentUsername: 
         #print("Empty Username!")
+        return redirect('/login')
+
+    if currentUsername != businessname:
         return redirect('/login')
     
     if request.method == 'POST':

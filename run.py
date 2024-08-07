@@ -515,8 +515,10 @@ def bookingPage():
 
         for booking in allBookings: 
             price = "$" + str(dbfunc.GetService(booking[0], booking[1])[4][0]) + "0"
-            # #print(price)
-            bookingData.append([booking[0], booking[1], str(booking[3])[:10],str(booking[3])[11:], str(booking[4])[11:], price, booking[6]])
+            print(booking)
+            bdata = dbfunc.CallBusinessInfo(booking[1])
+            print(bdata)
+            bookingData.append([booking[0], booking[1], bdata[1], bdata[7], str(booking[3])[:10],str(booking[3])[11:], str(booking[4])[11:], price, booking[6]])
             
     
         # for booking in allBookings:

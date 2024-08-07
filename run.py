@@ -27,7 +27,7 @@ from flask_session import Session
 import redis
 import re
 
-#import pytz
+import pytz
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -76,6 +76,24 @@ Session(app)
 
 
 # run.py General Functions 
+
+@app.errorhandler(TypeError)
+def handle_type_error(e):
+    # Log the error (if needed) and redirect to a custom error page or home page
+    print(f"TypeError occurred: {e}")
+    return redirect("/")
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return redirect("/")
+    # return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return redirect("/")
+    # return render_template('500.html'), 500
+
 
 @app.before_request
 def before_request():
@@ -470,7 +488,7 @@ def profilePage():
         #print("Empty Username!")
         return redirect(url_for('login'))
     name = dbfunc.CallCustomerInfo(username)[1] + " " + dbfunc.CallCustomerInfo(username)[2]
-    return render_template('templates/cEdit.html', name=name)
+    return render_template('templates/cProfile.html', name=name)
 
 @app.route('/bookings')
 def bookingPage():
@@ -1000,6 +1018,9 @@ def reBook(bookingId=None):
     print(imageFolder)
     # imageFolder = "static/images/uploads/ikeasunrise/Furniture Repair"
 
+    if not os.path.exists(imageFolder):
+        os.makedirs(imageFolder)
+
     image_files = [f for f in os.listdir(imageFolder) if os.path.isfile(os.path.join(imageFolder, f))]   
 
     return render_template("templates/sView.html", bookingId=bookingId, businessName=bookingInfo[0][1], serviceName=bookingInfo[0][0], customerName=customerName, customerUser=customerUser, currentDiscount=currentDiscount, image_files=image_files, image_folder=imageFolder)
@@ -1085,6 +1106,9 @@ def singleServicePage(businessname, serviceName):
     print(imageFolder)
     # imageFolder = "static/images/uploads/ikeasunrise/Furniture Repair"
 
+    if not os.path.exists(imageFolder):
+        os.makedirs(imageFolder)
+
     image_files = [f for f in os.listdir(imageFolder) if os.path.isfile(os.path.join(imageFolder, f))]   
 
 
@@ -1106,6 +1130,9 @@ def singleServiceEditPage(businessname, serviceName):
     # If they are not logged in, redirect them to the login page
     if not currentUsername: 
         #print("Empty Username!")
+        return redirect('/login')
+
+    if currentUsername != businessname:
         return redirect('/login')
     
     if request.method == 'POST':

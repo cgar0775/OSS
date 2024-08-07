@@ -8,70 +8,79 @@ We plan to utilize HTML, CSS, and JavaScript for the frontend development platfo
 
 Easy Find, presented by CCOM, is designed for both local service-seeking customers and small businesses that may find it difficult or expensive to maintain a personal booking system. Easy Find provides a local service browsing and booking system, eliminating the expense and manpower required to maintain the system while also offering an opportunity for further business outreach and development. By being listed as a service on our platform alongside various other services, Easy Find offers a one-stop shop for any consumer looking for services ranging from massages to handymen. Our user experience and filtering set Easy Find apart from other popular services like Booksy, which can be confusing or difficult to search for exactly what the consumer desires.
 
-## Project Structure
-
-```
-my_flask_app/
-├── app/
-│   ├── templates/
-│   │   └── index.html
-│   ├── static/
-│   │   ├── css/
-│   │   │   └── style.css
-│   │   ├── js/
-│   │   │   └── script.js
-│   │   └── images/
-│   ├── (Misc Python Classes)
-├── run.py
-├── requirements.txt
-└── .env
-```
-
-### Explanation of Each Component
-
-- **`app/`**: This directory contains the main application package.
-  - **`__init__.py`**: Initializes the Flask app.
-  - **`routes.py`**: Contains the route definitions for the application.
-  - **`templates/`**: Contains HTML templates.
-    - **`index.html`**: The main HTML template for the home page.
-  - **`static/`**: Contains static files (CSS, JavaScript, images, etc.).
-    - **`css/`**: Custom stylesheet.
-    - **`js/`**: Custom JavaScript file.
-    - **`images/`**: Image files.
-  - **`models.py`**: For database models if using an ORM like SQLAlchemy.
-  - **`forms.py`**: For form classes if using Flask-WTF.
-  - **`utils.py`**: For utility functions or helper functions used throughout the application.
-- **`config.py`**: Configuration settings for the application.
-- **`run.py`**: Used to run the Flask development server.
-- **`requirements.txt`**: Lists the Python dependencies for the project.
-- **`.env`**: Contains environment variables (e.g., secret keys, database URIs).
-
 ## Setting Up the Project
 
 1. **Clone the repository:**
     ```sh
     git clone <repository-url>
-    cd my_flask_app
+    cd oss
     ```
 
-2. **Create a virtual environment and activate it:**
+**WINDOWS**
+
+2. Install the Ubuntu emulator from the windows store
+
+3. Install Redis to the Ubuntu emulator
+
     ```sh
-    python3 -m venv venv
-    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+    sudo apt get update
+    sudo apt install redis-server
     ```
+4. Run the Redis server
 
-3. **Install the dependencies:**
+   ```sh
+   sudo service redis-server start
+   ```
+   test that redis is active
+   ```sh
+   redis-cli ping
+   ```
+   it should respond with PONG
+
+5. Install Oracle
+   
+   Navigate to https://www.oracle.com/database/technologies/instant-client.html and install Oracle client
+
+   Add Oracle client path as a system variable within environment variables.
+   (the system environment variables not user)
+   
+   Important: Name this system variable ORACLE_HOME.
+   
+   System->About->Advanced system settings->Environment Variables->Add New in System Variables
+
+**MAC**
+
+2. Install Homebrew
+   ```sh
+     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   ```
+3. Install Redis
+   ```sh
+   brew install redis
+   ```
+4. Start Redis
+   ```sh
+   brew services start redis
+   ```
+5. Verify redis
+  ```sh
+redis-cli ping
+```
+It should respond with PONG
+
+6. Install Oracle
+Navigate to https://www.oracle.com/database/technologies/instant-client/macos-intel-x86-downloads.html and download the latest version of instantclient-basic-macos.x64-##.#.#.#.#.zip and instantclient-sqlplus-macos.x64-##.#.#.#.#.zip
+
+Add the path location of the folder containing instantclient in your .env
+	    ORACLE_HOME = /users/name/”location”/instantclient_##
+
+
+7. **Install the dependencies:**
     ```sh
     pip install -r requirements.txt
     ```
 
-4. **Set up environment variables:**
-    Create a `.env` file in the root directory with the following content:
-    ```env
-    SECRET_KEY=your_secret_key_here
-    ```
-
-5. **Run the application:**
+8. **Run the application:**
     ```sh
     python run.py
     ```
@@ -79,14 +88,6 @@ my_flask_app/
 ## Using the Application
 
 Navigate to `http://127.0.0.1:5000/` in your web browser to view the application.
-
-## Project Dependencies
-
-- Flask
-- Flask-SQLAlchemy (if using SQLAlchemy ORM)
-- Flask-WTF (if using forms)
-- Flask-Migrate (if handling database migrations)
-- Python-Dotenv (for environment variables)
 
 ## Contributing
 

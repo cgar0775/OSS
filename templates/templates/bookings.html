@@ -19,7 +19,8 @@
                             body: JSON.stringify({ bookingID: bookingID })
                         });
                         const result = await response.json();
-                        alert('Python Function Response: ' + result.message);
+
+                        window.location.reload();
                     } catch (error) {
                         console.error('Error:', error);
                     }
@@ -53,7 +54,7 @@
                             <!-- <td></td> -->
                             <!-- <td><a href="/{{items[0]}}/booking/edit/{{items[1]}}"><button>Edit</button></a></td> -->
                             <!-- <td>{{items[6]}}</td> -->
-                            <td><button id="cancel" onclick="deleteBooking(items[6])">Cancel</button></td>
+                            <td><button id="cancel" onclick="deleteBooking('{{items[6]}}')">Cancel</button></td>
                         </tr>
                         {% endfor %}
                     <!-- Add dynamic data here -->

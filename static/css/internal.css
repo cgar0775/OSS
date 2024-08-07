@@ -630,3 +630,55 @@ input[type="submit"] {
 #serviceEdit .tablinks{
     height: 60px; 
 }
+
+#myPlot{
+    
+}
+
+.loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 2s linear infinite;
+
+    margin: 0 auto;
+    
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.displayImages{
+    width: 300px;
+}
+
+
+
+
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    justify-content: center;
+}
+.gallery-item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    /* width: 200px; */
+    height: 200px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+}
+.gallery-item:hover {
+    transform: scale(1.05);
+}
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

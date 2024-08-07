@@ -5,7 +5,7 @@ import hashlib
 from database import OracleConfig
 from dotenv import load_dotenv
 import math
-from haversine import haversine,Unit
+#from haversine import haversine,Unit
 load_dotenv()
 #setup the database connection
 database= OracleConfig()
@@ -137,6 +137,21 @@ def CheckBusinessName(name):
     #returns the first (and expectedly only) row
     return val
 
+def CallCustomerInfoByName(fname, lname):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    #calls a specific business' info from the database
+    query=f"SELECT * FROM CUSTOMERINFO WHERE firstname='{fname}' AND lastname='{lname}'"
+    cursor.execute(query)
+    connection.commit()
+    #store result so we can close db connection
+    val=cursor.fetchone()
+    cursor.close()
+    connection.close()
+    #returns the first (and expectedly only) row
+    return val
+
+
 def CallCustomerInfo(name):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
@@ -172,6 +187,7 @@ def CreateService(bname,sname,price,slots,time,discount):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
     query=f"INSERT INTO services VALUES('{bname}','{sname}',{price},{slots},{time},{discount})"  
+    print(query)
     cursor.execute(query)
     connection.commit()
     cursor.close()
@@ -353,6 +369,7 @@ def CreateBooking(sname,bname,username,timeslot_start,timeslot_end,discount):
     cursor=connection.cursor()
     naxtID = maxBookingId()[0] + 1
     query=f"INSERT INTO bookings VALUES('{sname}','{bname}','{username}',TO_DATE('{timeslot_start}', 'MON-DD-YYYY HH24:MI'),TO_DATE('{timeslot_end}', 'MON-DD-YYYY HH24:MI'), NULL, {naxtID})"
+    print(query)
     cursor.execute(query)
     connection.commit()
     cursor.close()
@@ -387,7 +404,34 @@ def getBusinessBookings(name):
 def getBusinessBookingsOnDate(name, date):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
-    query=f"SELECT * FROM bookings WHERE bname='{name}' AND timeslot_start = TO_DATE('{date}',  'DD-MON-YY HH24:MI:SS')"
+    query=f"SELECT COUNT(*) FROM bookings WHERE bname='{name}' AND TRUNC(timeslot_start) = TO_DATE('{date}', 'YYYY-MM-DD')"
+    print(query)
+    cursor.execute(query)
+    connection.commit()
+    bookings=cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return bookings
+
+#return bookings on date and time
+def getBusinessBookingsOnDateAndTime(name, date):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    print(date)
+    query=f"SELECT COUNT(*) FROM bookings WHERE bname='{name}' AND timeslot_start = TO_DATE('{date}', 'YYYY-MM-DD HH24:MI:SS')"
+    print(query)
+    cursor.execute(query)
+    connection.commit()
+    bookings=cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return bookings
+
+# Returns a booking from an id
+def getBookingFromId(id):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"SELECT * FROM bookings WHERE id='{id}'"
     cursor.execute(query)
     connection.commit()
     bookings=cursor.fetchall()
@@ -413,6 +457,17 @@ def UpdateBooking(sname,bname,username,timeslot_start,timeslot_end, new_timeslot
     connection.close()
     return
 
+def ApplyDiscount(discount, bookingId):
+    # UPDATE bookings SET discount='25' WHERE id = '3' 
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"""UPDATE bookings SET discount='{discount}' WHERE id = '{bookingId}' """
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return
+
 def DeleteBooking(sname,bname,username,timeslot_start,timeslot_end, new_timeslot_start, new_timeslot_end):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
@@ -420,6 +475,16 @@ def DeleteBooking(sname,bname,username,timeslot_start,timeslot_end, new_timeslot
     WHERE sname='{sname}', bname='{bname}', username='{username}',
     timeslot_start=TO_DATE('{timeslot_start}', 'MON-DD-YYYY HH24:MI'), 
     timeslot_end=TO_DATE('{timeslot_end}', 'MON-DD-YYYY HH24:MI'))"""
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return
+
+def DeleteBookingFromID(id):
+    connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
+    cursor=connection.cursor()
+    query=f"""DELETE FROM bookings WHERE id = {id}"""
     cursor.execute(query)
     connection.commit()
     cursor.close()
@@ -661,7 +726,8 @@ def getReviewIds(bname,sname):
 def CreateResponse(bname,id,body):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
-    query=f"INSERT INTO bresponse VALUES({id},{bname},'{body}')"
+    query=f"INSERT INTO bresponse VALUES({id},'{bname}','{body}')"
+    print(query)
     cursor.execute(query)
     connection.commit()
     cursor.close()
@@ -680,13 +746,32 @@ def EditResponse(id,body):
     return
 
 #gets the responses to reviews
-def GetResponse(bname,sname):
+def GetResponse(bname,sname,revid):
     connection=oracledb.connect(user=database.username, password=database.password, dsn=database.connection_string)
     cursor=connection.cursor()
-    query=f"SELECT bresponse.name, bresponse.body FROM bresponse INNER JOIN creviews c ON refid=id WHERE c.bname='{bname}' AND c.sname='{sname}'"
+    query=f"SELECT bresponse.refid, bresponse.name, bresponse.body FROM bresponse INNER JOIN creviews c ON refid=id WHERE c.bname='{bname}' AND c.sname='{sname}' AND refid={revid}"
+    print
     cursor.execute(query)
     connection.commit()
     res=cursor.fetchall()
     cursor.close()
     connection.close()
     return res
+
+def closeConnections(): 
+    cursor.close()
+    connection.close()
+    return
+
+#When first running reviews use this initially
+def getReviewScrollStart(amount,bname,sname,cursor,connection):
+    query=f"SELECT * FROM creviews WHERE bname='{bname}' and sname='{sname}'"
+    cursor.execute(query)
+    connection.commit()
+    rev=cursor.fetchmany(amount)
+    return rev
+
+#get more reviews 
+def getReviewScrollContinue(amount,cursor,connection):
+    
+    return cursor.fetchmany(amount)

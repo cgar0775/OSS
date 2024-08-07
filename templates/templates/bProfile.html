@@ -6,10 +6,25 @@
 
     <div id="header">
         <!-- header Content -->
-        <img src="../../static/images/misc/tempHeader.jpg" id="profileHeader">
+         <!-- ../../static/images/uploads/{{g.username}}/profile_picture.png -->
+        <!-- <img src="../../static/images/uploads/{{businessUsername}}/cover_photo.png" id="profileHeader"> -->
+
+        {% if background_exists %}
+
+            <img src="{{ url_for('static', filename='images/uploads/' ~ businessUsername ~ '/cover_photo.png') }}" alt="Profile Picture" id="profileHeader">
+            <!-- <p>true</p> -->
+        {% else %}
+            
+            <img src="{{ url_for('static', filename='images/misc/empty.png') }}" alt="Profile Picture" id="profileHeader">
+        {% endif %}
 
         <div id="profilePicture">
-            <img src="../../static/images/misc/tempProfile.jpg">
+            {% if file_exists %}
+                <img src="{{ url_for('static', filename='images/uploads/' ~ businessUsername ~ '/profile_picture.png') }}" alt="Profile Picture">
+            {% else %}
+            <img src="{{ url_for('static', filename='images/misc/emptyProfile.png') }}" alt="Profile Picture" id="profileHeader">
+            {% endif %}
+            <!-- <img src="../../static/images/uploads/{{businessUsername}}/profile_picture.png"> -->
         </div>
 
     </div>
@@ -46,7 +61,7 @@
         </div>
         <div id="sidebar">
             
-            <!-- Hours here -->
+            <!-- Hours here
             
             <div class="hours-section">
                 <h2>Opening Hours</h2>
@@ -58,9 +73,9 @@
                     <span class="day-name">Tuesday</span>
                     <span class="day-hours">9:00 AM - 5:00 PM</span>
                 </div>
-                <!-- Repeat for other days -->
-            </div>
             
+            </div>
+             -->
             <!-- google maps here -->
             <div class="map-section">
                 <h2>Find Us Here</h2>
@@ -74,20 +89,20 @@
 
     </div>
 
-    <div id="bottomBuis">
+    <div>
+        <!-- <h2>See Our Business</h2> -->
 
+        <div>
         <!-- reviews here (maybe) -->
         
         <h2>Reviews</h2>
-        
         <div id="servicesContainer" class="contentArea">
-            {% include 'components/reviews.html' %}
-            {% include 'components/reviews.html' %}
-            {% include 'components/reviews.html' %}
-            {% include 'components/reviews.html' %}
-            
+            {% for review in reviews %}
+                {% include 'components/reviews.html' %}
+            {% endfor %}
         </div>
     </div>
+
 </div>
     
     {% endblock %}

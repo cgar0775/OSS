@@ -6,22 +6,22 @@
     <h1>Add A Service</h1>
     <form action="{{url_for('addServiceFunction')}}" method="post">
         <label>Service Name: </label>
-        <input type="text" id="textInput" name="name">
+        <input type="text" id="textInput" name="name" required>
 
         <br>
         
         <label>Price: </label>
-        <input type="number" id="textInput" name="price">
+        <input type="number" id="textInput" name="price" required>
 
         <br>
 
         <label>Avalible Slots At Once: </label>
-        <input type="number" id="textInput" name="slots">
+        <input type="number" id="textInput" name="slots" required>
 
         <br>
 
-        <label>Total Service Time: (mind)</label>
-        <input type="number" id="textInput" name="time">
+        <label>Total Service Time: (in mins)</label>
+        <input type="number" id="textInput" name="time" required>
 
         <br>
 
@@ -55,8 +55,8 @@
         <br>
         
         <label for="break-start">Break: </label>
-        <input type="time" id="break-start" name="break-start">
-        <input type="time" id="break-end" name="break-end">
+        <input type="time" id="break-start" name="break-start" required>
+        <input type="time" id="break-end" name="break-end" required>
         <br>
 
         <label for="description">description: </label>

@@ -9,16 +9,16 @@
     </form>
 
     {% if businesses %}
-        <h2>Search Results</h2>
+        <h2>Search Results for "{{query}}"</h2>
         <ul>
             {% for business in businesses %}
             
-                    <strong><a href="{{ url_for('businessViewProfilePage', username=business.username) }}">{{ business.business_name }}</strong></a><br>
+                    <strong><a href="{{ url_for('businessViewProfilePage', username=business.business_username) }}">{{ business.business_name }}</strong></a><br>
                     <strong>Service: </strong>
-                        {{ business.service_name }} - ${{ business.service_price }}<br>
+                        {{ business.service_name }} - ${{ business.service_price }}0<br>
                     Address: {{ business.address }}<br>
                     <a href="{{ url_for('viewMap', lat=business.lat, lng=business.lng, name=business.business_name, address=business.address) }}">View on Map</a><br>
-                
+                    <br>
             {% endfor %}
         </ul>
     {% elif error %}

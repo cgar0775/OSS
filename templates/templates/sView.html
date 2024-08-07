@@ -1,219 +1,552 @@
-{% extends 'frame.html' %}
+    {% extends 'frame.html' %}
 
-{% block content %}
+    {% block content %}
 
-<div>
-    <div id="header">
-        <!-- header Content -->
-        <img src="../../static/images/misc/tempHeader.jpg" id="profileHeader">
 
-        <div id="profilePicture">
-            <img src="../../static/images/misc/tempProfile.jpg">
-        </div>
-
-    </div>
-
-    <div id="profileContainer">
-        
-        <!-- make it a circle crop -->
-        <h2>{{ businessName }}</h2>
-        <h3>{{ businessAddress }}</h3>
-
-        <!-- TODO: Turn this into a resopnsive image -->
-        <h4>⭐️⭐️⭐️⭐️⭐️</h4>
-    </div>
+    <head>
+        <title> {{businessName}} - {{serviceName}}</title>
+        <!-- Include jQuery for easier AJAX handling -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    </head>
 
     <div>
-        <h1>{{ serviceName }}</h1>
-        <h4>{{ serviceDescription }}</h4>
-    </div>
+        <div id="header">
+            <!-- header Content -->
+            {% if background_exists %}
 
-    <div id="bookingGroup">
+                        <img src="{{ url_for('static', filename='images/uploads/' ~ username ~ '/cover_photo.png') }}" alt="Profile Picture" style="height: 200px;" id="profileHeader">
+                        <!-- <p>true</p> -->
+                    {% else %}
+                        
+                        <img src="{{ url_for('static', filename='images/misc/empty.png') }}" alt="Profile Picture" id="profileHeader" style="height: 200px;">
+                    {% endif %}
+                    <!-- <button class="editButton"><img src="../../static/images/misc/edit.svg" style="color: white;"></button> -->
 
-        <div class="calendar">
-            <div class="calendar-header">
-                <button class="prev-month">&#9664;</button>
-                <div class="month-year"></div>
-                <button class="next-month">&#9654;</button>
+            <div id="profilePicture">
+                {% if file_exists %}
+                    <img src="{{ url_for('static', filename='images/uploads/' ~ username ~ '/profile_picture.png') }}" alt="Profile Picture">
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/misc/emptyProfile.png') }}" alt="Profile Picture" id="profileHeader">
+                {% endif %}
+                <!-- <img src="../../static/images/misc/tempProfile.jpg"> -->
             </div>
-            <div class="calendar-body">
-                <div class="calendar-weekdays">
-                    <div>Sun</div>
-                    <div>Mon</div>
-                    <div>Tue</div>
-                    <div>Wed</div>
-                    <div>Thu</div>
-                    <div>Fri</div>
-                    <div>Sat</div>
-                </div>
-                <div class="calendar-dates"></div>
-            </div>
+
         </div>
 
-        <div class="times">
-            <h2>Book Now!</h2>  
-            <div id="heading">
-
-            </div>
-            <div id="data">
-
-            </div>
-            <!-- <p>hi there</p> -->
-        </div>
-
-        
-        <script>
-            // Done with ChatGPT
-            document.addEventListener('DOMContentLoaded', () => {
-    const calendarDates = document.querySelector('.calendar-dates');
-    const monthYearDisplay = document.querySelector('.month-year');
-    const prevMonthButton = document.querySelector('.prev-month');
-    const nextMonthButton = document.querySelector('.next-month');
-
-    let currentDate = new Date();
-    currentDate.setDate(1);
-
-    function renderCalendar() {
-        const month = currentDate.getMonth();
-        const year = currentDate.getFullYear();
-        const firstDayIndex = currentDate.getDay();
-        const lastDay = new Date(year, month + 1, 0).getDate();
-        const prevLastDay = new Date(year, month, 0).getDate();
-        const lastDayIndex = new Date(year, month + 1, 0).getDay();
-        const nextDays = 7 - lastDayIndex - 1;
-
-        monthYearDisplay.innerText = `${currentDate.toLocaleString('default', { month: 'long' })} ${year}`;
-
-        let days = '';
-
-        for (let x = firstDayIndex; x > 0; x--) {
-            days += `<div class="prev-date" data-date="${year}-${month}-${prevLastDay - x + 1}">${prevLastDay - x + 1}</div>`;
-        }
-
-        for (let i = 1; i <= lastDay; i++) {
-            const day = new Date(year, month, i);
-            const isBooked = checkIfBooked(day);
-            days += `<div class="${isBooked ? 'booked' : 'available'}" data-date="${year}-${month + 1}-${i}">${i}</div>`;
-        }
-
-        for (let j = 1; j <= nextDays; j++) {
-            days += `<div class="next-date" data-date="${year}-${month + 2}-${j}">${j}</div>`;
-        }
-
-        calendarDates.innerHTML = days;
-        addDateClickListeners();
-    }
-
-    function checkIfBooked(date) {
-        // Example: all dates after today are booked for demonstration purposes
-        return date <= new Date();
-    }
-
-    function addDateClickListeners() {
-        const dateElements = document.querySelectorAll('.calendar-dates div');
-        dateElements.forEach(dateElement => {
-            dateElement.addEventListener('click', handleDateClick);
-        });
-    }
-
-    function handleDateClick(event) {
-        const clickedDate = event.target.getAttribute('data-date');
-        const dateInfo = new Date(clickedDate);
-
-        // Display the current date and the avalible times
-        document.querySelector("#heading").innerText = dateInfo;
-
-        fetch('/run_python', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ dateInfo: dateInfo })
-        })
-        .then(response => response.json())
-        .then(data => {
+        <div id="profileContainer">
             
-            // document.querySelector(".times").innerText = data.result[2];
-            // document.querySelector(".times").innerText = data.result.length;
-            document.querySelector("#data").innerText = "";   
+            <!-- make it a circle crop -->
+            <h2>{{ businessName }}</h2>
+            <h3>{{ businessAddress }}</h3>
 
-            for(const item of data.result){
-                const dateObject = new Date(item);
-                console.log(dateObject); // Output: Date object representing the date and time
-                console.log(dateObject.getHours()); // Output: Date object representing the date and time
+            <h2 id="customerName">{{ customerName }}</h2>
+            <h2 id="customerUser" style="display: none">{{ customerUser }}</h2>
+            <h2 id="bookingId" style="display: none">{{ bookingId }}</h2>
 
-                // add to the block
+            <!-- TODO: Turn this into a resopnsive image -->
+            <h4>⭐️⭐️⭐️⭐️⭐️</h4>
+        </div>
 
-                // TODO: Update the styles
-                document.querySelector("#data").innerHTML += "<form>";
-                // document.querySelector(".times").innerHTML += dateObject.getHours() + ":" + dateObject.getMinutes() + "<button class='button'>Book Now!</button><br>"
-                
-                // Get hours and minutes
-                const hours = dateObject.getHours();
-                const minutes = dateObject.getMinutes();
-                
-                
-                const timeSmallLabel = `${hours > 12 ? hours - 12 : hours}:${minutes < 10 ? '0' + minutes : minutes}`;
-                const timeLabel = `<label>${hours > 12 ? hours - 12 : hours}:${minutes < 10 ? '0' + minutes : minutes}</label>`;
-    
-                document.querySelector("#data").innerHTML += "<label>" + timeLabel + "</label>"
-                document.querySelector("#data").innerHTML += "<button class='button' id='" + timeSmallLabel + "'>Book</button> <br>"
-                
-                document.querySelector("#data").innerHTML += "</form>"
+        <div>
+            <h1>{{ serviceName }}</h1>
+            <h4>{{ serviceDescription }}</h4>
+        </div>
 
-        
-            }
-            const buttons = document.querySelectorAll('.button');
+        <div id="bookingGroup">
 
-            // Iterate over the NodeList and add an event listener to each button
-            buttons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const buttonId = button.id;
+            <div class="calendar">
+                <div class="calendar-header">
+                    <button class="prev-month">&#9664;</button>
+                    <div class="month-year"></div>
+                    <button class="next-month">&#9654;</button>
+                </div>
+                <div class="calendar-body">
+                    <div class="calendar-weekdays">
+                        <div>Sun</div>
+                        <div>Mon</div>
+                        <div>Tue</div>
+                        <div>Wed</div>
+                        <div>Thu</div>
+                        <div>Fri</div>
+                        <div>Sat</div>
+                    </div>
+                    <div class="calendar-dates"></div>
+                </div>
+            </div>
 
-                    // Send an HTTP request to the Flask endpoint
-                    fetch('/run_python_function', {
+            <div class="times">
+                <h2>Book Now!</h2>  
+                <div id="heading">
+
+                </div>
+                <div id="data">
+
+                </div>
+                <!-- <p>hi there</p> -->
+            </div>
+
+            
+            <script>
+                // Outline done with ChatGPT
+                document.addEventListener('DOMContentLoaded', () => {
+                    const calendarDates = document.querySelector('.calendar-dates');
+                    const monthYearDisplay = document.querySelector('.month-year');
+                    const prevMonthButton = document.querySelector('.prev-month');
+                    const nextMonthButton = document.querySelector('.next-month');
+
+                    let currentDate = new Date();
+                    currentDate.setDate(1);
+
+                    function renderCalendar() {
+                        const month = currentDate.getMonth();
+                        const year = currentDate.getFullYear();
+                        const firstDayIndex = currentDate.getDay();
+                        const lastDay = new Date(year, month + 1, 0).getDate();
+                        const prevLastDay = new Date(year, month, 0).getDate();
+                        const lastDayIndex = new Date(year, month + 1, 0).getDay();
+                        const nextDays = 7 - lastDayIndex - 1;
+
+                        monthYearDisplay.innerText = `${currentDate.toLocaleString('default', { month: 'long' })} ${year}`;
+
+                        let days = '';
+
+                        for (let x = firstDayIndex; x > 0; x--) {
+                            days += `<div class="prev-date" data-date="${year}-${month}-${prevLastDay - x + 1}">${prevLastDay - x + 1}</div>`;
+                        }
+
+                        for (let i = 1; i <= lastDay; i++) {
+                            const day = new Date(year, month, i);
+                            const isBooked = checkIfBooked(day);
+                            days += `<div class="${isBooked ? 'booked' : 'available'}" data-date="${year}-${month + 1}-${i}">${i}</div>`;
+                        }
+
+                        for (let j = 1; j <= nextDays; j++) {
+                            days += `<div class="next-date" data-date="${year}-${month + 2}-${j}">${j}</div>`;
+                        }
+
+                        calendarDates.innerHTML = days;
+                        addDateClickListeners();
+                    }
+
+                    function checkIfBooked(date) {
+                        // Example: all dates after today are booked for demonstration purposes
+                        return date <= new Date();
+                    }
+
+                    function addDateClickListeners() {
+                        const dateElements = document.querySelectorAll('.calendar-dates div');
+                        dateElements.forEach(dateElement => {
+                            dateElement.addEventListener('click', handleDateClick);
+                        });
+                    }
+
+                    function handleDateClick(event) {
+                        const clickedDate = event.target.getAttribute('data-date');
+                        const dateInfo = new Date(clickedDate);
+
+                        // Display the current date and the avalible times
+                        document.querySelector("#heading").innerText = dateInfo;
+                        document.querySelector("#data").innerHTML = "<div class='loader'></div>";
+
+                        fetch('/run_python', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ dateInfo: dateInfo, bInfo: businessName, sname: serviceName })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            
+                            // document.querySelector(".times").innerText = data.result[2];
+                            // document.querySelector(".times").innerText = data.result.length;
+                            document.querySelector("#data").innerText = "";   
+
+                            counter = 0;
+
+                            for(const item of data.result){
+                                const dateObject = new Date(item);
+                                console.log(dateObject); // Output: Date object representing the date and time
+                                console.log(dateObject.getHours()); // Output: Date object representing the date and time
+
+                                // add to the block
+
+                                // TODO: Update the styles
+                                document.querySelector("#data").innerHTML += "<form>";
+                                // document.querySelector(".times").innerHTML += dateObject.getHours() + ":" + dateObject.getMinutes() + "<button class='button'>Book Now!</button><br>"
+                                
+                                // Get hours and minutes
+                                const hours = dateObject.getHours();
+                                const minutes = dateObject.getMinutes();
+                                
+                                
+                                const timeSmallLabel = `${hours > 12 ? hours - 12 : hours}:${minutes < 10 ? '0' + minutes : minutes}`;
+                                const timeLabel = `<label>${hours > 12 ? hours - 12 : hours}:${minutes < 10 ? '0' + minutes : minutes}</label>`;
+                    
+                                document.querySelector("#data").innerHTML += "<label>" + timeLabel + "</label>"
+                                document.querySelector("#data").innerHTML += "<button class='button' id='" + timeSmallLabel + "'>Book</button> <br>"
+                                document.querySelector("#data").innerHTML += data.bookingsNum[counter]
+                                document.querySelector("#data").innerHTML += "</form>"
+
+                        
+                                counter++;
+                            }
+                            const buttons = document.querySelectorAll('.button');
+
+                            // Iterate over the NodeList and add an event listener to each button
+                            buttons.forEach(button => {
+                                button.addEventListener('click', () => {
+                                    const buttonId = button.id;
+
+                                    // Send an HTTP request to the Flask endpoint
+                                    fetch('/run_python_function', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({ buttonId: buttonId, location: window.location.href, date: document.querySelector("#heading").innerText, customer: document.querySelector("#customerName").innerText, customerUser: document.querySelector("#customerUser").innerText, bookingId: window.location.pathname})
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        console.log('Success:', data);
+                                        // console.log(window.location.href)
+                                        // console.log(window.location.host)
+                                        window.location.href = "/bookings"
+
+
+                                        // Handle the response data if needed
+                                    })
+                                    .catch((error) => {
+                                        console.error('Error:', error);
+                                    });
+                                    
+                                });
+                            });
+                        })
+                        .catch(error => console.error('Error:', error));
+
+                    }
+
+                    
+
+                    prevMonthButton.addEventListener('click', () => {
+                        currentDate.setMonth(currentDate.getMonth() - 1);
+                        renderCalendar();
+                    });
+
+                    nextMonthButton.addEventListener('click', () => {
+                        currentDate.setMonth(currentDate.getMonth() + 1);
+                        renderCalendar();
+                    });
+
+                    renderCalendar();
+                });
+
+                window.addEventListener('beforeunload', function (event) {
+                    // Custom function to execute on page exit
+                    myFunction();
+
+                    // Standard message for confirmation dialog (note that most modern browsers ignore this)
+                    
+                });
+
+                function myFunction() { 
+                    // Your custom code here
+                    console.log('Page is being exited');
+                    // Example: Send data to the server or perform some action
+                    fetch('/exitingServicePage', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ buttonId: buttonId, location: window.location.href, date: document.querySelector("#heading").innerText })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Success:', data);
-                        console.log(window.location.href)
-                        // Handle the response data if needed
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
-                    });
-                    
+                        body: JSON.stringify({ message: 'User is leaving the page' })
+                    }); 
+                }
+
+
+            </script>   
+        </div>
+
+        <script>
+            $(window).on('beforeunload', function() {
+                $.ajax({
+                    url: '/cleanup',
+                    type: 'GET',
+                    async: false  // Synchronous request to ensure it completes before unload
                 });
             });
-        })
-        .catch(error => console.error('Error:', error));
 
-    }
+            function applyDiscount() {
+                fetch('/apply_discount', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({discountAmount: document.getElementById('discountInput').value, bookingId: window.location.pathname})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    // console.log(window.location.href)
+                    // console.log(window.location.host)
+                    window.location.reload();
+
+
+                    // Handle the response data if needed
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+            }
+        </script>
+
+
+        {% if userType != "customer" %}
+            <div id="discountSection">
+
+                <div>
+                    {% if currentDiscount %}
+                        <h2>Current Discount: {{ currentDiscount }}%</h2>
+                    {% else %}
+                        <h2>No discount offered.</h2>
+                    {% endif %}
+                </div>
+
+                <form onsubmit="applyDiscount()">
+
+                    <label>Enter Discount:</label>
+                    <input type="number" name="discountInput" id="discountInput">
+                    <br>
+                    <input type="submit" id="submitDiscount">
+                </form>
+            </div>
+
+
+            
+
+        {% endif %}
+
+        <h2>Images</h2>
+        <div class="gallery">
+            
+            {% for image in image_files %}
+                <!-- <div class="image-container">
+                    <img src="{{ '/' + image_folder + '/' + image}}" alt="Image" class="displayImages">
+                </div> -->
+
+                <a href="{{ '/' + image_folder + '/' + image}}" data-lightbox="gallery" data-title="{{ image }}" class="gallery-item">
+                    <img src="{{ '/' + image_folder + '/' + image}}" alt="Image">
+                </a>
+
+            {% endfor %}
+        </div>
+    <!--Reviews Section-->
+    <div id="reviews">
+        <h2>User Reviews</h2>
+        <div class="review-list" id="review-list">
+            {% for review in reviews %}
+                <div class="review">
+                    <h3> {{review.header}}</h3>
+                    <p>{{review.body}}</p>
+                    <p>Rating: {{review.rating}}</p>
+                    <p>By: {{review.fname}} {{review.lname}} ({{review.username}})</p>
+
+                    {% if not review.reply %}
+
+                        {% if g.role == 'Business' %}
+                        
+                            <button onclick="showReplyForm('{{ review.id }}')">Reply</button>
+                            <div id="textBoxContainer_{{review.id}}"  style="display:none;" class="replyBox">
+                                <textarea id="Reply_{{review.id}}" name="Reply" required></textarea>
+                                <button type="button" id="button_{{review.id}}" onclick="submitReply('{{review.id}}')">Submit</button>
+                            </div>
+                        
+                            <script>
+                                function showReplyForm() {
+                                    // Use the unique review ID to show the corresponding textarea
+                                    console.log("hi there")
+                                    // document.getElementById('Reply').style.display = 'block';    
+                                    document.getElementsByClassName('replyBox')[0].style.display = 'block';    
+                                    // document.getElementById('button').style.display = 'block';
+                                }
+                            </script>
+
+                        {% endif %}
+                        
+                        
+                    {% else %}
+                            
+                        <div class="reply">
+
+                            <p><strong>Reply:</strong> {{review.reply}}</p>
+
+                        </div>
+                        
+                    {% endif %}
+
+                    
+                    
+                    <!-- <button onclick="openReplyPopup('{{ review.id }}')">Reply</button> -->
+
+                    <!-- Display replies -->
+                    {% for reply in review.replies %}
+                    <div class="reply">
+                        <p>{{ reply.body }}</p>
+                        <p>By: {{ reply.business_name }}</p>
+                        
+                    </div>
+                    {% endfor %}
+
+                </div>
+            {% endfor %}
+        </div>
+        <button id = "loadMoreBtn" onclick="loadMoreReviews()">Load More</button>
+    </div>
+
+        <script>
+
+            const businessName = "{{ businessName }}";
+            const serviceName = "{{ serviceName }}";
+
+            function submitReply(reviewId){
+
+                console.log("hi there")
+                console.log(reviewId)
+                console.log(businessName)
+                const Reply = document.getElementById('Reply_' + reviewId).value;
+                console.log("hi there")
+                fetch('/submit_reply', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                },
+                    body: JSON.stringify({ 
+                    
+                        businessName: businessName,
+                        serviceName: serviceName,
+                        reply: Reply,
+                        reviewId: reviewId
+                    })
+                 })
+            }
+
+        </script>
+
+        <script>
+
+            let currentReviewIndex = 10;
+
+            console.log(businessName)
+            console.log(serviceName)
+
+
+            function loadMoreReviews(){
+
+            fetch('/load_more_reviews', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    
+                    businessName: businessName,
+                    serviceName: serviceName,
+                    start: currentReviewIndex
+                 })
+            })
+            
+            .then(response => response.json())
+            .then(data => {
+                console.log("here!!!")
+                console.log(data.reviews)
+                console.log(data.reviews)
+                const reviewList = document.getElementById('review-list');
+                data.reviews.forEach(review => {
+                    const reviewDiv = document.createElement('div');
+                    reviewDiv.classList.add('review');
+                    
+                    reviewDiv.innerHTML = `
+                        <h3>${review.header}</h3>
+                        <p>${review.body}</p>
+                        <p>Rating: ${review.rating}</p>
+                        <p>By: ${review.fname} ${review.lname} (${review.username})</p>`;                
+               
+                
+                    reviewList.appendChild(reviewDiv);
+                });
+                currentReviewIndex += data.reviews.length;
+                //if (data.reviews.length < 10) {
+                  //  document.getElementById('loadMoreBtn').style.display = 'none';
+                //}
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function submitReview() {
+            const body = document.getElementById('body').value;
+            const reviewHeader = document.getElementById('reviewTitle').value;
+            const reviewRating = document.getElementById('rating').value;
+
+            // const additionalData = { key: 'value' }; // Replace with your data
+
+            fetch('/submit_review', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    
+                },
+                body: JSON.stringify({
+                    body: body,
+                    header: reviewHeader,
+                    rating: reviewRating,
+                    businessName: businessName,
+                    serviceName: serviceName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                window.location.reload();  // Redirect after success
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
 
     
+    <!--Review Submission Form-->
+    {% if g.role == 'Customer' %}
 
-    prevMonthButton.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() - 1);
-        renderCalendar();
-    });
+    <div>
+        <h2>Leave a Review!</h2>
 
-    nextMonthButton.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() + 1);
-        renderCalendar();
-    });
+        <form method="post" >
+<!--            
+            <input type="hidden" name="business_name" value="{{ businessName }}">
+            <input type="hidden" name="service_name" value="{{ serviceName }}"> -->
 
-    renderCalendar();
-});
+            <label for="reviewTitle">Review Title:</label>
+            <input type="text" id="reviewTitle" name="reviewTitle" required>
+            <br>
+            <br>
 
+            <label for="body">Review:</label>
+            <textarea id="body" name="body" required></textarea>
+            <br>
 
-        </script>   
+            <label for="rating">Rating:</label>
+            <input type="number" id="rating" name="rating" min="1" max="5" step="0.5" required>
+            <br>
+
+            <button type="button" onclick="submitReview()">Submit Review</button>
+        </form>
     </div>
-    </div>
+
+    {% endif %}
+
 </div>
 
-{% endblock %}
+
+
+    {% endblock %}

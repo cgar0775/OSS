@@ -1,6 +1,6 @@
 <div id="navheader">
     <nav class="navbar">
-        <a href="/home"><img src="{{ url_for('static', filename='/images/logo/logo1.png')}}" id="headerlogo"></a>
+        <img src="{{ url_for('static', filename='/images/logo/logo1.png')}}" id="headerlogo">
 
 
 
@@ -10,19 +10,21 @@
             <li><a href="/search">Search</a></li>
             <li><a href="/bookings">My Bookings</a></li>
             <li><a href="/profile">Profile</a></li>
-            <li><a href="/">Logout</a></li>
+            <li><a href="/logout">Logout</a></li>
         </ul>
         {% endif %}
 
         {% if g.role == 'Business' %}
         <ul>
-            <!-- <li><a href="/home">Home</a></li> -->
+            <li><a href="/home">Home</a></li> 
             <li><a href="/services">Services</a></li>
             <li><a href="/bookings">Bookings</a></li>
             <li><a href="/employees">Employees</a></li>
+            <li><a href="/analytics">Analytics</a></li>
             <!-- <li><a href="profile/edit">Profile</a></li>  -->
+            <li><a href="/business/view">Our Profile</a></li>
             <li><a href="/logout">Logout</a></li>
-            <li><a href="/business/view"><img src="/static/images/icons/profile.png" style="width:50px;"></a></li>
+            <!-- <img src="../../static/images/uploads/{{username}}/profile_picture.png"> -->
             <!-- <li><a href="/profile"><img src="/static/images/icons/profile.png" style="width:50px;"></a></li> -->
             
         </ul>
@@ -30,26 +32,25 @@
 
         {% if g.role == 'Administrator' %}
         <ul>
-            <!-- <li><a href="/home">Home</a></li> -->
+            <li><a href="/home">Home</a></li>
             <li><a href="/services">Services</a></li>
             <li><a href="/bookings">Bookings</a></li>
             <li><a href="/employees">Employees</a></li>
             <!-- <li><a href="profile/edit">Profile</a></li>  -->
-            <li><a href="/logout">Logout</a></li>
-            <li><a href="/business/view"><img src="/static/images/icons/profile.png" style="width:50px;"></a></li>
+            <li><a href="/business/view">Business Profile</a></li>
             <!-- <li><a href="/profile"><img src="/static/images/icons/profile.png" style="width:50px;"></a></li> -->
-            
+            <li><a href="/logout">Logout</a></li>
         </ul>
         {% endif %}
 
         {% if g.role == 'Employee' %}
         <ul>
-            <!-- <li><a href="/home">Home</a></li> -->
+            <li><a href="/home">Home</a></li>
             <li><a href="/bookings">Bookings</a></li>
             <!-- <li><a href="profile/edit">Profile</a></li>  -->
-            <li><a href="/logout">Logout</a></li>
-            <li><a href="/business/view"><img src="/static/images/icons/profile.png" style="width:50px;"></a></li>
+            <li><a href="/business/view">Business Profile</a></li>
             <!-- <li><a href="/profile"><img src="/static/images/icons/profile.png" style="width:50px;"></a></li> -->
+            <li><a href="/logout">Logout</a></li>
         </ul>
         {% endif %}
 
